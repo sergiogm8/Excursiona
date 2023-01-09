@@ -27,9 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(250, 250, 250, .98),
       body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                  color: Theme.of(context).primaryColor))
+          ? const Loader()
           : SingleChildScrollView(
               child: Padding(
                 padding:

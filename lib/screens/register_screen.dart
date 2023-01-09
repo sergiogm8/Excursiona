@@ -25,9 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(250, 250, 250, .98),
       body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                  color: Theme.of(context).primaryColor))
+          ? const Loader()
           : SingleChildScrollView(
               child: Padding(
                 padding:
