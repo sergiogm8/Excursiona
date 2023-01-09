@@ -42,6 +42,11 @@ class DBService {
     return snapshot;
   }
 
+  Stream<UserModel> getUserDataByID(String userId) {
+    return userCollection.doc(userId).snapshots().map(
+        (event) => UserModel.fromMap(event.data()! as Map<String, dynamic>));
+  }
+
   Future<UserModel?> getCurrentUserData() async {
     var userData =
         await userCollection.doc(FirebaseAuth.instance.currentUser?.uid).get();
@@ -186,11 +191,24 @@ class DBService {
     // }
   }
 
-  getUserChats() async {
-    return userCollection.doc(uid).snapshots();
+  Stream<List<Message>> getUserMessages(String receiverUserId) {
+    return userCollection
+        .doc(authService.firebaseAuth.currentUser!.uid)
+        .collection('chats')
+        .doc(receiverUserId)
+        .collection('messages')
+        .orderBy('timeSent')
+        .snapshots()
+        .map((event) {
+      List<Message> messages = [];
+      for (var doc in event.docs) {
+        messages.add(Message.fromMap(doc.data()));
+      }
+      return messages;
+    });
   }
 
-  Future getUserDataByID(String recieverID) async {
-    return await userCollection.doc(recieverID).get() as User;
-  }
+  // Future getUserDataByID(String recieverID) async {
+  //   return await userCollection.doc(recieverID).get() as User;
+  // }
 }

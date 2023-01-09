@@ -1,9 +1,12 @@
 import 'package:chat_app/model/chat_contact.dart';
+import 'package:chat_app/model/message.dart';
 import 'package:chat_app/pages/chat_page.dart';
 import 'package:chat_app/pages/profile_page.dart';
 import 'package:chat_app/screens/login_screen.dart';
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/db_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 const textInputDecoration = InputDecoration(
@@ -18,6 +21,56 @@ const textInputDecoration = InputDecoration(
     borderSide: BorderSide(color: Color.fromARGB(255, 255, 98, 98), width: 2.0),
   ),
 );
+
+class ChatList extends StatefulWidget {
+  final String receiverUserId;
+
+  const ChatList({super.key, required this.receiverUserId});
+
+  @override
+  State<ChatList> createState() => _ChatListState();
+}
+
+class _ChatListState extends State<ChatList> {
+  final ScrollController messageController = ScrollController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    messageController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Message>>(
+      stream: DBService().getUserMessages(widget.receiverUserId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Loader();
+        }
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          messageController.jumpTo(messageController.position.maxScrollExtent);
+        });
+        return ListView.builder(
+          controller: messageController,
+          itemCount: snapshot.data!.length,
+          itemBuilder: ,
+        );
+      },
+    );
+  }
+}
+
+class Loader extends StatelessWidget {
+  const Loader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child:
+            CircularProgressIndicator(color: Theme.of(context).primaryColor));
+  }
+}
 
 class ChatTile extends StatelessWidget {
   final ChatContact chatContactData;
