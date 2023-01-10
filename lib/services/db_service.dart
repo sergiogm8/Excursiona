@@ -42,6 +42,23 @@ class DBService {
     return snapshot;
   }
 
+  Stream<List<UserModel>> getContacts() {
+    return userCollection.snapshots().asyncMap((snapshot) async {
+      List<UserModel> contacts = [];
+      print("longitud de snapshot " + snapshot.docs.length.toString());
+      print(snapshot.docs[0].data().toString());
+      print(snapshot.docs[1].data().toString());
+      print("nombre " + snapshot.docs[1]['name']);
+      for (var doc in snapshot.docs) {
+        print("it 1");
+        var contact = UserModel.fromMap(doc as Map<String, dynamic>);
+        contacts.add(contact);
+        print(contacts.length);
+      }
+      return contacts;
+    });
+  }
+
   Stream<UserModel> getUserDataByID(String userId) {
     return userCollection.doc(userId).snapshots().map(
         (event) => UserModel.fromMap(event.data()! as Map<String, dynamic>));
@@ -133,18 +150,19 @@ class DBService {
   void sendTextMessage(
       {required BuildContext context,
       required String text,
-      required String recieverUserID,
-      required UserModel senderUserData}) async {
+      required String recieverUserID}) async {
     try {
       var timeSent = DateTime.now();
       UserModel recieverUserData;
       // User recieverUserData = getUserDataByID(recieverUserID) as User;
 
-      var userDataMap = await userCollection.doc(recieverUserID).get();
-      recieverUserData =
-          UserModel.fromMap(userDataMap.data()! as Map<String, dynamic>);
+      var recieverUserDataMap = await userCollection.doc(recieverUserID).get();
+      recieverUserData = UserModel.fromMap(
+          recieverUserDataMap.data()! as Map<String, dynamic>);
 
       var messageID = const Uuid().v1();
+
+      UserModel senderUserData = await getCurrentUserData() as UserModel;
 
       _saveMessageToContactsSubcollection(
           senderUserData, recieverUserData, text, timeSent, recieverUserID);

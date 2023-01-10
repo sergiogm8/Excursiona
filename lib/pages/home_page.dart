@@ -1,5 +1,7 @@
 import 'package:chat_app/helper/helper_functions.dart';
 import 'package:chat_app/model/chat_contact.dart';
+import 'package:chat_app/pages/chat_page.dart';
+import 'package:chat_app/pages/contacts_page.dart';
 import 'package:chat_app/pages/profile_page.dart';
 import 'package:chat_app/screens/login_screen.dart';
 import 'package:chat_app/services/auth_service.dart';
@@ -54,91 +56,92 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          "Mis chats",
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+          title: const Text(
+            "Mis chats",
+          ),
         ),
-      ),
-      drawer: Drawer(
-        child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 50),
-            children: <Widget>[
-              const Icon(Icons.account_circle, size: 100),
-              Text(name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16)),
-              Text(email,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14)),
-              const SizedBox(height: 15),
-              const Divider(),
-              ListTile(
-                  title: const Text("Mi perfil",
+        drawer: Drawer(
+          child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 50),
+              children: <Widget>[
+                const Icon(Icons.account_circle, size: 100),
+                Text(name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16)),
+                Text(email,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 15),
+                const Divider(),
+                ListTile(
+                    title: const Text("Mi perfil",
+                        style: TextStyle(color: Colors.black)),
+                    leading: const Icon(Icons.person),
+                    selectedColor: Theme.of(context).primaryColor,
+                    onTap: () {
+                      Navigator.pop(context);
+                      nextScreen(
+                          context,
+                          ProfilePage(
+                            name: name,
+                            email: email,
+                          ));
+                    }),
+                ListTile(
+                  title: const Text("Mis chats",
                       style: TextStyle(color: Colors.black)),
-                  leading: const Icon(Icons.person),
                   selectedColor: Theme.of(context).primaryColor,
+                  selected: true,
+                  leading: const Icon(Icons.chat_rounded),
                   onTap: () {
                     Navigator.pop(context);
-                    nextScreen(
-                        context,
-                        ProfilePage(
-                          name: name,
-                          email: email,
-                        ));
-                  }),
-              ListTile(
-                title: const Text("Mis chats",
-                    style: TextStyle(color: Colors.black)),
-                selectedColor: Theme.of(context).primaryColor,
-                selected: true,
-                leading: const Icon(Icons.chat_rounded),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text("Cerrar sesión",
-                    style: TextStyle(color: Colors.black)),
-                leading: const Icon(Icons.logout),
-                selectedColor: Theme.of(context).primaryColor,
-                onTap: () async {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                            title: const Text("Cerrar sesión"),
-                            content: const Text(
-                                "¿Seguro que quieres cerrar la sesión?"),
-                            actions: [
-                              IconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: const Text("Cerrar sesión",
+                      style: TextStyle(color: Colors.black)),
+                  leading: const Icon(Icons.logout),
+                  selectedColor: Theme.of(context).primaryColor,
+                  onTap: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                              title: const Text("Cerrar sesión"),
+                              content: const Text(
+                                  "¿Seguro que quieres cerrar la sesión?"),
+                              actions: [
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    icon: const Icon(Icons.cancel)),
+                                IconButton(
+                                  onPressed: () async {
+                                    await authService.signOut();
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const LoginScreen()),
+                                        (route) => false);
                                   },
-                                  icon: const Icon(Icons.cancel)),
-                              IconButton(
-                                onPressed: () async {
-                                  await authService.signOut();
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const LoginScreen()),
-                                      (route) => false);
-                                },
-                                icon: const Icon(Icons.check),
-                              ),
-                            ]);
-                      });
-                },
-              ),
-            ]),
-      ),
-      body: chatList(),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Theme.of(context).primaryColor,
-          child: const Icon(Icons.chat)),
-    );
+                                  icon: const Icon(Icons.check),
+                                ),
+                              ]);
+                        });
+                  },
+                ),
+              ]),
+        ),
+        body: chatList(),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              nextScreen(context, const ContactsPage());
+            },
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.chat)));
   }
 
   chatList() {
