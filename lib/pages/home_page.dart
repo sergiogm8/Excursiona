@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
         contactID: "4321"));
     // return StreamBuilder<List<ChatContact>>(
     //   stream: chatService.getChatsContacts(),
-    //   builder: (context, snapshot) {
+    //   builder: (context, AsyncSnapshot snapshot) {
     //     if (snapshot.connectionState == ConnectionState.waiting) {
     //       return const Center(child: CircularProgressIndicator());
     //     } else {

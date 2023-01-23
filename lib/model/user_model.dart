@@ -3,7 +3,7 @@ class UserModel {
   final String uid;
   final String profilePic;
   final String email;
-  final List<String> contactsID;
+  final List contactsID;
 
   UserModel(
       {required this.name,
@@ -18,7 +18,7 @@ class UserModel {
       uid: map['uid'] ?? '',
       profilePic: map['profilePic'] ?? '',
       email: map['email'] ?? '',
-      contactsID: List<String>.from(map['contactsID']),
+      contactsID: map['contacts'] ?? [],
     );
   }
 

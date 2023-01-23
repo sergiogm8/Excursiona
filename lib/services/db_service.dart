@@ -1,5 +1,6 @@
 import 'package:chat_app/enums/message_enums.dart';
 import 'package:chat_app/model/chat_contact.dart';
+import 'package:chat_app/model/contact.dart';
 import 'package:chat_app/model/message.dart';
 import 'package:chat_app/model/user_model.dart';
 import 'package:chat_app/services/auth_service.dart';
@@ -33,6 +34,7 @@ class DBService {
       'name': name,
       'email': email,
       'profilePic': '',
+      'contacts': [],
     });
   }
 
@@ -42,26 +44,14 @@ class DBService {
     return snapshot;
   }
 
-  Stream<List<UserModel>> getContacts() {
-    return userCollection.snapshots().asyncMap((snapshot) async {
-      List<UserModel> contacts = [];
-      print("longitud de snapshot " + snapshot.docs.length.toString());
-      print(snapshot.docs[0].data().toString());
-      print(snapshot.docs[1].data().toString());
-      print("nombre " + snapshot.docs[1]['name']);
-      for (var doc in snapshot.docs) {
-        print("it 1");
-        var contact = UserModel.fromMap(doc as Map<String, dynamic>);
-        contacts.add(contact);
-        print(contacts.length);
-      }
-      return contacts;
-    });
-  }
-
   Stream<UserModel> getUserDataByID(String userId) {
     return userCollection.doc(userId).snapshots().map(
         (event) => UserModel.fromMap(event.data()! as Map<String, dynamic>));
+  }
+
+  Future<UserModel> getFutureUserDataByID(String userId) async {
+    var userData = await userCollection.doc(userId).get();
+    return UserModel.fromMap(userData.data()! as Map<String, dynamic>);
   }
 
   Future<UserModel?> getCurrentUserData() async {
@@ -225,6 +215,16 @@ class DBService {
       return messages;
     });
   }
+
+  // Future getUserContacts() async {
+  //   List<String> contacts = [];
+  //   var data;
+  //   var a = userCollection.doc(uid).snapshots().map((event) {
+  //     var b = event.data;
+  //     data = b['contacts'];
+  //   });
+  //   print(data);
+  // }
 
   // Future getUserDataByID(String recieverID) async {
   //   return await userCollection.doc(recieverID).get() as User;

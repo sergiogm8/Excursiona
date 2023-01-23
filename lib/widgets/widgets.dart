@@ -1,4 +1,5 @@
 import 'package:chat_app/model/chat_contact.dart';
+import 'package:chat_app/model/contact.dart';
 import 'package:chat_app/model/message.dart';
 import 'package:chat_app/model/user_model.dart';
 import 'package:chat_app/pages/chat_page.dart';
@@ -61,54 +62,58 @@ class _ChatListState extends State<ChatList> {
             return Column(
               children: [
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: message.recieverID ==
-                          AuthService().firebaseAuth.currentUser!.uid
-                      ? MainAxisAlignment.end
-                      : MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: message.recieverID ==
-                                AuthService().firebaseAuth.currentUser!.uid
-                            ? const Color.fromARGB(255, 255, 98, 98)
-                            : const Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            message.text,
-                            style: TextStyle(
-                              color: message.recieverID ==
-                                      AuthService()
-                                          .firebaseAuth
-                                          .currentUser!
-                                          .uid
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(timeSent,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: message.recieverID ==
+                            AuthService().firebaseAuth.currentUser!.uid
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.7),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: message.recieverID ==
+                                  AuthService().firebaseAuth.currentUser!.uid
+                              ? const Color.fromARGB(255, 255, 255, 255)
+                              : const Color.fromARGB(255, 255, 98, 98),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              message.text,
                               style: TextStyle(
                                 color: message.recieverID ==
                                         AuthService()
                                             .firebaseAuth
                                             .currentUser!
                                             .uid
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 12,
-                              ))
-                        ],
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(timeSent,
+                                style: TextStyle(
+                                  color: message.recieverID ==
+                                          AuthService()
+                                              .firebaseAuth
+                                              .currentUser!
+                                              .uid
+                                      ? Colors.black
+                                      : Colors.white,
+                                  fontSize: 12,
+                                ))
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             );
@@ -200,8 +205,8 @@ class Loader extends StatelessWidget {
 }
 
 class ContactTile extends StatelessWidget {
-  final UserModel contactData;
   const ContactTile({super.key, required this.contactData});
+  final Contact contactData;
 
   @override
   Widget build(BuildContext context) {
@@ -216,20 +221,19 @@ class ContactTile extends StatelessWidget {
           title: Text(contactData.name,
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          // onTap: () {
-          //   nextScreen(
-          //       context,
-          //       ChatPage(
-          //         contactName: chatContactData.name,
-          //         contactID: chatContactData.contactID,
-          //         contactPicture: chatContactData.profilePic,
-          //       ));
-          // },
+          onTap: () {
+            nextScreenReplace(
+                context,
+                ChatPage(
+                    contactID: contactData.contactID,
+                    contactName: contactData.name,
+                    contactPicture: contactData.profilePic));
+          },
         ),
         const Divider(
           height: 5,
           thickness: 1,
-        ),
+        )
       ],
     );
   }
