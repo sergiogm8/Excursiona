@@ -59,64 +59,155 @@ class _ChatListState extends State<ChatList> {
           itemBuilder: (context, index) {
             final message = snapshot.data![index];
             var timeSent = DateFormat.Hm().format(message.timeSent);
-            return Column(
-              children: [
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    mainAxisAlignment: message.recieverID ==
-                            AuthService().firebaseAuth.currentUser!.uid
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.7),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: message.recieverID ==
-                                  AuthService().firebaseAuth.currentUser!.uid
-                              ? const Color.fromARGB(255, 255, 255, 255)
-                              : const Color.fromARGB(255, 255, 98, 98),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              message.text,
-                              style: TextStyle(
-                                color: message.recieverID ==
-                                        AuthService()
-                                            .firebaseAuth
-                                            .currentUser!
-                                            .uid
-                                    ? Colors.black
-                                    : Colors.white,
-                              ),
+            return Align(
+                alignment: message.recieverID ==
+                        AuthService().firebaseAuth.currentUser!.uid
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      minWidth: MediaQuery.of(context).size.width * 0.4,
+                    ),
+                    child: Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      color: message.recieverID ==
+                              AuthService().firebaseAuth.currentUser!.uid
+                          ? const Color.fromARGB(255, 255, 210, 210)
+                          : const Color.fromARGB(255, 255, 98, 98),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 5),
+                      child: Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 10,
+                              right: 50,
+                              top: 5,
+                              bottom: 15,
                             ),
-                            const SizedBox(width: 10),
-                            Text(timeSent,
-                                style: TextStyle(
-                                  color: message.recieverID ==
-                                          AuthService()
-                                              .firebaseAuth
-                                              .currentUser!
-                                              .uid
-                                      ? Colors.black
-                                      : Colors.white,
-                                  fontSize: 12,
-                                ))
-                          ],
-                        ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  message.text,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: message.recieverID ==
+                                            AuthService()
+                                                .firebaseAuth
+                                                .currentUser!
+                                                .uid
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 2,
+                            right: 4,
+                            child: Row(
+                              children: [
+                                Text(
+                                  timeSent,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: message.recieverID ==
+                                            AuthService()
+                                                .firebaseAuth
+                                                .currentUser!
+                                                .uid
+                                        ? Colors.grey[600]
+                                        : Colors.grey[300],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            );
+                    )));
+            // return Column(
+            //   children: [
+            //     const SizedBox(height: 10),
+            //     Padding(
+            //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            //       child: Row(
+            //         mainAxisAlignment: message.recieverID ==
+            //                 AuthService().firebaseAuth.currentUser!.uid
+            //             ? MainAxisAlignment.start
+            //             : MainAxisAlignment.end,
+            //         children: [
+            //           Container(
+            //               constraints: BoxConstraints(
+            //                   maxWidth:
+            //                       MediaQuery.of(context).size.width * 0.7),
+            //               padding: const EdgeInsets.symmetric(
+            //                   horizontal: 12, vertical: 10),
+            //               decoration: BoxDecoration(
+            //                   color: message.recieverID ==
+            //                           AuthService()
+            //                               .firebaseAuth
+            //                               .currentUser!
+            //                               .uid
+            //                       ? const Color.fromARGB(255, 255, 210, 210)
+            //                       : const Color.fromARGB(255, 255, 98, 98),
+            //                   borderRadius: message.recieverID ==
+            //                           AuthService()
+            //                               .firebaseAuth
+            //                               .currentUser!
+            //                               .uid
+            //                       ? const BorderRadius.only(
+            //                           bottomRight: Radius.circular(10),
+            //                           topLeft: Radius.circular(10),
+            //                           topRight: Radius.circular(10))
+            //                       : const BorderRadius.only(
+            //                           bottomLeft: Radius.circular(10),
+            //                           topLeft: Radius.circular(10),
+            //                           topRight: Radius.circular(10))),
+            //               child: Card(
+            //                   child: Stack(
+            //                 children: [
+            //                   Row(
+            //                     mainAxisSize: MainAxisSize.min,
+            //                     children: [
+            //                       Text(
+            //                         message.text,
+            //                         style: TextStyle(
+            //                           color: message.recieverID ==
+            //                                   AuthService()
+            //                                       .firebaseAuth
+            //                                       .currentUser!
+            //                                       .uid
+            //                               ? Colors.black
+            //                               : Colors.white,
+            //                           fontSize: 14,
+            //                         ),
+            //                       ),
+            //                       const SizedBox(width: 10),
+            //                       Text(timeSent,
+            //                           style: TextStyle(
+            //                             color: message.recieverID ==
+            //                                     AuthService()
+            //                                         .firebaseAuth
+            //                                         .currentUser!
+            //                                         .uid
+            //                                 ? Colors.black
+            //                                 : Colors.white,
+            //                             fontSize: 12,
+            //                           ))
+            //                     ],
+            //                   ),
+            //                 ],
+            //               ))),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // );
           },
         );
       },
@@ -175,9 +266,11 @@ class _BottomChatField extends State<BottomChatField> {
                   }
                 }),
                 decoration: textInputDecoration.copyWith(
-                    hintText: 'Type a message',
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 10)),
+                  hintText: 'Type a message',
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  fillColor: const Color.fromARGB(255, 255, 255, 255),
+                ),
                 textAlignVertical: TextAlignVertical.center,
               ),
             ),
@@ -211,24 +304,29 @@ class ContactTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ListTile(
-          //a leading circle avatar of large size
-          leading: CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(contactData.profilePic),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ListTile(
+            //a leading circle avatar of large size
+            leading: contactData.profilePic.isEmpty
+                ? const Icon(Icons.account_circle, size: 60)
+                : CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(contactData.profilePic)),
+            title: Text(contactData.name,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            onTap: () {
+              nextScreenReplace(
+                  context,
+                  ChatPage(
+                      contactID: contactData.contactID,
+                      contactName: contactData.name,
+                      contactPicture: contactData.profilePic));
+            },
           ),
-          title: Text(contactData.name,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          onTap: () {
-            nextScreenReplace(
-                context,
-                ChatPage(
-                    contactID: contactData.contactID,
-                    contactName: contactData.name,
-                    contactPicture: contactData.profilePic));
-          },
         ),
         const Divider(
           height: 5,
@@ -248,11 +346,11 @@ class ChatTile extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          //a leading circle avatar of large size
-          leading: CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(chatContactData.profilePic),
-          ),
+          leading: chatContactData.profilePic.isEmpty
+              ? const Icon(Icons.account_circle, size: 60)
+              : CircleAvatar(
+                  radius: 30,
+                  backgroundImage: NetworkImage(chatContactData.profilePic)),
           title: Text(chatContactData.name,
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

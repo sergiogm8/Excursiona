@@ -48,10 +48,11 @@ class _ChatPageState extends State<ChatPage> {
                             backgroundImage:
                                 NetworkImage(widget.contactPicture),
                           )
-                        : const CircleAvatar(
-                            child: Icon(Icons.person),
+                        : const Icon(
+                            Icons.account_circle,
+                            size: 50,
                           ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 10),
                     Text(widget.contactName,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 20)),
@@ -59,6 +60,7 @@ class _ChatPageState extends State<ChatPage> {
                 );
               }),
         ),
+        // backgroundColor: const Color.fromARGB(245, 245, 245, 245),
         body: Column(
           children: [
             Expanded(child: ChatList(receiverUserId: widget.contactID)),

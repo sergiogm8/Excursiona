@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   ChatService chatService = ChatService();
   String name = "";
   String email = "";
+  String profilePic = "";
   Stream? chats;
 
   @override
@@ -44,6 +45,11 @@ class _HomePageState extends State<HomePage> {
         name = value!;
       });
     });
+    // await HelperFunctions.getUserProfilePic().then((value) {
+    //   setState(() {
+    //     profilePic = value!;
+    //   });
+    // });
     // await DBService(uid: FirebaseAuth.instance.currentUser!.uid)
     //     .getUserChats()
     //     .then((snapshots) {
@@ -66,7 +72,9 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 50),
               children: <Widget>[
-                const Icon(Icons.account_circle, size: 100),
+                profilePic.isEmpty
+                    ? const Icon(Icons.account_circle, size: 100)
+                    : Image.network(profilePic, width: 100, height: 100),
                 Text(name,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16)),
@@ -89,6 +97,7 @@ class _HomePageState extends State<HomePage> {
                             email: email,
                           ));
                     }),
+                const Divider(),
                 ListTile(
                   title: const Text("Mis chats",
                       style: TextStyle(color: Colors.black)),
@@ -99,6 +108,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pop(context);
                   },
                 ),
+                const Divider(),
                 ListTile(
                   title: const Text("Cerrar sesión",
                       style: TextStyle(color: Colors.black)),
@@ -133,6 +143,7 @@ class _HomePageState extends State<HomePage> {
                         });
                   },
                 ),
+                const Divider(),
               ]),
         ),
         body: chatList(),
@@ -145,45 +156,45 @@ class _HomePageState extends State<HomePage> {
   }
 
   chatList() {
-    var chatContacts = List<ChatContact>.empty(growable: true);
-    chatContacts.add(ChatContact(
-        name: "Juan",
-        lastMessage: "Hola",
-        timeSent: DateTime.now(),
-        profilePic:
-            "https://xsgames.co/randomusers/assets/avatars/pixel/25.jpg",
-        contactID: "1234"));
-    chatContacts.add(ChatContact(
-        name: "Pedro",
-        lastMessage: "Hola que tal hermano como te trata la vida",
-        timeSent: DateTime.now(),
-        profilePic:
-            "https://xsgames.co/randomusers/assets/avatars/pixel/26.jpg",
-        contactID: "4321"));
-    // return StreamBuilder<List<ChatContact>>(
-    //   stream: chatService.getChatsContacts(),
-    //   builder: (context, AsyncSnapshot snapshot) {
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return const Center(child: CircularProgressIndicator());
-    //     } else {
-    //       return ListView.builder(
-    //         shrinkWrap: true,
-    //         itemCount: snapshot.data!.length,
-    //         itemBuilder: (context, index) {
-    //           var chatContactData = snapshot.data![index];
-    //           return ChatTile(chatContactData: chatContactData);
-    //         },
-    //       );
-    //     }
-    //   },
-    // );
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: chatContacts.length,
-      itemBuilder: (context, index) {
-        var chatContactData = chatContacts[index];
-        return ChatTile(chatContactData: chatContactData);
+    // var chatContacts = List<ChatContact>.empty(growable: true);
+    // chatContacts.add(ChatContact(
+    //     name: "Juan",
+    //     lastMessage: "Hola",
+    //     timeSent: DateTime.now(),
+    //     profilePic:
+    //         "https://xsgames.co/randomusers/assets/avatars/pixel/25.jpg",
+    //     contactID: "1234"));
+    // chatContacts.add(ChatContact(
+    //     name: "Pedro",
+    //     lastMessage: "Hola que tal hermano como te trata la vida",
+    //     timeSent: DateTime.now(),
+    //     profilePic:
+    //         "https://xsgames.co/randomusers/assets/avatars/pixel/26.jpg",
+    //     contactID: "4321"));
+    return StreamBuilder<List<ChatContact>>(
+      stream: chatService.getChatsContacts(),
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              var chatContactData = snapshot.data![index];
+              return ChatTile(chatContactData: chatContactData);
+            },
+          );
+        }
       },
     );
+    // return ListView.builder(
+    //   shrinkWrap: true,
+    //   itemCount: chatContacts.length,
+    //   itemBuilder: (context, index) {
+    //     var chatContactData = chatContacts[index];
+    //     return ChatTile(chatContactData: chatContactData);
+    //   },
+    // );
   }
 }

@@ -4,6 +4,7 @@ import 'package:chat_app/shared/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/pages/home_page.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,13 +40,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Chat App',
-      theme: ThemeData(
-        primaryColor: Constants().primaryColor,
-      ),
-      home: _isUserLoggedIn ? const HomePage() : const LoginScreen(),
-    );
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Chat App',
+          theme: ThemeData(
+            primaryColor: Constants().primaryColor,
+          ),
+          home: _isUserLoggedIn ? const HomePage() : const LoginScreen(),
+        ));
   }
 }
