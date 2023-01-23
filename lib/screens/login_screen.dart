@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
           : SingleChildScrollView(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 38, vertical: 80),
+                    const EdgeInsets.symmetric(horizontal: 38, vertical: 200),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -78,22 +78,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               : null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 5),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 38),
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              'No recuerdo mi contraseña',
-                              style: TextStyle(
-                                color: Colors.redAccent,
-                              ),
+                        child: TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'No recuerdo mi contraseña',
+                            style: TextStyle(
+                              color: Colors.redAccent,
                             ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 15),
                       ElevatedButton(
                         onPressed: () {
                           _login();
@@ -112,14 +110,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
                       Text.rich(
+                        textAlign: TextAlign.center,
                         TextSpan(
-                          text: "¿No tienes cuenta?",
+                          text: "¿No tienes cuenta? ",
                           style: const TextStyle(
                             color: Colors.black,
                           ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: "Regístrate",
+                              text: " Regístrate",
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   nextScreen(context, const RegisterScreen());

@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           : SingleChildScrollView(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 38, vertical: 80),
+                    const EdgeInsets.symmetric(horizontal: 38, vertical: 200),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -94,18 +94,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               : null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 5),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 38),
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              'No recuerdo mi contraseña',
-                              style: TextStyle(
-                                color: Colors.redAccent,
-                              ),
+                        child: TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'No recuerdo mi contraseña',
+                            style: TextStyle(
+                              color: Colors.redAccent,
                             ),
                           ),
                         ),
@@ -129,13 +126,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 20),
                       Text.rich(
                         TextSpan(
-                          text: "¿Ya tienes una cuenta?",
+                          text: "¿Ya tienes una cuenta? ",
                           style: const TextStyle(
                             color: Colors.black,
                           ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: "Inicia sesión",
+                              text: " Inicia sesión",
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   nextScreen(context, const LoginScreen());
@@ -167,6 +164,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserName(name);
           await HelperFunctions.saveUserEmail(email);
+          await HelperFunctions.saveUserProfilePic("");
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackBar(
