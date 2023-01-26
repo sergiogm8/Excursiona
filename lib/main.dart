@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Chat App',
           theme: ThemeData(
-            primaryColor: Constants().primaryColor,
+            primaryColor: Constants.primaryColor,
           ),
           home: _isUserLoggedIn ? const HomePage() : const LoginScreen(),
         ));

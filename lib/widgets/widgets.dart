@@ -7,6 +7,7 @@ import 'package:chat_app/pages/profile_page.dart';
 import 'package:chat_app/screens/login_screen.dart';
 import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/services/db_service.dart';
+import 'package:chat_app/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
@@ -67,7 +68,7 @@ class _ChatListState extends State<ChatList> {
                 child: ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      minWidth: MediaQuery.of(context).size.width * 0.4,
+                      minWidth: MediaQuery.of(context).size.width * 0.3,
                     ),
                     child: Card(
                       elevation: 1,
@@ -75,8 +76,8 @@ class _ChatListState extends State<ChatList> {
                           borderRadius: BorderRadius.circular(8)),
                       color: message.recieverID ==
                               AuthService().firebaseAuth.currentUser!.uid
-                          ? const Color.fromARGB(255, 255, 210, 210)
-                          : const Color.fromARGB(255, 255, 98, 98),
+                          ? Constants.lightChatColor
+                          : Constants.primaryColor,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 15, vertical: 5),
                       child: Stack(
@@ -120,8 +121,8 @@ class _ChatListState extends State<ChatList> {
                                                 .firebaseAuth
                                                 .currentUser!
                                                 .uid
-                                        ? Colors.grey[600]
-                                        : Colors.grey[300],
+                                        ? Constants.darkGrey
+                                        : Constants.lightGrey,
                                   ),
                                 ),
                               ],
@@ -130,84 +131,6 @@ class _ChatListState extends State<ChatList> {
                         ],
                       ),
                     )));
-            // return Column(
-            //   children: [
-            //     const SizedBox(height: 10),
-            //     Padding(
-            //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            //       child: Row(
-            //         mainAxisAlignment: message.recieverID ==
-            //                 AuthService().firebaseAuth.currentUser!.uid
-            //             ? MainAxisAlignment.start
-            //             : MainAxisAlignment.end,
-            //         children: [
-            //           Container(
-            //               constraints: BoxConstraints(
-            //                   maxWidth:
-            //                       MediaQuery.of(context).size.width * 0.7),
-            //               padding: const EdgeInsets.symmetric(
-            //                   horizontal: 12, vertical: 10),
-            //               decoration: BoxDecoration(
-            //                   color: message.recieverID ==
-            //                           AuthService()
-            //                               .firebaseAuth
-            //                               .currentUser!
-            //                               .uid
-            //                       ? const Color.fromARGB(255, 255, 210, 210)
-            //                       : const Color.fromARGB(255, 255, 98, 98),
-            //                   borderRadius: message.recieverID ==
-            //                           AuthService()
-            //                               .firebaseAuth
-            //                               .currentUser!
-            //                               .uid
-            //                       ? const BorderRadius.only(
-            //                           bottomRight: Radius.circular(10),
-            //                           topLeft: Radius.circular(10),
-            //                           topRight: Radius.circular(10))
-            //                       : const BorderRadius.only(
-            //                           bottomLeft: Radius.circular(10),
-            //                           topLeft: Radius.circular(10),
-            //                           topRight: Radius.circular(10))),
-            //               child: Card(
-            //                   child: Stack(
-            //                 children: [
-            //                   Row(
-            //                     mainAxisSize: MainAxisSize.min,
-            //                     children: [
-            //                       Text(
-            //                         message.text,
-            //                         style: TextStyle(
-            //                           color: message.recieverID ==
-            //                                   AuthService()
-            //                                       .firebaseAuth
-            //                                       .currentUser!
-            //                                       .uid
-            //                               ? Colors.black
-            //                               : Colors.white,
-            //                           fontSize: 14,
-            //                         ),
-            //                       ),
-            //                       const SizedBox(width: 10),
-            //                       Text(timeSent,
-            //                           style: TextStyle(
-            //                             color: message.recieverID ==
-            //                                     AuthService()
-            //                                         .firebaseAuth
-            //                                         .currentUser!
-            //                                         .uid
-            //                                 ? Colors.black
-            //                                 : Colors.white,
-            //                             fontSize: 12,
-            //                           ))
-            //                     ],
-            //                   ),
-            //                 ],
-            //               ))),
-            //         ],
-            //       ),
-            //     ),
-            //   ],
-            // );
           },
         );
       },
@@ -254,6 +177,7 @@ class _BottomChatField extends State<BottomChatField> {
             Expanded(
               child: TextField(
                 controller: messageController,
+                maxLines: null,
                 onChanged: ((value) {
                   if (value.trimLeft().isNotEmpty) {
                     setState(() {
@@ -270,6 +194,7 @@ class _BottomChatField extends State<BottomChatField> {
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   fillColor: const Color.fromARGB(255, 255, 255, 255),
+                  filled: true,
                 ),
                 textAlignVertical: TextAlignVertical.center,
               ),
