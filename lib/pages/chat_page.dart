@@ -60,7 +60,6 @@ class _ChatPageState extends State<ChatPage> {
                 );
               }),
         ),
-        // backgroundColor: const Color.fromARGB(245, 245, 245, 245),
         body: Column(
           children: [
             Expanded(child: ChatList(receiverUserId: widget.contactID)),
