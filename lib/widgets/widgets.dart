@@ -11,6 +11,7 @@ import 'package:chat_app/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
+import 'package:page_transition/page_transition.dart';
 
 const textInputDecoration = InputDecoration(
   labelStyle: TextStyle(color: Colors.grey),
@@ -249,7 +250,8 @@ class ContactTile extends StatelessWidget {
                   ChatPage(
                       contactID: contactData.contactID,
                       contactName: contactData.name,
-                      contactPicture: contactData.profilePic));
+                      contactPicture: contactData.profilePic),
+                  PageTransitionType.rightToLeft);
             },
           ),
         ),
@@ -293,7 +295,8 @@ class ChatTile extends StatelessWidget {
                   contactName: chatContactData.name,
                   contactID: chatContactData.contactID,
                   contactPicture: chatContactData.profilePic,
-                ));
+                ),
+                PageTransitionType.rightToLeft);
           },
         ),
         const Divider(
@@ -305,13 +308,13 @@ class ChatTile extends StatelessWidget {
   }
 }
 
-void nextScreen(context, page) {
-  Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+void nextScreen(context, page, PageTransitionType animation) {
+  Navigator.push(context, PageTransition(child: page, type: animation));
 }
 
-void nextScreenReplace(context, page) {
+void nextScreenReplace(context, page, PageTransitionType animation) {
   Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (context) => page));
+      context, PageTransition(child: page, type: animation));
 }
 
 void showSnackBar(context, color, message) {

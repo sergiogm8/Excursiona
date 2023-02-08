@@ -19,15 +19,6 @@ class DBService {
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
-  // final CollectionReference chatCollection =
-  //     FirebaseFirestore.instance.collection('chats');
-
-  // final CollectionReference messagesCollection =
-  //     FirebaseFirestore.instance.collection('messages');
-
-  // final CollectionReference contactsCollection =
-  //     FirebaseFirestore.instance.collection('contacts');
-
   Future saveUserData(String name, String email) async {
     return await userCollection.doc(uid).set({
       'uid': uid,
@@ -162,41 +153,6 @@ class DBService {
     } catch (e) {
       showSnackBar(context, Theme.of(context).primaryColor, e.toString());
     }
-    // var senderRef = userCollection.doc(senderUser.uid).collection('chats').doc(recieverID);
-    // var recieverRef = userCollection.doc(recieverID).collection('chats').doc(senderUser.uid);
-
-    // var senderSnapshot = await senderRef.get();
-    // var recieverSnapshot = await recieverRef.get();
-
-    // if(!senderSnapshot.exists){
-    //   senderRef.set({
-    //     'id': recieverID,
-    //     'name': recieverSnapshot.get('name'),
-    //     'profilePic': recieverSnapshot.get('profilePic'),
-    //     'lastMessage': text,
-    //     'lastMessageTime': DateTime.now(),
-    //   });
-    // }else{
-    //   senderRef.update({
-    //     'lastMessage': text,
-    //     'lastMessageTime': DateTime.now(),
-    //   });
-    // }
-
-    // if(!recieverSnapshot.exists){
-    //   recieverRef.set({
-    //     'id': senderUser.uid,
-    //     'name': senderSnapshot.get('name'),
-    //     'profilePic': senderSnapshot.get('profilePic'),
-    //     'lastMessage': text,
-    //     'lastMessageTime': DateTime.now(),
-    //   });
-    // }else{
-    //   recieverRef.update({
-    //     'lastMessage': text,
-    //     'lastMessageTime': DateTime.now(),
-    //   });
-    // }
   }
 
   Stream<List<Message>> getUserMessages(String receiverUserId) {
@@ -215,18 +171,4 @@ class DBService {
       return messages;
     });
   }
-
-  // Future getUserContacts() async {
-  //   List<String> contacts = [];
-  //   var data;
-  //   var a = userCollection.doc(uid).snapshots().map((event) {
-  //     var b = event.data;
-  //     data = b['contacts'];
-  //   });
-  //   print(data);
-  // }
-
-  // Future getUserDataByID(String recieverID) async {
-  //   return await userCollection.doc(recieverID).get() as User;
-  // }
 }

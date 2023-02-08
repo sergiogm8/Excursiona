@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -121,7 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               text: " Regístrate",
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  nextScreen(context, const RegisterScreen());
+                                  nextScreenReplace(
+                                      context,
+                                      const RegisterScreen(),
+                                      PageTransitionType.fade);
                                 },
                               style: const TextStyle(
                                 color: Colors.redAccent,
@@ -153,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
           HelperFunctions.saveUserLoggedInStatus(true);
           HelperFunctions.saveUserEmail(email);
           HelperFunctions.saveUserName(snapshot.docs[0].get("name"));
-          nextScreenReplace(context, const HomePage());
+          nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
         } else {
           showSnackBar(
             context,

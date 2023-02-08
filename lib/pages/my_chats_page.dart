@@ -3,6 +3,7 @@ import 'package:chat_app/pages/contacts_page.dart';
 import 'package:chat_app/services/chat_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 class MyChatsPage extends StatefulWidget {
   const MyChatsPage({super.key});
@@ -26,7 +27,8 @@ class _MyChatsPageState extends State<MyChatsPage> {
       body: _buildChatsList(),
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            nextScreen(context, const ContactsPage());
+            nextScreen(
+                context, const ContactsPage(), PageTransitionType.rightToLeft);
           },
           backgroundColor: Theme.of(context).primaryColor,
           child: const Icon(Icons.chat)),

@@ -13,28 +13,29 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  static const CameraPosition initialCameraPosition =
+      CameraPosition(target: LatLng(38.9842, -3.9275), zoom: 5);
+
   final LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: 100,
+    distanceFilter: 5,
   );
 
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   StreamSubscription<Position>? positionStream;
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  final _markers = <Marker>[];
-  static const CameraPosition initialCameraPosition =
-      CameraPosition(target: LatLng(38.9842, -3.9275), zoom: 5);
-
-  var _finishedLocation = false;
-
   Position? _currentPosition;
+  var _finishedLocation = false;
+  var _geoServiceEnabled;
+  var _isDragging = false;
 
   @override
   void dispose() {
     super.dispose();
-    // positionStream!.cancel();
+    if (positionStream != null) positionStream!.cancel();
   }
 
   @override
@@ -45,12 +46,14 @@ class _MapPageState extends State<MapPage> {
 
   loadData() {
     getCurrentPosition().then((value) async {
-      _markers.add(Marker(
-        markerId: const MarkerId("currentPosition"),
+      const markerId = MarkerId('currentPos');
+      Marker marker = Marker(
+        markerId: markerId,
         position: LatLng(value.latitude, value.longitude),
-      ));
+      );
       CameraPosition cameraPosition = CameraPosition(
-          target: LatLng(value.latitude, value.longitude), zoom: 18);
+        target: LatLng(value.latitude, value.longitude),
+      );
 
       final GoogleMapController controller = await _controller.future;
 
@@ -59,7 +62,11 @@ class _MapPageState extends State<MapPage> {
       _finishedLocation = true;
       setState(() {
         _currentPosition = value;
+        markers[markerId] = marker;
       });
+    }).catchError((error) {
+      showSnackBar(context, Theme.of(context).primaryColor, error.toString());
+      _finishedLocation = true;
     });
   }
 
@@ -69,7 +76,7 @@ class _MapPageState extends State<MapPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return Future.error('La ubicación no está activada');
     }
 
     permission = await Geolocator.checkPermission();
@@ -88,18 +95,99 @@ class _MapPageState extends State<MapPage> {
     return await Geolocator.getCurrentPosition();
   }
 
+  getOthersLocation() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
       children: [
-        GoogleMap(
-          initialCameraPosition: initialCameraPosition,
-          markers: Set<Marker>.of(_markers),
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-        ),
+        StreamBuilder(
+            stream: getOthersLocation(),
+            builder: (context, snapshot) {
+              return GoogleMap(
+                initialCameraPosition: initialCameraPosition,
+                markers: Set<Marker>.of(markers.values),
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                  Geolocator.getServiceStatusStream().listen((status) {
+                    if (status == ServiceStatus.disabled) {
+                      _geoServiceEnabled = false;
+                      showSnackBar(context, Theme.of(context).primaryColor,
+                          'La ubicación no está activada');
+                    } else {
+                      _geoServiceEnabled = true;
+                    }
+                  });
+                  if (_currentPosition != null) {
+                    positionStream = Geolocator.getPositionStream(
+                            locationSettings: locationSettings)
+                        .listen((Position? position) {
+                      if (!_isDragging) {
+                        controller.animateCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(
+                                    position!.latitude, position.longitude),
+                                zoom: 18)));
+                      }
+                      const markerId = MarkerId('currentPos');
+                      try {
+                        final marker = markers[markerId];
+                        Marker _marker = Marker(
+                          markerId: marker!.markerId,
+                          position:
+                              LatLng(position!.latitude, position.longitude),
+                        );
+                        setState(() {
+                          markers[markerId] = _marker;
+                          _currentPosition = position;
+                        });
+                      } catch (e) {}
+                    });
+                  }
+                },
+                onTap: (LatLng? latLng) {
+                  _isDragging = true;
+                },
+                zoomControlsEnabled: false,
+              );
+            }),
+        Positioned(
+            bottom: 20,
+            right: 20,
+            child: _currentPosition != null
+                ? FloatingActionButton(
+                    onPressed: () async {
+                      _isDragging = false;
+                      final GoogleMapController controller =
+                          await _controller.future;
+                      controller.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                              target: LatLng(_currentPosition!.latitude,
+                                  _currentPosition!.longitude),
+                              zoom: 18),
+                        ),
+                      );
+                    },
+                    backgroundColor: Theme.of(context).primaryColor,
+                    tooltip: "Centrar en mi ubicación",
+                    child: const Icon(
+                      Icons.gps_fixed,
+                      size: 40,
+                    ),
+                  )
+                : FloatingActionButton(
+                    onPressed: () {
+                      loadData();
+                    },
+                    backgroundColor: Theme.of(context).primaryColor,
+                    tooltip: "Localizarme",
+                    child: const Icon(
+                      Icons.location_searching,
+                      size: 40,
+                    ),
+                  )),
         if (!_finishedLocation) const Geolocating(),
       ],
     ));
@@ -116,7 +204,7 @@ class Geolocating extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.only(top: 40),
+        padding: const EdgeInsets.only(top: 55),
         child: Container(
             height: 50,
             constraints: BoxConstraints(

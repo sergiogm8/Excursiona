@@ -5,6 +5,7 @@ import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -37,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Center(
-                        child: Text("Iniciar sesión",
+                        child: Text("Registro",
                             style: TextStyle(
                                 fontSize: 48, fontWeight: FontWeight.bold)),
                       ),
@@ -125,6 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 20),
                       Text.rich(
+                        textAlign: TextAlign.center,
                         TextSpan(
                           text: "¿Ya tienes una cuenta? ",
                           style: const TextStyle(
@@ -135,7 +137,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               text: " Inicia sesión",
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  nextScreen(context, const LoginScreen());
+                                  nextScreenReplace(
+                                      context,
+                                      const LoginScreen(),
+                                      PageTransitionType.fade);
                                 },
                               style: const TextStyle(
                                 color: Colors.redAccent,
@@ -165,7 +170,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           await HelperFunctions.saveUserName(name);
           await HelperFunctions.saveUserEmail(email);
           await HelperFunctions.saveUserProfilePic("");
-          nextScreenReplace(context, const HomePage());
+          nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
         } else {
           showSnackBar(
             context,
