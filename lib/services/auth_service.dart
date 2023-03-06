@@ -1,6 +1,7 @@
 import 'package:chat_app/helper/helper_functions.dart';
 import 'package:chat_app/services/db_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -42,5 +43,20 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
+  }
+
+  Future signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser =
+        await GoogleSignIn(scopes: <String>["email"]).signIn();
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser!.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await firebaseAuth.signInWithCredential(credential);
   }
 }
