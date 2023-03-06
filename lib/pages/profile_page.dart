@@ -1,4 +1,5 @@
 import 'package:chat_app/helper/helper_functions.dart';
+import 'package:chat_app/pages/landing_page.dart';
 import 'package:chat_app/screens/login_screen.dart';
 import 'package:chat_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     await authService.signOut();
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
+                            builder: (context) => const LandingPage()),
                         (route) => false);
                   },
                   icon: const Icon(Icons.check),

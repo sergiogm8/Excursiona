@@ -3,6 +3,7 @@ import 'package:chat_app/pages/my_chats_page.dart';
 import 'package:chat_app/pages/post_screen.dart';
 import 'package:chat_app/pages/profile_page.dart';
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/excursion_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      nextScreen(context, const PostScreen(), PageTransitionType.bottomToTop);
+      ExcursionService().createExcursion();
     } else {
       setState(() {
         currentIndex = index;
@@ -42,10 +43,10 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: currentIndex,
-          selectedItemColor: Theme.of(context).primaryColor,
+          selectedItemColor: Colors.white,
           onTap: _onItemTapped,
-          backgroundColor: Colors.white,
-          unselectedItemColor: Colors.grey,
+          backgroundColor: Colors.grey[900],
+          unselectedItemColor: Colors.grey[500],
           items: const [
             BottomNavigationBarItem(
                 icon: Icon(Icons.chat_rounded), label: "Mis chats"),
