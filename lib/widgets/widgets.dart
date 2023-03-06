@@ -10,19 +10,19 @@ import 'package:chat_app/services/db_service.dart';
 import 'package:chat_app/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 
-const textInputDecoration = InputDecoration(
-  labelStyle: TextStyle(color: Colors.grey),
-  enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Color.fromARGB(255, 255, 98, 98), width: 2.0),
+final textInputDecoration = InputDecoration(
+  hintStyle: GoogleFonts.inter(
+      color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w300),
+  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+  enabledBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Colors.black, width: 1.5),
   ),
-  focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Color.fromARGB(255, 255, 98, 98), width: 2.0),
-  ),
-  errorBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Color.fromARGB(255, 255, 98, 98), width: 2.0),
+  focusedBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Constants.lapisLazuli, width: 2.0),
   ),
 );
 
@@ -78,7 +78,7 @@ class _ChatListState extends State<ChatList> {
                       color: message.recieverID ==
                               AuthService().firebaseAuth.currentUser!.uid
                           ? Constants.lightChatColor
-                          : Constants.primaryColor,
+                          : Constants.indigoDye,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 15, vertical: 5),
                       child: Stack(
