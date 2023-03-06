@@ -1,10 +1,12 @@
 import 'package:chat_app/helper/helper_functions.dart';
+import 'package:chat_app/pages/landing_page.dart';
 import 'package:chat_app/screens/login_screen.dart';
 import 'package:chat_app/shared/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/pages/home_page.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +51,12 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Chat App',
           theme: ThemeData(
-            primaryColor: Constants.primaryColor,
+            primaryColor: Constants.indigoDye,
+            textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
           ),
-          home: _isUserLoggedIn ? const HomePage() : const LoginScreen(),
+          // textTheme:
+          //     GoogleFonts.interTextTheme(Theme.of(context).textTheme)),
+          home: _isUserLoggedIn ? const HomePage() : const LandingPage(),
         ));
   }
 }
