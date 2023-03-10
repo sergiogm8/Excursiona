@@ -1,10 +1,10 @@
-import 'package:chat_app/pages/map_page.dart';
-import 'package:chat_app/pages/my_chats_page.dart';
-import 'package:chat_app/pages/post_screen.dart';
-import 'package:chat_app/pages/profile_page.dart';
-import 'package:chat_app/services/auth_service.dart';
-import 'package:chat_app/services/excursion_service.dart';
-import 'package:chat_app/widgets/widgets.dart';
+import 'package:excursiona/pages/map_page.dart';
+import 'package:excursiona/pages/my_chats_page.dart';
+import 'package:excursiona/pages/post_screen.dart';
+import 'package:excursiona/pages/profile_page.dart';
+import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/services/excursion_service.dart';
+import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 

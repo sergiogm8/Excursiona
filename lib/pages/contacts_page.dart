@@ -1,7 +1,7 @@
-import 'package:chat_app/model/contact.dart';
-import 'package:chat_app/model/user_model.dart';
-import 'package:chat_app/services/db_service.dart';
-import 'package:chat_app/widgets/widgets.dart';
+import 'package:excursiona/model/contact.dart';
+import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/user_service.dart';
+import 'package:excursiona/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -24,12 +24,13 @@ class _ContactsPageState extends State<ContactsPage> {
   }
 
   getUserContacts() async {
-    var user = await DBService(uid: FirebaseAuth.instance.currentUser!.uid)
+    var user = await UserService(uid: FirebaseAuth.instance.currentUser!.uid)
         .getCurrentUserData();
     var contactsId = user!.contactsID;
 
+    //TODO: resvisar esta funcionalidad para hacerla con Stream
     for (var id in contactsId) {
-      await DBService().getFutureUserDataByID(id).then((userData) {
+      await UserService().getFutureUserDataByID(id).then((userData) {
         var contact = Contact(
             name: userData.name,
             profilePic: userData.profilePic,
@@ -57,7 +58,7 @@ class _ContactsPageState extends State<ContactsPage> {
                   return ContactTile(contactData: contacts[index]);
                 },
               )
-        // body: Text(DBService(uid: FirebaseAuth.instance.currentUser!.uid)
+        // body: Text(UserService(uid: FirebaseAuth.instance.currentUser!.uid)
         //     .getContactsInfo()
         //     .toString()),
         // body: StreamBuilder(
@@ -87,6 +88,6 @@ class _ContactsPageState extends State<ContactsPage> {
   }
 
   // getContactData(contactId) async {
-  //   return DBService().getUserDataById2(contactId);
+  //   return UserService().getUserDataById2(contactId);
   // }
 }

@@ -1,13 +1,14 @@
-import 'package:chat_app/model/chat_contact.dart';
-import 'package:chat_app/model/contact.dart';
-import 'package:chat_app/model/message.dart';
-import 'package:chat_app/model/user_model.dart';
-import 'package:chat_app/pages/chat_page.dart';
-import 'package:chat_app/pages/profile_page.dart';
-import 'package:chat_app/screens/login_screen.dart';
-import 'package:chat_app/services/auth_service.dart';
-import 'package:chat_app/services/db_service.dart';
-import 'package:chat_app/shared/constants.dart';
+import 'package:excursiona/model/chat_contact.dart';
+import 'package:excursiona/model/contact.dart';
+import 'package:excursiona/model/message.dart';
+import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/chat_page.dart';
+import 'package:excursiona/pages/profile_page.dart';
+
+import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/services/user_service.dart';
+import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,7 +48,7 @@ class _ChatListState extends State<ChatList> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Message>>(
-      stream: DBService().getUserMessages(widget.receiverUserId),
+      stream: UserService().getUserMessages(widget.receiverUserId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Loader();
@@ -153,7 +154,7 @@ class _BottomChatField extends State<BottomChatField> {
 
   void sendTextMessage() async {
     if (enableSend) {
-      DBService().sendTextMessage(
+      UserService().sendTextMessage(
           context: context,
           text: messageController.text.trimLeft(),
           recieverUserID: widget.receiverUserId);
@@ -306,30 +307,4 @@ class ChatTile extends StatelessWidget {
       ],
     );
   }
-}
-
-void nextScreen(context, page, PageTransitionType animation) {
-  Navigator.push(context, PageTransition(child: page, type: animation));
-}
-
-void nextScreenReplace(context, page, PageTransitionType animation) {
-  Navigator.pushReplacement(
-      context, PageTransition(child: page, type: animation));
-}
-
-void showSnackBar(context, color, message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: color,
-      content: Text(
-        message,
-        style: const TextStyle(fontSize: 14),
-      ),
-      duration: const Duration(seconds: 2),
-      action: SnackBarAction(
-        label: 'OK',
-        textColor: Colors.white,
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      )));
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_app/widgets/widgets.dart';
+import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
