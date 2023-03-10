@@ -1,10 +1,9 @@
-import 'package:chat_app/helper/helper_functions.dart';
-import 'package:chat_app/pages/landing_page.dart';
-import 'package:chat_app/screens/login_screen.dart';
-import 'package:chat_app/shared/constants.dart';
+import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/pages/home_page.dart';
+import 'package:excursiona/pages/landing_page.dart';
+import 'package:excursiona/shared/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app/pages/home_page.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
