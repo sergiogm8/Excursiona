@@ -1,4 +1,4 @@
-# chat_app
+# excursiona
 
 A new Flutter project.
 
