@@ -48,7 +48,7 @@ class _MyAppState extends State<MyApp> {
         ),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Chat App',
+          title: 'Excursiona',
           theme: ThemeData(
             primaryColor: Constants.indigoDye,
             textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
