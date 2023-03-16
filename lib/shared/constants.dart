@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Constants {
-  static const Color indigoDye = Color.fromRGBO(0, 76, 109, 1);
-  static const Color lapisLazuli = Color.fromRGBO(5, 102, 141, 1);
-  static const Color steelBlue = Color.fromARGB(255, 75, 137, 182);
+  static const Color indigoDye = Color(0xFF004C6D);
+  static const Color lapisLazuli = Color(0xFF05668D);
+  static const Color steelBlue = Color(0xFF4B89B6);
   static const Color secondaryColor = Color(0xFFB44444);
 
   static const Color lightChatColor = Color.fromARGB(255, 255, 210, 210);

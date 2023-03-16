@@ -72,17 +72,13 @@ class _LandingPageState extends State<LandingPage>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: Duration(seconds: 2),
-      curve: Curves.linear,
+    return Container(
       decoration: const BoxDecoration(
           image: DecorationImage(
-        image: AssetImage(Assets.resourceImagesLoginImage2),
+        image: AssetImage(Assets.resourceImagesLoginImage),
         fit: BoxFit.cover,
       )),
-      child: AnimatedContainer(
-        duration: Duration(seconds: 2),
-        curve: Curves.linear,
+      child: Container(
         decoration: const BoxDecoration(
             gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -95,98 +91,110 @@ class _LandingPageState extends State<LandingPage>
           // backgroundColor: Colors.transparent,
           backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
-          body: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                    height: MediaQuery.of(context).size.height * topBoxFactor),
-                Padding(
-                    padding: const EdgeInsets.only(left: 25),
-                    child: tabController!.index == 0
-                        ? Text(
-                            "¡Bienvenido\nde nuevo!",
-                            style: GoogleFonts.inter(
-                                fontSize: 38,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        : Text(
-                            "¡Comienza tu aventura ahora!",
-                            style: GoogleFonts.inter(
-                                fontSize: 38,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )),
-                const SizedBox(height: 24),
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(240, 255, 255, 255),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(50),
-                          topRight: Radius.circular(50)),
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16.0),
-                        TabBar(
-                          indicatorColor: Colors.black,
-                          onTap: (index) {
-                            setState(() {
-                              tabController!.index = index;
-                            });
-                          },
-                          indicatorPadding:
-                              const EdgeInsets.symmetric(horizontal: 40),
-                          unselectedLabelColor: Colors.grey[700],
-                          labelColor: Colors.black,
-                          splashFactory: NoSplash.splashFactory,
-                          enableFeedback: false,
-                          splashBorderRadius: const BorderRadius.only(
+          body: Stack(
+            children: [
+              const Positioned(
+                  top: 80,
+                  right: 0,
+                  child: Image(
+                    image: AssetImage(Assets.resourceImagesLogoRecortado),
+                    height: 30,
+                  )),
+              Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height:
+                            MediaQuery.of(context).size.height * topBoxFactor),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 25),
+                        child: tabController!.index == 0
+                            ? Text(
+                                "¡Bienvenido\nde nuevo!",
+                                style: GoogleFonts.inter(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )
+                            : Text(
+                                "¡Comienza tu aventura ahora!",
+                                style: GoogleFonts.inter(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )),
+                    const SizedBox(height: 24),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(240, 255, 255, 255),
+                          borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(50),
                               topRight: Radius.circular(50)),
-                          controller: tabController,
-                          tabs: [
-                            Tab(
-                              child: Text(
-                                "Accede",
-                                style: GoogleFonts.inter(
-                                    // color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600),
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            TabBar(
+                              indicatorColor: Colors.black,
+                              onTap: (index) {
+                                setState(() {
+                                  tabController!.index = index;
+                                });
+                              },
+                              indicatorPadding:
+                                  const EdgeInsets.symmetric(horizontal: 40),
+                              unselectedLabelColor: Colors.grey[700],
+                              labelColor: Colors.black,
+                              splashFactory: NoSplash.splashFactory,
+                              enableFeedback: false,
+                              splashBorderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(50),
+                                  topRight: Radius.circular(50)),
+                              controller: tabController,
+                              tabs: [
+                                Tab(
+                                  child: Text(
+                                    "Accede",
+                                    style: GoogleFonts.inter(
+                                        // color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    "Regístrate",
+                                    style: GoogleFonts.inter(
+                                        // color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Flexible(
+                              fit: FlexFit.tight,
+                              child: TabBarView(
+                                controller: tabController,
+                                physics: const BouncingScrollPhysics(),
+                                children: [
+                                  LoginTabWidget(authService: authService),
+                                  RegisterTabWidget(authService: authService),
+                                ],
                               ),
                             ),
-                            Tab(
-                              child: Text(
-                                "Regístrate",
-                                style: GoogleFonts.inter(
-                                    // color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            )
                           ],
                         ),
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: TabBarView(
-                            controller: tabController,
-                            physics: const BouncingScrollPhysics(),
-                            children: [
-                              LoginTabWidget(authService: authService),
-                              RegisterTabWidget(authService: authService),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
 
-                // height: double.maxFinite)
-              ]),
+                    // height: double.maxFinite)
+                  ])
+            ],
+          ),
         ),
       ),
     );
