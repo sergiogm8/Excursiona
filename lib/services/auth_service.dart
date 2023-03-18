@@ -1,5 +1,6 @@
-import 'package:chat_app/helper/helper_functions.dart';
-import 'package:chat_app/services/db_service.dart';
+import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/services/user_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -8,27 +9,32 @@ class AuthService {
 
   Future registerWithEmailAndPassword(
       String name, String email, String password) async {
+    bool result = false;
     try {
       User user = (await firebaseAuth.createUserWithEmailAndPassword(
               email: email, password: password))
           .user!;
+      await UserService(uid: user.uid).saveUserData(name, email);
       if (user != null) {
-        await DBService(uid: user.uid).saveUserData(name, email);
-        return true;
+        result = true;
       }
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
+    return result;
   }
 
   Future signOut() async {
     try {
-      await HelperFunctions.saveUserLoggedInStatus(false);
-      await HelperFunctions.saveUserName('');
-      await HelperFunctions.saveUserEmail('');
+      GoogleSignIn googleSignIn = GoogleSignIn();
+      var isSignedInWithGoogle = await googleSignIn.isSignedIn();
+      if (isSignedInWithGoogle) {
+        await googleSignIn.signOut();
+        // await googleSignIn.disconnect();
+      }
       await firebaseAuth.signOut();
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      return;
     }
   }
 
@@ -38,25 +44,70 @@ class AuthService {
               email: email, password: password))
           .user!;
       if (user != null) {
-        return true;
+        QuerySnapshot snapshot =
+            await UserService(uid: firebaseAuth.currentUser!.uid)
+                .getUserData(email);
+        return snapshot.docs[0].get("name");
       }
+    } on FirebaseException catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<QueryDocumentSnapshot> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      UserCredential userCredential =
+          await firebaseAuth.signInWithCredential(credential);
+      User? user = userCredential.user;
+      if (user != null) {
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          await UserService(uid: user.uid)
+              .saveUserData(user.displayName!, user.email!, user.photoURL!);
+        }
+      }
+      QuerySnapshot snapshot =
+          await UserService(uid: firebaseAuth.currentUser!.uid)
+              .getUserData(user!.email!);
+      return snapshot.docs[0];
+      // } on FirebaseAuthException catch (e) {
+      //   return e.message;
+    } on FirebaseAuthException catch (e) {
+      rethrow;
+    }
+  }
+
+  Future sendEmailVerification() async {
+    try {
+      await firebaseAuth.currentUser!.sendEmailVerification();
+      return true;
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
   }
 
-  Future signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn(scopes: <String>["email"]).signIn();
+  reloadAuthInstance() async {
+    await firebaseAuth.currentUser!.reload();
+  }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser!.authentication;
+  bool isEmailVerified() {
+    return firebaseAuth.currentUser!.emailVerified;
+  }
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    return await firebaseAuth.signInWithCredential(credential);
+  Future<bool> resetPassword(String email) async {
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email: email);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      return false;
+    }
   }
 }

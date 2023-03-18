@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:347651667271:android:35b5a5c172d37e39d20862",
         "android_client_info": {
-          "package_name": "com.example.chat_app"
+          "package_name": "com.example.excursiona"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "347651667271-ur60kqct9cq5hie2aldp727r6vekkgg4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.chat_app",
+            "package_name": "com.example.excursiona",
             "certificate_hash": "d9b084e32c402e8de5d86d643ed58ad0161f278d"
           }
         },

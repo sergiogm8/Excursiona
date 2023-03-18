@@ -1,4 +1,4 @@
-import 'package:chat_app/enums/message_enums.dart';
+import 'package:excursiona/enums/message_enums.dart';
 
 class Message {
   final String senderID;

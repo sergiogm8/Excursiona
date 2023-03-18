@@ -1,11 +1,11 @@
-import 'package:chat_app/model/chat_contact.dart';
-import 'package:chat_app/model/user_model.dart';
-import 'package:chat_app/services/db_service.dart';
+import 'package:excursiona/model/chat_contact.dart';
+import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatService {
   Stream<List<ChatContact>> getChatsContacts() {
-    return DBService()
+    return UserService()
         .userCollection
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('chats')
@@ -15,7 +15,7 @@ class ChatService {
       for (var doc in snapshot.docs) {
         var chatContact = ChatContact.fromMap(doc.data());
         var userData =
-            await DBService().userCollection.doc(chatContact.contactID).get();
+            await UserService().userCollection.doc(chatContact.contactID).get();
         var user = UserModel.fromMap(userData.data()! as Map<String, dynamic>);
 
         chatContacts.add(ChatContact(

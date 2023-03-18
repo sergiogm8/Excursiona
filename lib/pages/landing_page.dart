@@ -1,20 +1,21 @@
 import 'dart:async';
 
-import 'package:chat_app/constants/assets.dart';
-import 'package:chat_app/helper/helper_functions.dart';
-import 'package:chat_app/pages/home_page.dart';
-import 'package:chat_app/services/auth_service.dart';
-import 'package:chat_app/services/db_service.dart';
-import 'package:chat_app/shared/constants.dart';
-import 'package:chat_app/shared/keyboard_visibility.dart';
-import 'package:chat_app/widgets/widgets.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
+import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/controllers/auth_controller.dart';
+import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/pages/forgot_password.dart';
+import 'package:excursiona/pages/home_page.dart';
+import 'package:excursiona/pages/verify_email_page.dart';
+import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/form_button.dart';
+import 'package:excursiona/widgets/widgets.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
 
 class LandingPage extends StatefulWidget {
@@ -26,39 +27,55 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage>
     with SingleTickerProviderStateMixin {
-  TabController? tabController;
+  // KeyboardVisibility _keyboardVisibility = KeyboardVisibility();
+  // StreamSubscription<bool>? _subscription;
+  AuthService authService = AuthService();
+
   // control if the keyboard is open or not
   bool keyboardIsOpen = false;
-  KeyboardVisibility _keyboardVisibility = KeyboardVisibility();
-  StreamSubscription<bool>? _subscription;
-  AuthService authService = AuthService();
+
+  late StreamSubscription<bool> keyboardSubscription;
+  TabController? tabController;
+  double topBoxFactor = 0.31;
+
+  @override
+  void dispose() {
+    // _subscription?.cancel();
+    // _keyboardVisibility.dispose();
+    tabController!.dispose();
+    keyboardSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 2, initialIndex: 0, vsync: this);
-    _keyboardVisibility.init(context);
-    _subscription = _keyboardVisibility.stream.listen((bool isVisible) {
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
       setState(() {
-        keyboardIsOpen = isVisible;
+        topBoxFactor = visible ? 0.1 : 0.31;
       });
     });
   }
 
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    _keyboardVisibility.dispose();
-    tabController!.dispose();
-    super.dispose();
-  }
+  // void _googleSignIn() {
+  //   AuthController().signInWithGoogle().then((value) {
+  //     if (value != true) {
+  //       showSnackBar(context, Colors.red, value);
+  //     } else {
+  //       nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
           image: DecorationImage(
-        image: AssetImage(Assets.resourceImagesLoginImage2),
+        image: AssetImage(Assets.resourceImagesLoginImage),
         fit: BoxFit.cover,
       )),
       child: Container(
@@ -73,88 +90,111 @@ class _LandingPageState extends State<LandingPage>
         child: Scaffold(
           // backgroundColor: Colors.transparent,
           backgroundColor: Colors.transparent,
-          body: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedContainer(
-                    duration: const Duration(seconds: 2),
-                    curve: Curves.bounceInOut,
-                    child: SizedBox(
-                        height: keyboardIsOpen
-                            ? MediaQuery.of(context).size.height * 0.1
-                            : MediaQuery.of(context).size.height * 0.31)),
-                Padding(
-                    padding: const EdgeInsets.only(left: 25),
-                    child: Text(
-                      "¡Bienvenido\nde nuevo!",
-                      style: GoogleFonts.inter(
-                          fontSize: 38,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    )),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(240, 255, 255, 255),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(50),
-                          topRight: Radius.circular(50)),
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16.0),
-                        TabBar(
-                          indicatorColor: Colors.black,
-                          indicatorPadding:
-                              const EdgeInsets.symmetric(horizontal: 40),
-                          unselectedLabelColor: Colors.grey[700],
-                          labelColor: Colors.black,
-                          splashFactory: NoSplash.splashFactory,
-                          enableFeedback: false,
-                          splashBorderRadius: const BorderRadius.only(
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              const Positioned(
+                  top: 80,
+                  right: 0,
+                  child: Image(
+                    image: AssetImage(Assets.resourceImagesLogoRecortado),
+                    height: 30,
+                  )),
+              Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height:
+                            MediaQuery.of(context).size.height * topBoxFactor),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 25),
+                        child: tabController!.index == 0
+                            ? Text(
+                                "¡Bienvenido\nde nuevo!",
+                                style: GoogleFonts.inter(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )
+                            : Text(
+                                "¡Comienza tu aventura ahora!",
+                                style: GoogleFonts.inter(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )),
+                    const SizedBox(height: 24),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(240, 255, 255, 255),
+                          borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(50),
                               topRight: Radius.circular(50)),
-                          controller: tabController,
-                          tabs: [
-                            Tab(
-                              child: Text(
-                                "Accede",
-                                style: GoogleFonts.inter(
-                                    // color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600),
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            TabBar(
+                              indicatorColor: Colors.black,
+                              onTap: (index) {
+                                setState(() {
+                                  tabController!.index = index;
+                                });
+                              },
+                              indicatorPadding:
+                                  const EdgeInsets.symmetric(horizontal: 40),
+                              unselectedLabelColor: Colors.grey[700],
+                              labelColor: Colors.black,
+                              splashFactory: NoSplash.splashFactory,
+                              enableFeedback: false,
+                              splashBorderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(50),
+                                  topRight: Radius.circular(50)),
+                              controller: tabController,
+                              tabs: [
+                                Tab(
+                                  child: Text(
+                                    "Accede",
+                                    style: GoogleFonts.inter(
+                                        // color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    "Regístrate",
+                                    style: GoogleFonts.inter(
+                                        // color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Flexible(
+                              fit: FlexFit.tight,
+                              child: TabBarView(
+                                controller: tabController,
+                                physics: const BouncingScrollPhysics(),
+                                children: [
+                                  LoginTabWidget(authService: authService),
+                                  RegisterTabWidget(authService: authService),
+                                ],
                               ),
                             ),
-                            Tab(
-                              child: Text(
-                                "Regístrate",
-                                style: GoogleFonts.inter(
-                                    // color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            )
                           ],
                         ),
-                        Flexible(
-                            fit: FlexFit.tight,
-                            child: TabBarView(
-                              controller: tabController,
-                              physics: const BouncingScrollPhysics(),
-                              children: [
-                                LoginTabWidget(authService: authService),
-                                RegisterTabWidget(authService: authService),
-                              ],
-                            )),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
 
-                // height: double.maxFinite)
-              ]),
+                    // height: double.maxFinite)
+                  ])
+            ],
+          ),
         ),
       ),
     );
@@ -162,35 +202,34 @@ class _LandingPageState extends State<LandingPage>
 }
 
 class LoginTabWidget extends StatefulWidget {
-  final AuthService authService;
   const LoginTabWidget({super.key, required this.authService});
+
+  final AuthService authService;
 
   @override
   State<LoginTabWidget> createState() => _LoginTabWidgetState();
 }
 
 class _LoginTabWidgetState extends State<LoginTabWidget> {
-  final _formKey = GlobalKey<FormState>();
   String email = "";
   String password = "";
+
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  _login() async {
+  _login() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
-      await widget.authService
+      AuthController()
           .signInWithEmailAndPassword(email, password)
-          .then((value) async {
+          .then((value) {
         if (value == true) {
-          QuerySnapshot snapshot =
-              await DBService(uid: FirebaseAuth.instance.currentUser!.uid)
-                  .getUserData(email);
-          HelperFunctions.saveUserLoggedInStatus(true);
-          HelperFunctions.saveUserEmail(email);
-          HelperFunctions.saveUserName(snapshot.docs[0].get("name"));
           nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+        } else if (value == false) {
+          nextScreenReplace(
+              context, const VerifyEmailPage(), PageTransitionType.fade);
         } else {
           showSnackBar(
             context,
@@ -205,9 +244,20 @@ class _LoginTabWidgetState extends State<LoginTabWidget> {
     }
   }
 
+  void _googleSignIn() {
+    AuthController().signInWithGoogle().then((value) {
+      if (value != true) {
+        showSnackBar(context, Colors.red, value);
+      } else {
+        nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: _isLoading
           ? const Loader()
@@ -223,32 +273,31 @@ class _LoginTabWidgetState extends State<LoginTabWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: textInputDecoration.copyWith(
                           hintText: 'Correo electrónico',
                           prefixIcon: Icon(Icons.email,
                               color: Theme.of(context).primaryColor),
                         ),
                         onChanged: (value) {
-                          setState(() => email = value);
+                          setState(() => email = value.trim());
                         },
-                        validator: (value) {
-                          return RegExp(
-                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(value!)
-                              ? null
-                              : "Por favor ingrese un correo válido";
-                        },
+                        validator: (email) =>
+                            email != null && !EmailValidator.validate(email)
+                                ? "Por favor ingrese un correo válido"
+                                : null,
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
                         obscureText: true,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: textInputDecoration.copyWith(
                           hintText: 'Contraseña',
                           prefixIcon: Icon(Icons.lock,
                               color: Theme.of(context).primaryColor),
                         ),
                         onChanged: (value) {
-                          setState(() => password = value);
+                          setState(() => password = value.trimRight());
                         },
                         validator: (value) {
                           return value!.length < 6
@@ -260,12 +309,17 @@ class _LoginTabWidgetState extends State<LoginTabWidget> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            nextScreen(context, const ForgotPasswordPage(),
+                                PageTransitionType.bottomToTop);
+                          },
                           child: const Text(
                             'No recuerdo mi contraseña',
                             style: TextStyle(
+                              fontSize: 13,
                               color: Constants.steelBlue,
                               fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
@@ -278,31 +332,33 @@ class _LoginTabWidgetState extends State<LoginTabWidget> {
                         child: FormButton(
                             text: "Iniciar sesión", onPressed: _login),
                       ),
-
-                      const Divider(
-                        color: Color.fromARGB(255, 194, 194, 194),
-                        height: 40,
-                        thickness: 1,
-                        // indent: 5,
-                        // endIndent: 20,
-                      ),
-
+                      const SizedBox(height: 5),
+                      Text("o",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.bold,
+                          )),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        padding: const EdgeInsets.only(
+                          top: 5,
+                          right: 30,
+                          left: 30,
+                        ),
                         child: SignInButton(
                           Buttons.Google,
-                          text: "Iniciar sesión con Google",
-                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          text: "Inicia sesión con Google",
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
                           onPressed: () {
-                            //TODO implementar login con google
+                            _googleSignIn();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                      )
-                      // https://pub.dev/packages/auth_buttons/example
-                      //https://pub.dev/packages/flutter_signin_button
+                      ),
                     ],
                   ),
                 ),
@@ -312,49 +368,55 @@ class _LoginTabWidgetState extends State<LoginTabWidget> {
   }
 }
 
-class FormButton extends StatelessWidget {
-  final onPressed;
-  final String text;
-  const FormButton({super.key, required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        onPressed();
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        fixedSize: Size(MediaQuery.of(context).size.width, 50),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
 class RegisterTabWidget extends StatefulWidget {
-  final AuthService authService;
   const RegisterTabWidget({super.key, required this.authService});
+
+  final AuthService authService;
 
   @override
   State<RegisterTabWidget> createState() => _RegisterTabWidgetState();
 }
 
 class _RegisterTabWidgetState extends State<RegisterTabWidget> {
+  String email = "";
+  String name = "";
+  String password = "";
+
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  String email = "";
-  String password = "";
-  String name = "";
+
+  _register() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      var result = await AuthController()
+          .registerWithEmailAndPassword(name, email, password);
+      if (result == true) {
+        var isVerified = AuthController().isEmailVerified();
+        if (!isVerified) {
+          nextScreenReplace(
+              context, const VerifyEmailPage(), PageTransitionType.fade);
+        }
+        // nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+      } else {
+        showSnackBar(
+          context,
+          Colors.red,
+          result,
+        );
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: _isLoading
           ? const Loader()
@@ -376,7 +438,7 @@ class _RegisterTabWidgetState extends State<RegisterTabWidget> {
                               color: Theme.of(context).primaryColor),
                         ),
                         onChanged: (value) {
-                          setState(() => name = value);
+                          setState(() => name = value.trimLeft());
                         },
                         validator: (value) {
                           if (value!.isNotEmpty) {
@@ -388,24 +450,23 @@ class _RegisterTabWidgetState extends State<RegisterTabWidget> {
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: textInputDecoration.copyWith(
                           hintText: 'Correo electrónico',
                           prefixIcon: Icon(Icons.email,
                               color: Theme.of(context).primaryColor),
                         ),
                         onChanged: (value) {
-                          setState(() => email = value);
+                          setState(() => email = value.trim());
                         },
-                        validator: (value) {
-                          return RegExp(
-                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(value!)
-                              ? null
-                              : "Por favor ingrese un correo válido";
-                        },
+                        validator: (email) =>
+                            email != null && !EmailValidator.validate(email)
+                                ? "Por favor ingrese un correo válido"
+                                : null,
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         obscureText: true,
                         decoration: textInputDecoration.copyWith(
                           hintText: 'Contraseña',
@@ -413,7 +474,7 @@ class _RegisterTabWidgetState extends State<RegisterTabWidget> {
                               color: Theme.of(context).primaryColor),
                         ),
                         onChanged: (value) {
-                          setState(() => password = value);
+                          setState(() => password = value.trimRight());
                         },
                         validator: (value) {
                           return value!.length < 6
@@ -436,33 +497,5 @@ class _RegisterTabWidgetState extends State<RegisterTabWidget> {
               ),
             ),
     );
-  }
-
-  _register() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      await widget.authService
-          .registerWithEmailAndPassword(name, email, password)
-          .then((value) async {
-        if (value == true) {
-          await HelperFunctions.saveUserLoggedInStatus(true);
-          await HelperFunctions.saveUserName(name);
-          await HelperFunctions.saveUserEmail(email);
-          await HelperFunctions.saveUserProfilePic("");
-          nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
-        } else {
-          showSnackBar(
-            context,
-            Colors.red,
-            value,
-          );
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      });
-    }
   }
 }

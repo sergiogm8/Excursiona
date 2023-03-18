@@ -1,7 +1,8 @@
-import 'package:chat_app/model/chat_contact.dart';
-import 'package:chat_app/pages/contacts_page.dart';
-import 'package:chat_app/services/chat_service.dart';
-import 'package:chat_app/widgets/widgets.dart';
+import 'package:excursiona/model/chat_contact.dart';
+import 'package:excursiona/pages/contacts_page.dart';
+import 'package:excursiona/services/chat_service.dart';
+import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 

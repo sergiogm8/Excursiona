@@ -1,7 +1,8 @@
-import 'package:chat_app/helper/helper_functions.dart';
-import 'package:chat_app/pages/landing_page.dart';
-import 'package:chat_app/screens/login_screen.dart';
-import 'package:chat_app/services/auth_service.dart';
+import 'package:excursiona/controllers/auth_controller.dart';
+import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/pages/landing_page.dart';
+import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -15,6 +16,7 @@ class _ProfilePageState extends State<ProfilePage> {
   AuthService authService = AuthService();
   String email = "";
   String name = "";
+  String? profilePic;
   @override
   void initState() {
     super.initState();
@@ -30,6 +32,11 @@ class _ProfilePageState extends State<ProfilePage> {
     await HelperFunctions.getUserName().then((value) {
       setState(() {
         name = value!;
+      });
+    });
+    await HelperFunctions.getUserProfilePic().then((value) {
+      setState(() {
+        profilePic = value;
       });
     });
   }
@@ -48,11 +55,22 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(
-              Icons.account_circle,
-              size: 200,
-              color: Colors.grey,
-            ),
+            profilePic != null
+                ? CircleAvatar(
+                    radius: 50,
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Image.network(profilePic!, fit: BoxFit.cover),
+                      ),
+                    ),
+                  )
+                : const Icon(
+                    Icons.account_circle,
+                    size: 100,
+                    color: Colors.grey,
+                  ),
             const SizedBox(height: 20),
             Text(name,
                 textAlign: TextAlign.center,
@@ -84,15 +102,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     icon: const Icon(Icons.cancel)),
                 IconButton(
                   onPressed: () async {
-                    await authService.signOut();
-                    Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                            builder: (context) => const LandingPage()),
-                        (route) => false);
+                    _signout();
                   },
                   icon: const Icon(Icons.check),
                 ),
               ]);
         });
+  }
+
+  void _signout() async {
+    var couldExit = await AuthController().signOut();
+    if (couldExit != true) {
+      Navigator.pop(context);
+      showSnackBar(context, Colors.red, couldExit);
+      return;
+    }
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LandingPage()),
+        (route) => false);
   }
 }
