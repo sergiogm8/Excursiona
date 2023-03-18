@@ -8,8 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthController {
   final AuthService _authService = AuthService();
 
-  AuthController();
-
   Future registerWithEmailAndPassword(
       String name, String email, String password) async {
     HelperFunctions.saveUserEmail(email);
