@@ -6,11 +6,11 @@ class UserModel {
   final List contactsID;
 
   UserModel(
-      {required this.name,
-      required this.uid,
-      required this.profilePic,
-      required this.email,
-      required this.contactsID});
+      {this.name = '',
+      this.uid = '',
+      this.profilePic = '',
+      this.email = '',
+      this.contactsID = const []});
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
