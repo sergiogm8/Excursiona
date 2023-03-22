@@ -33,7 +33,7 @@ class UserService {
     });
   }
 
-  Future getUserData(String email) async {
+  Future getUserDataByEmail(String email) async {
     try {
       QuerySnapshot snapshot =
           await userCollection.where('email', isEqualTo: email).get();
@@ -177,6 +177,29 @@ class UserService {
         messages.add(Message.fromMap(doc.data()));
       }
       return messages;
+    });
+  }
+
+  Stream<List<UserModel>> getAllUsersBasicInfo([String? name]) {
+    List<UserModel> users = [];
+    //if a name is given filter by name
+    if (name != null) {
+      return userCollection
+          .where('name', isEqualTo: name)
+          .snapshots()
+          .map((event) {
+        for (var doc in event.docs) {
+          users.add(UserModel.fromMap(doc.data() as Map<String, dynamic>));
+        }
+        return users;
+      });
+    }
+    //if no name is given return all users
+    return userCollection.snapshots().map((event) {
+      for (var doc in event.docs) {
+        users.add(UserModel.fromMap(doc.data() as Map<String, dynamic>));
+      }
+      return users;
     });
   }
 }
