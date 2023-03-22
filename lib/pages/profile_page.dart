@@ -1,6 +1,6 @@
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/helper/helper_functions.dart';
-import 'package:excursiona/pages/landing_page.dart';
+import 'package:excursiona/pages/auth_page.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LandingPage()),
+        MaterialPageRoute(builder: (context) => const AuthPage()),
         (route) => false);
   }
 }
