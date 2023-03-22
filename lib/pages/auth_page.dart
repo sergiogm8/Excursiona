@@ -18,14 +18,14 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 
-class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  State<AuthPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage>
+class _LandingPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
   // KeyboardVisibility _keyboardVisibility = KeyboardVisibility();
   // StreamSubscription<bool>? _subscription;

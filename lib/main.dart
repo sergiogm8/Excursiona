@@ -1,6 +1,6 @@
 import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/pages/auth_page.dart';
 import 'package:excursiona/pages/home_page.dart';
-import 'package:excursiona/pages/landing_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
           ),
           // textTheme:
           //     GoogleFonts.interTextTheme(Theme.of(context).textTheme)),
-          home: _isUserLoggedIn ? const HomePage() : const LandingPage(),
+          home: _isUserLoggedIn ? const HomePage() : const AuthPage(),
         ));
   }
 }
