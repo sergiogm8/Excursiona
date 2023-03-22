@@ -1,9 +1,12 @@
+import 'package:excursiona/pages/create_excursion_page.dart';
 import 'package:excursiona/pages/map_page.dart';
 import 'package:excursiona/pages/my_chats_page.dart';
 import 'package:excursiona/pages/post_screen.dart';
 import 'package:excursiona/pages/profile_page.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
+import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -21,15 +24,16 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
 
   List<Widget> pages = [
+    const MyChatsPage(), // => const LandingPage(),
     const MyChatsPage(),
-    const PostScreen(),
+    const CreateExcursionPage(),
     const MapPage(),
     const ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
-    if (index == 1) {
-      ExcursionService().createExcursion();
+    if (index == 2) {
+      return;
     } else {
       setState(() {
         currentIndex = index;
@@ -37,26 +41,48 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _createExcursion() {
+    nextScreen(context, pages.elementAt(2), PageTransitionType.bottomToTop);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        // bottomNavigationBar: BottomNavBarMallika1(),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: currentIndex,
-          selectedItemColor: Colors.white,
+          selectedItemColor: Constants.indigoDye,
           onTap: _onItemTapped,
-          backgroundColor: Colors.grey[900],
+          // backgroundColor: Colors.grey[900],
           unselectedItemColor: Colors.grey[500],
-          items: const [
+          unselectedFontSize: 3,
+          selectedFontSize: 3,
+          items: [
+            const BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home_rounded,
+                  size: 35,
+                ),
+                label: ""),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_rounded, size: 35), label: ""),
             BottomNavigationBarItem(
-                icon: Icon(Icons.chat_rounded), label: "Mis chats"),
-            BottomNavigationBarItem(icon: Icon(Icons.add_box), label: "Añadir"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.map),
-              label: "Mapa",
+                icon: FloatingActionButton(
+                  heroTag: "createExcursion",
+                  elevation: 1,
+                  onPressed: _createExcursion,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Constants.indigoDye,
+                  child: Icon(Icons.landscape_rounded, size: 40),
+                ),
+                label: ""),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.map_rounded, size: 35),
+              label: "",
             ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.person), label: "Mi perfil"),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.person, size: 35), label: ""),
           ],
         ),
         body: pages.elementAt(currentIndex));
