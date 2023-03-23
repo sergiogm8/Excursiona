@@ -16,7 +16,7 @@ class _ProfilePageState extends State<ProfilePage> {
   AuthService authService = AuthService();
   String email = "";
   String name = "";
-  String? profilePic;
+  String profilePic = "";
   @override
   void initState() {
     super.initState();
@@ -36,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
     await HelperFunctions.getUserProfilePic().then((value) {
       setState(() {
-        profilePic = value;
+        profilePic = value!;
       });
     });
   }
@@ -55,14 +55,14 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            profilePic != null
+            profilePic != ""
                 ? CircleAvatar(
                     radius: 50,
                     child: ClipOval(
                       child: SizedBox(
                         width: 100,
                         height: 100,
-                        child: Image.network(profilePic!, fit: BoxFit.cover),
+                        child: Image.network(profilePic, fit: BoxFit.cover),
                       ),
                     ),
                   )
