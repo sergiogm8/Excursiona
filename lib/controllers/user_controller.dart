@@ -8,7 +8,8 @@ class UserController {
   Future<UserModel> getUserBasicInfo() async {
     var name = await HelperFunctions.getUserName();
     var profilePic = await HelperFunctions.getUserProfilePic();
-    return UserModel(name: name!, profilePic: profilePic!);
+    var uid = await HelperFunctions.getUserUID();
+    return UserModel(name: name!, profilePic: profilePic!, uid: uid!);
   }
 
   Stream<List<UserModel>> getAllUsersBasicInfo() {

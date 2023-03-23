@@ -47,7 +47,7 @@ class AuthService {
         QuerySnapshot snapshot =
             await UserService(uid: firebaseAuth.currentUser!.uid)
                 .getUserDataByEmail(email);
-        return snapshot.docs[0].get("name");
+        return snapshot.docs[0];
       }
     } on FirebaseException catch (e) {
       rethrow;
