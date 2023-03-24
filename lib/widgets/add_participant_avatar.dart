@@ -39,7 +39,7 @@ class AddParticipantAvatar extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  "Añadir participante",
+                  "Añadir participantes",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: color,

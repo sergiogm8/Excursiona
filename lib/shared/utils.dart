@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
-void nextScreen(context, page, PageTransitionType animation) {
-  Navigator.push(context, PageTransition(child: page, type: animation));
+Future nextScreen(context, page, PageTransitionType animation) {
+  return Navigator.push(context, PageTransition(child: page, type: animation));
 }
 
 void nextScreenReplace(context, page, PageTransitionType animation) {

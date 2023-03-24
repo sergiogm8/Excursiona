@@ -38,9 +38,10 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     _initializeParticipants();
   }
 
-  _addParticipant() {
-    nextScreen(
-        context, const SearchParticipantsPage(), PageTransitionType.fade);
+  _addParticipant() async {
+    final result = await nextScreen(context, const SearchParticipantsPage(),
+        PageTransitionType.rightToLeftWithFade);
+    showSnackBar(context, Colors.green, result.toString());
   }
 
   @override
