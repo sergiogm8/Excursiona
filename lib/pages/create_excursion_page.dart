@@ -1,12 +1,16 @@
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/add_participant_avatar.dart';
 import 'package:excursiona/widgets/participant_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:page_transition/page_transition.dart';
 
 class CreateExcursionPage extends StatefulWidget {
   const CreateExcursionPage({super.key});
@@ -34,6 +38,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     _initializeParticipants();
   }
 
+  _addParticipant() {
+    nextScreen(
+        context, const SearchParticipantsPage(), PageTransitionType.fade);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,19 +63,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Añadir participantes...',
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Constants.indigoDye)),
-                    prefixIcon: Icon(Icons.search_rounded,
-                        size: 28, color: Constants.indigoDye),
-                  ),
-                ),
-                const SizedBox(height: 25),
                 const Text(
                   "Participantes",
                   style: TextStyle(
@@ -75,15 +71,30 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-
-                //TODO: Add the participants avatars
-                // Horizontal list of participants
-                SizedBox(
-                  height: 100,
+                Container(
+                  height: 120,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 7,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: _participants.length,
+                    itemCount: _participants.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == _participants.length) {
+                        return AddParticipantAvatar(onTap: _addParticipant);
+                      }
                       return ParticipantAvatar(
                         user: _participants[index],
                         onDelete: () {
