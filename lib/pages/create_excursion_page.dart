@@ -86,6 +86,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     itemBuilder: (context, index) {
                       return ParticipantAvatar(
                         user: _participants[index],
+                        onDelete: () {
+                          setState(() {
+                            _participants.removeAt(index);
+                          });
+                        },
                       );
                     },
                   ),
