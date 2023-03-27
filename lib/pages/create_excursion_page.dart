@@ -38,7 +38,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     _initializeParticipants();
   }
 
-  _addParticipant() async {
+  _addParticipants() async {
     final result = await nextScreen(context, const SearchParticipantsPage(),
         PageTransitionType.rightToLeftWithFade);
     showSnackBar(context, Colors.green, result.toString());
@@ -94,7 +94,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     itemCount: _participants.length + 1,
                     itemBuilder: (context, index) {
                       if (index == _participants.length) {
-                        return AddParticipantAvatar(onTap: _addParticipant);
+                        return AddParticipantAvatar(onTap: _addParticipants);
                       }
                       return ParticipantAvatar(
                         user: _participants[index],
