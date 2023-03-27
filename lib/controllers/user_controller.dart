@@ -12,7 +12,7 @@ class UserController {
     return UserModel(name: name!, profilePic: profilePic!, uid: uid!);
   }
 
-  Future<List<UserModel>> getAllUsersBasicInfo([String? name]) async {
+  Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
     return await _userService.getAllUsersBasicInfo(name);
   }
 }

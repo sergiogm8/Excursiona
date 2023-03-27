@@ -180,26 +180,17 @@ class UserService {
     });
   }
 
-  Stream<List<UserModel>> getAllUsersBasicInfo([String? name]) {
-    List<UserModel> users = [];
+  Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
     //if a name is given filter by name
-    if (name != null) {
-      return userCollection
-          .where('name', isEqualTo: name)
-          .snapshots()
-          .map((event) {
-        for (var doc in event.docs) {
-          users.add(UserModel.fromMap(doc.data() as Map<String, dynamic>));
-        }
-        return users;
-      });
-    }
     //if no name is given return all users
-    return userCollection.snapshots().map((event) {
-      for (var doc in event.docs) {
+    List<UserModel> users = [];
+    QuerySnapshot snapshot =
+        await userCollection.orderBy('name').limit(25).get();
+    for (var doc in snapshot.docs) {
+      if (doc['name'].toString().toLowerCase().contains(name.toLowerCase())) {
         users.add(UserModel.fromMap(doc.data() as Map<String, dynamic>));
       }
-      return users;
-    });
+    }
+    return users;
   }
 }
