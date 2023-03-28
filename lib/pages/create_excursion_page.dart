@@ -7,8 +7,6 @@ import 'package:excursiona/widgets/add_participant_avatar.dart';
 import 'package:excursiona/widgets/participant_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -20,9 +18,9 @@ class CreateExcursionPage extends StatefulWidget {
 }
 
 class _CreateExcursionPageState extends State<CreateExcursionPage> {
-  List<UserModel> _participants = [];
-
-  UserController _userController = UserController();
+  final Set<UserModel> _participants = {};
+  final UserController _userController = UserController();
+  String excursionName = "";
 
   _initializeParticipants() async {
     UserModel currentUser = await _userController.getUserBasicInfo();
@@ -33,15 +31,16 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initializeParticipants();
   }
 
   _addParticipants() async {
-    final result = await nextScreen(context, const SearchParticipantsPage(),
-        PageTransitionType.rightToLeftWithFade);
-    showSnackBar(context, Colors.green, result.toString());
+    Set<UserModel> result = await nextScreen(context,
+        const SearchParticipantsPage(), PageTransitionType.rightToLeftWithFade);
+    setState(() {
+      _participants.addAll(result);
+    });
   }
 
   @override
@@ -60,10 +59,34 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: "Nombre de la excursión",
+                    labelStyle: GoogleFonts.inter(
+                        textStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300)),
+                    prefixIcon: const Icon(
+                      Icons.info,
+                      color: Constants.indigoDye,
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Constants.indigoDye),
+                    ),
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Constants.indigoDye),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() => excursionName = value.trim());
+                  },
+                ),
+                const SizedBox(height: 30),
                 const Text(
                   "Participantes",
                   style: TextStyle(
@@ -97,10 +120,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                         return AddParticipantAvatar(onTap: _addParticipants);
                       }
                       return ParticipantAvatar(
-                        user: _participants[index],
+                        user: _participants.elementAt(index),
                         onDelete: () {
                           setState(() {
-                            _participants.removeAt(index);
+                            _participants
+                                .remove(_participants.elementAt(index));
                           });
                         },
                       );
