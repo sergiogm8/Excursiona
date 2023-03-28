@@ -20,7 +20,7 @@ class ParticipantAvatar extends StatelessWidget {
           children: [
             user.profilePic.isNotEmpty
                 ? CircleAvatar(
-                    radius: 30,
+                    radius: 25,
                     backgroundImage: NetworkImage(user.profilePic),
                     child: !AuthController().isCurrentUser(uid: user.uid)
                         ? Align(
@@ -44,10 +44,39 @@ class ParticipantAvatar extends StatelessWidget {
                           )
                         : null,
                   )
-                : Icon(
-                    Icons.account_circle,
-                    size: 60,
-                    color: Colors.grey[600],
+                : CircleAvatar(
+                    radius: 25,
+                    foregroundColor: Colors.grey,
+                    backgroundColor: Colors.transparent,
+                    child: !AuthController().isCurrentUser(uid: user.uid)
+                        ? Stack(
+                            children: [
+                              const Icon(
+                                Icons.account_circle_rounded,
+                                size: 55,
+                              ),
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: GestureDetector(
+                                  onTap: onDelete,
+                                  child: Container(
+                                    height: 20,
+                                    width: 20,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : null,
                   ),
             const SizedBox(height: 5),
             Text(

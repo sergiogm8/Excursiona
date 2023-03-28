@@ -12,8 +12,8 @@ class AddParticipantAvatar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 0.0),
       child: SizedBox(
-        height: 60,
-        width: 80,
+        height: 55,
+        width: 70,
         child: IconButton(
           padding: const EdgeInsets.all(0),
           color: color,
@@ -21,15 +21,15 @@ class AddParticipantAvatar extends StatelessWidget {
           icon: Column(
             children: [
               Container(
-                height: 60,
-                width: 60,
+                height: 50,
+                width: 50,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.add,
-                  size: 40,
+                  size: 35,
                   color: Colors.white,
                 ),
               ),
