@@ -53,8 +53,6 @@ class _MyAppState extends State<MyApp> {
             primaryColor: Constants.indigoDye,
             textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
           ),
-          // textTheme:
-          //     GoogleFonts.interTextTheme(Theme.of(context).textTheme)),
           home: _isUserLoggedIn ? const HomePage() : const AuthPage(),
         ));
   }
