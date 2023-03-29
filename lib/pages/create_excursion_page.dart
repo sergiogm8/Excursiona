@@ -1,9 +1,12 @@
+import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/add_participant_avatar.dart';
+import 'package:excursiona/widgets/form_button.dart';
 import 'package:excursiona/widgets/participant_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -36,11 +39,55 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   }
 
   _addParticipants() async {
+    WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
     Set<UserModel> result = await nextScreen(context,
         const SearchParticipantsPage(), PageTransitionType.rightToLeftWithFade);
     setState(() {
       _participants.addAll(result);
     });
+  }
+
+  _deleteParticipant(UserModel user) {
+    WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+    setState(() {
+      _participants.remove(user);
+    });
+  }
+
+  _createExcursion() async {
+    WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+    showDialog(
+        barrierColor: const Color(0xFFFAFAFA).withOpacity(0.7),
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(Assets.resourceImagesMaploader,
+                        height: 200, width: 200),
+                    // SizedBox(height: 20),
+                    Text("Creando excursión...",
+                        style: GoogleFonts.inter(
+                            textStyle: const TextStyle(
+                                fontSize: 28, fontWeight: FontWeight.w400))),
+                  ],
+                ),
+              ));
+        });
+    // var result = await ExcursionController().createExcursion();
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.of(context).pop();
+    });
+    // if (result == false) {
+    //   showSnackBar(context, Colors.red, "Hubo un error al crear la excursión");
+    // } else {
+
+    // }
   }
 
   @override
@@ -96,7 +143,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                 ),
                 const SizedBox(height: 15),
                 Container(
-                  height: 120,
+                  height: 135,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   decoration: BoxDecoration(
@@ -112,25 +159,42 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                       ),
                     ],
                   ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _participants.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == _participants.length) {
-                        return AddParticipantAvatar(onTap: _addParticipants);
-                      }
-                      return ParticipantAvatar(
-                        user: _participants.elementAt(index),
-                        onDelete: () {
-                          setState(() {
-                            _participants
-                                .remove(_participants.elementAt(index));
-                          });
-                        },
-                      );
-                    },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 90,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _participants.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == _participants.length) {
+                              return AddParticipantAvatar(
+                                  onTap: _addParticipants);
+                            }
+                            return ParticipantAvatar(
+                              user: _participants.elementAt(index),
+                              onDelete: () => _deleteParticipant(
+                                  _participants.elementAt(index)),
+                            );
+                          },
+                        ),
+                      ),
+                      Text("Nº de participantes: ${_participants.length}",
+                          style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w300)))
+                    ],
                   ),
                 ),
+                const SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 38.0),
+                  child: FormButton(
+                      text: "Empezar excursión",
+                      onPressed: _createExcursion,
+                      icon: Icons.play_arrow_rounded),
+                )
               ],
             ),
           ),
