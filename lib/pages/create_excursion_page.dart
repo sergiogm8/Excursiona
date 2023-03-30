@@ -1,6 +1,7 @@
 import 'package:excursiona/constants/assets.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/shared/constants.dart';
@@ -11,6 +12,7 @@ import 'package:excursiona/widgets/participant_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 import 'package:page_transition/page_transition.dart';
 
 class CreateExcursionPage extends StatefulWidget {
@@ -23,12 +25,13 @@ class CreateExcursionPage extends StatefulWidget {
 class _CreateExcursionPageState extends State<CreateExcursionPage> {
   final Set<UserModel> _participants = {};
   final UserController _userController = UserController();
-  String excursionName = "";
+  String _excursionName = "";
+  UserModel? currentUser;
 
   _initializeParticipants() async {
-    UserModel currentUser = await _userController.getUserBasicInfo();
+    currentUser = await _userController.getUserBasicInfo();
     setState(() {
-      _participants.add(currentUser);
+      _participants.add(currentUser!);
     });
   }
 
@@ -54,10 +57,9 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     });
   }
 
-  _createExcursion() async {
-    WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+  _showLoadingDialog() {
     showDialog(
-        barrierColor: const Color(0xFFFAFAFA).withOpacity(0.7),
+        barrierColor: const Color(0xFFFAFAFA).withOpacity(0.8),
         context: context,
         barrierDismissible: false,
         builder: (context) {
@@ -71,23 +73,45 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     Image.asset(Assets.resourceImagesMaploader,
                         height: 200, width: 200),
                     // SizedBox(height: 20),
-                    Text("Creando excursión...",
-                        style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                                fontSize: 28, fontWeight: FontWeight.w400))),
+                    Text(
+                      "Creando excursión...",
+                      style: GoogleFonts.inter(
+                        textStyle: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.black),
+                      ),
+                    ),
                   ],
                 ),
               ));
         });
-    // var result = await ExcursionController().createExcursion();
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.of(context).pop();
-    });
-    // if (result == false) {
-    //   showSnackBar(context, Colors.red, "Hubo un error al crear la excursión");
-    // } else {
+  }
 
-    // }
+  _createExcursion() async {
+    WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+    _showLoadingDialog();
+
+    Excursion excursion = Excursion(
+      ownerName: currentUser!.name,
+      ownerPic: currentUser!.profilePic,
+      id: const Uuid().v4(),
+      nParticipants: _participants.length,
+      date: DateTime.now(),
+      title: _excursionName,
+    );
+
+    var result =
+        await ExcursionController().createExcursion(excursion, _participants);
+
+    if (result == false) {
+      Navigator.of(context).pop();
+      showSnackBar(context, Colors.red, "Hubo un error al crear la excursión");
+    } else {
+      Navigator.of(context).pop();
+      showSnackBar(context, Colors.green, "Excursión creada con éxito");
+      // TODO: Redirect to excursion page (map)
+    }
   }
 
   @override
@@ -130,7 +154,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     ),
                   ),
                   onChanged: (value) {
-                    setState(() => excursionName = value.trim());
+                    setState(() => _excursionName = value.trim());
                   },
                 ),
                 const SizedBox(height: 30),
@@ -143,7 +167,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                 ),
                 const SizedBox(height: 15),
                 Container(
-                  height: 135,
+                  height: 140,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   decoration: BoxDecoration(
@@ -180,10 +204,10 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                           },
                         ),
                       ),
+                      const SizedBox(height: 5),
                       Text("Nº de participantes: ${_participants.length}",
                           style: GoogleFonts.inter(
-                              textStyle: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w300)))
+                              textStyle: const TextStyle(fontSize: 13)))
                     ],
                   ),
                 ),
