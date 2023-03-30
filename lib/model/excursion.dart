@@ -1,4 +1,7 @@
 class Excursion {
+  final String ownerName;
+  final String ownerPic;
+  final String title;
   final String id;
   final int nParticipants;
   final double duration;
@@ -6,15 +9,21 @@ class Excursion {
   final DateTime date;
 
   Excursion({
+    required this.ownerName,
+    required this.ownerPic,
     required this.id,
     required this.nParticipants,
-    required this.duration,
-    required this.distance,
+    this.duration = 0,
+    this.distance = 0,
+    required this.title,
     required this.date,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'ownerName': ownerName,
+      'ownerPic': ownerPic,
+      'title': title,
       'id': id,
       'nParticipants': nParticipants,
       'duration': duration,
@@ -23,8 +32,20 @@ class Excursion {
     };
   }
 
+  Map<String, dynamic> toMapForInvitation() {
+    return <String, dynamic>{
+      'title': title,
+      'id': id,
+      'ownerName': ownerName,
+      'ownerPic': ownerPic,
+    };
+  }
+
   factory Excursion.fromMap(Map<String, dynamic> map) {
     return Excursion(
+      ownerName: map['ownerName'] ?? '',
+      ownerPic: map['ownerPic'] ?? '',
+      title: map['title'] ?? '',
       id: map['id'] ?? '',
       nParticipants: map['nParticipants'] ?? 1,
       duration: map['duration'] ?? 0.0,
