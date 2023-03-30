@@ -1,6 +1,7 @@
 import 'package:excursiona/enums/message_enums.dart';
 import 'package:excursiona/model/chat_contact.dart';
 import 'package:excursiona/model/contact.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
@@ -61,6 +62,18 @@ class UserService {
       user = UserModel.fromMap(userData.data()! as Map<String, dynamic>);
     }
     return user;
+  }
+
+  Future insertExcursionInvitation(Excursion excursion, String userId) async {
+    try {
+      await userCollection
+          .doc(userId)
+          .collection('invitations')
+          .doc(excursion.id)
+          .set(excursion.toMapForInvitation());
+    } on FirebaseException {
+      rethrow;
+    }
   }
 
   void _saveMessageToContactsSubcollection(
