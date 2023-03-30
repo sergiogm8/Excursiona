@@ -1,11 +1,21 @@
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
 
 class ExcursionController {
   final ExcursionService _excursionService = ExcursionService();
 
-  Future createExcursion() async {
-    return await _excursionService.createExcursion();
+  Future createExcursion(
+      Excursion excursion, Set<UserModel> participants) async {
+    bool result = false;
+    result = await _excursionService.createExcursion(excursion);
+    if (!result) return 'Hubo un error al crear la excursión';
+
+    result =
+        await _excursionService.inviteUsersToExcursion(excursion, participants);
+    if (!result) return 'Hubo un error al enviar las invitaciones';
+
+    return result;
   }
 
   Future<bool> leaveExcursion(String excursionID) async {
@@ -16,10 +26,8 @@ class ExcursionController {
     return await _excursionService.joinExcursion(excursionID);
   }
 
-  Future<bool> inviteUserToExcursion(
-      String excursionId, String userId, String name) async {
-    return await _excursionService.inviteUserToExcursion(
-        excursionId, userId, name);
+  Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
+    return await _excursionService.inviteUserToExcursion(excursion, userId);
   }
 
   Future<bool> rejectExcursionInvitation(String excursionId) async {
@@ -32,6 +40,7 @@ class ExcursionController {
   }
 
   List<Excursion>? getUserExcursions() {
+    //TODO: Review later with the method of the service
     List<Excursion>? excursions = [];
     _excursionService.getUserExcursions().then((excursionsQuery) {
       for (var excursion in excursionsQuery) {

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -10,42 +12,44 @@ class ExcursionService {
 
   final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  Future createExcursion() async {
+  Future createExcursion(Excursion excursion) async {
     try {
-      var excursionID = const Uuid().v4();
-      await excursionCollection
-          .doc(excursionID)
-          .set({'id': excursionID}).then((value) async {
-        await excursionCollection
-            .doc(excursionID)
-            .collection('participants')
-            .doc(currentUserId)
-            .set({
-          'uid': currentUserId,
-        });
-      });
-      return excursionID;
+      await excursionCollection.doc(excursion.id).set(excursion.toMap());
+      await joinExcursion(excursion.id);
+      // await excursionCollection.doc(excursion.id).collection('participants').doc(currentUserId).set({
+      //   'isInExcursion': true,
+      // });
+      return true;
     } on FirebaseException {
       return false;
     }
   }
 
-  Future<bool> inviteUserToExcursion(
-      String excursionId, String userId, String name) async {
+  Future inviteUsersToExcursion(
+      Excursion excursion, Set<UserModel> participants) async {
     try {
-      var excursion = excursionCollection.doc(excursionId);
-      var user = await excursion.collection('participants').doc(userId).get();
-      if (user.data() == null) {
-        await excursion.collection('participants').doc(userId).set({
-          'uid': userId,
-          'name': name,
-          'isInExcursion': false,
-        });
+      for (var participant in participants) {
+        await UserService()
+            .insertExcursionInvitation(excursion, participant.uid);
+        sendExcursionNotificationToUser(excursion, participant.uid);
       }
       return true;
     } on FirebaseException {
       return false;
     }
+  }
+
+  Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
+    try {
+      UserService().insertExcursionInvitation(excursion, userId);
+      return true;
+    } on FirebaseException {
+      return false;
+    }
+  }
+
+  sendExcursionNotificationToUser(Excursion excursion, String userId) async {
+    //TODO: Implement the emission of a notification to the user
   }
 
   Future<bool> rejectExcursionInvitation(String excursionId) async {
@@ -76,6 +80,7 @@ class ExcursionService {
   }
 
   Future<List<QueryDocumentSnapshot>> getUserExcursions() async {
+    //TODO: Modify this, it won't work
     String participantsSubcollection = 'participants';
     QuerySnapshot querySnapshot = await excursionCollection
         .where('$participantsSubcollection.$currentUserId', isEqualTo: true)
