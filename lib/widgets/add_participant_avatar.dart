@@ -13,7 +13,7 @@ class AddParticipantAvatar extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 0.0),
       child: SizedBox(
         height: 55,
-        width: 70,
+        width: 80,
         child: IconButton(
           padding: const EdgeInsets.all(0),
           color: color,
@@ -39,7 +39,7 @@ class AddParticipantAvatar extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: color,
-                  fontSize: 11,
+                  fontSize: 12,
                 ),
               )
             ],

@@ -83,7 +83,7 @@ class ParticipantAvatar extends StatelessWidget {
               AuthController().isCurrentUser(uid: user.uid)
                   ? 'Tú'
                   : _getNameAbbreviation(),
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 14),
             ),
           ],
         ),
