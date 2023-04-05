@@ -31,4 +31,12 @@ class UserModel {
       'contactsID': contactsID,
     };
   }
+
+  Map<String, dynamic> toMapShort() {
+    return {
+      'name': name,
+      'uid': uid,
+      'profilePic': profilePic,
+    };
+  }
 }
