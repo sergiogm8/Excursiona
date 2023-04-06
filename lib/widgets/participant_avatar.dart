@@ -17,6 +17,7 @@ class ParticipantAvatar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(right: 15.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             user.profilePic.isNotEmpty
                 ? CircleAvatar(
@@ -76,7 +77,10 @@ class ParticipantAvatar extends StatelessWidget {
                               ),
                             ],
                           )
-                        : null,
+                        : const Icon(
+                            Icons.account_circle_rounded,
+                            size: 55,
+                          ),
                   ),
             const SizedBox(height: 5),
             Text(
@@ -84,6 +88,7 @@ class ParticipantAvatar extends StatelessWidget {
                   ? 'Tú'
                   : _getNameAbbreviation(),
               style: const TextStyle(fontSize: 14),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
