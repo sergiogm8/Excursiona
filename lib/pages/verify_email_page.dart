@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:excursiona/controllers/auth_controller.dart';
-import 'package:excursiona/pages/auth_page.dart';
+import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/form_button.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +48,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     if (isEmailVerified) {
       timer?.cancel();
       await authController.setUserLoggedIn();
-      nextScreenReplace(context, const AuthPage(), PageTransitionType.fade);
+      nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
     }
   }
 
