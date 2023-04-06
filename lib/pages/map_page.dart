@@ -97,62 +97,56 @@ class _MapPageState extends State<MapPage> {
   }
 
   getOthersLocation() {}
+  _onMapCreated(GoogleMapController controller) {
+    _controller.complete(controller);
+    Geolocator.getServiceStatusStream().listen((status) {
+      if (status == ServiceStatus.disabled) {
+        _geoServiceEnabled = false;
+        showSnackBar(context, Theme.of(context).primaryColor,
+            'La ubicación no está activada');
+      } else {
+        _geoServiceEnabled = true;
+      }
+    });
+    positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) {
+      if (!_isDragging) {
+        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+            target: LatLng(position!.latitude, position.longitude), zoom: 18)));
+      }
+      const markerId = MarkerId('currentPos');
+      try {
+        final marker = markers[markerId];
+        Marker _marker = Marker(
+          markerId: marker!.markerId,
+          position: LatLng(position!.latitude, position.longitude),
+        );
+        setState(() {
+          markers[markerId] = _marker;
+          _currentPosition = position;
+        });
+      } catch (e) {
+        print(e.toString());
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
       children: [
-        StreamBuilder(
-            stream: getOthersLocation(),
-            builder: (context, snapshot) {
-              return GoogleMap(
-                initialCameraPosition: initialCameraPosition,
-                markers: Set<Marker>.of(markers.values),
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                  Geolocator.getServiceStatusStream().listen((status) {
-                    if (status == ServiceStatus.disabled) {
-                      _geoServiceEnabled = false;
-                      showSnackBar(context, Theme.of(context).primaryColor,
-                          'La ubicación no está activada');
-                    } else {
-                      _geoServiceEnabled = true;
-                    }
-                  });
-                  if (_currentPosition != null) {
-                    positionStream = Geolocator.getPositionStream(
-                            locationSettings: locationSettings)
-                        .listen((Position? position) {
-                      if (!_isDragging) {
-                        controller.animateCamera(CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                                target: LatLng(
-                                    position!.latitude, position.longitude),
-                                zoom: 18)));
-                      }
-                      const markerId = MarkerId('currentPos');
-                      try {
-                        final marker = markers[markerId];
-                        Marker _marker = Marker(
-                          markerId: marker!.markerId,
-                          position:
-                              LatLng(position!.latitude, position.longitude),
-                        );
-                        setState(() {
-                          markers[markerId] = _marker;
-                          _currentPosition = position;
-                        });
-                      } catch (e) {}
-                    });
-                  }
-                },
-                onTap: (LatLng? latLng) {
-                  _isDragging = true;
-                },
-                zoomControlsEnabled: false,
-              );
-            }),
+        GoogleMap(
+          initialCameraPosition: initialCameraPosition,
+          markers: Set<Marker>.of(markers.values),
+          onMapCreated: (GoogleMapController controller) =>
+              _onMapCreated(controller),
+          onTap: (LatLng? latLng) {
+            _isDragging = true;
+          },
+          zoomControlsEnabled: false,
+        ),
         Positioned(
             bottom: 20,
             right: 20,
