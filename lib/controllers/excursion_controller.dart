@@ -1,6 +1,9 @@
+import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ExcursionController {
   final ExcursionService _excursionService = ExcursionService();
@@ -8,7 +11,8 @@ class ExcursionController {
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
     bool result = false;
-    result = await _excursionService.createExcursion(excursion);
+    result = await _excursionService.createExcursion(
+        excursion, await UserController().getUserBasicInfo());
     if (!result) return 'Hubo un error al crear la excursión';
 
     result =
@@ -23,7 +27,8 @@ class ExcursionController {
   }
 
   Future<bool> joinExcursion(String excursionID) async {
-    return await _excursionService.joinExcursion(excursionID);
+    return await _excursionService.joinExcursion(
+        excursionID, await UserController().getUserBasicInfo());
   }
 
   Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
@@ -51,5 +56,13 @@ class ExcursionController {
       excursions = null;
     });
     return excursions;
+  }
+
+  shareCurrentLocation(Position coords, String excursionId) async {
+    await _excursionService.shareCurrentLocation(coords, excursionId);
+  }
+
+  Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
+    return _excursionService.getOthersLocation(excursionId);
   }
 }

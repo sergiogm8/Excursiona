@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
 
 class ExcursionService {
@@ -12,10 +14,10 @@ class ExcursionService {
 
   final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  Future createExcursion(Excursion excursion) async {
+  Future createExcursion(Excursion excursion, UserModel userInfo) async {
     try {
       await excursionCollection.doc(excursion.id).set(excursion.toMap());
-      await joinExcursion(excursion.id);
+      await joinExcursion(excursion.id, userInfo);
       // await excursionCollection.doc(excursion.id).collection('participants').doc(currentUserId).set({
       //   'isInExcursion': true,
       // });
@@ -29,6 +31,7 @@ class ExcursionService {
       Excursion excursion, Set<UserModel> participants) async {
     try {
       for (var participant in participants) {
+        if (participant.uid == currentUserId) continue;
         await UserService()
             .insertExcursionInvitation(excursion, participant.uid);
         sendExcursionNotificationToUser(excursion, participant.uid);
@@ -67,12 +70,15 @@ class ExcursionService {
     }
   }
 
-  Future<bool> joinExcursion(String excursionID) async {
+  Future<bool> joinExcursion(String excursionID, UserModel userInfo) async {
     try {
       var excursion = excursionCollection.doc(excursionID);
-      await excursion.collection('participants').doc(currentUserId).set({
-        'isInExcursion': true,
-      });
+      var userInfoMap = userInfo.toMapShort();
+      userInfoMap.addAll({'isInExcursion': true});
+      await excursion
+          .collection('participants')
+          .doc(currentUserId)
+          .set(userInfoMap);
       return true;
     } on FirebaseException {
       return false;
@@ -99,5 +105,35 @@ class ExcursionService {
     } on FirebaseException {
       return false;
     }
+  }
+
+  shareCurrentLocation(Position coords, String excursionId) async {
+    print("Sharing location: ${coords.latitude}, ${coords.longitude}");
+    try {
+      await excursionCollection
+          .doc(excursionId)
+          .collection('participants')
+          .doc(currentUserId)
+          .update({
+        'currentLocation': GeoPoint(coords.latitude, coords.longitude),
+      });
+    } on FirebaseFirestore catch (e) {
+      print(e);
+    }
+  }
+
+  Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
+    return excursionCollection
+        .doc(excursionId)
+        .collection('participants')
+        .snapshots()
+        .map((snapshot) {
+      List<ExcursionParticipant> participantsInfo = [];
+      for (var doc in snapshot.docs) {
+        participantsInfo.add(ExcursionParticipant.fromMap(doc.data()));
+      }
+      print(participantsInfo.length);
+      return participantsInfo;
+    });
   }
 }
