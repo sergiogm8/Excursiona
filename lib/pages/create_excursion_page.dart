@@ -3,6 +3,7 @@ import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/excursion_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
@@ -25,6 +26,8 @@ class CreateExcursionPage extends StatefulWidget {
 class _CreateExcursionPageState extends State<CreateExcursionPage> {
   final Set<UserModel> _participants = {};
   final UserController _userController = UserController();
+  final _formKey = GlobalKey<FormState>();
+
   String _excursionName = "";
   UserModel? currentUser;
 
@@ -89,6 +92,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   }
 
   _createExcursion() async {
+    if (!_formKey.currentState!.validate()) return;
     WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
     _showLoadingDialog();
 
@@ -111,6 +115,12 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       Navigator.of(context).pop();
       showSnackBar(context, Colors.green, "Excursión creada con éxito");
       // TODO: Redirect to excursion page (map)
+      nextScreen(
+          context,
+          ExcursionPage(
+            excursionId: excursion.id,
+          ),
+          PageTransitionType.fade);
     }
   }
 
@@ -134,28 +144,36 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Nombre de la excursión",
-                    labelStyle: GoogleFonts.inter(
-                        textStyle: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w300)),
-                    prefixIcon: const Icon(
-                      Icons.info,
-                      color: Constants.indigoDye,
+                Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Nombre de la excursión",
+                      labelStyle: GoogleFonts.inter(
+                          textStyle: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300)),
+                      prefixIcon: const Icon(
+                        Icons.info,
+                        color: Constants.indigoDye,
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Constants.indigoDye),
+                      ),
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Constants.indigoDye),
+                      ),
                     ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Constants.indigoDye),
-                    ),
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Constants.indigoDye),
-                    ),
+                    onChanged: (value) {
+                      setState(() => _excursionName = value.trim());
+                    },
+                    validator: (value) {
+                      return value!.isEmpty
+                          ? "Por favor ingrese un nombre"
+                          : null;
+                    },
                   ),
-                  onChanged: (value) {
-                    setState(() => _excursionName = value.trim());
-                  },
                 ),
                 const SizedBox(height: 30),
                 const Text(
