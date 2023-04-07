@@ -1,5 +1,6 @@
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/widgets.dart';
@@ -77,11 +78,7 @@ class ParticipantAvatar extends StatelessWidget {
                               ),
                             ],
                           )
-                        : const Icon(
-                            Icons.account_circle_rounded,
-                            size: 55,
-                          ),
-                  ),
+                        : AccountAvatar(radius: 25, name: user.name)),
             const SizedBox(height: 5),
             Text(
               AuthController().isCurrentUser(uid: user.uid)

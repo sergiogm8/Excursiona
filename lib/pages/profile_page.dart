@@ -3,6 +3,7 @@ import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/pages/auth_page.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -55,22 +56,17 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            profilePic != ""
-                ? CircleAvatar(
-                    radius: 50,
-                    child: ClipOval(
-                      child: SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Image.network(profilePic, fit: BoxFit.cover),
-                      ),
-                    ),
-                  )
-                : const Icon(
-                    Icons.account_circle,
-                    size: 100,
-                    color: Colors.grey,
-                  ),
+            CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.transparent,
+                child: profilePic != ""
+                    ? ClipOval(
+                        child: SizedBox(
+                            width: 100,
+                            height: 100,
+                            child:
+                                Image.network(profilePic, fit: BoxFit.cover)))
+                    : AccountAvatar(radius: 50, name: name)),
             const SizedBox(height: 20),
             Text(name,
                 textAlign: TextAlign.center,
