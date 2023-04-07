@@ -1,4 +1,5 @@
 import 'package:excursiona/pages/create_excursion_page.dart';
+import 'package:excursiona/pages/landing_page.dart';
 import 'package:excursiona/pages/map_page.dart';
 import 'package:excursiona/pages/my_chats_page.dart';
 import 'package:excursiona/pages/post_screen.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
 
   List<Widget> pages = [
-    const MyChatsPage(), // => const LandingPage(),
+    const LandingPage(), // => const LandingPage(),
     const MyChatsPage(),
     const CreateExcursionPage(),
     const MapPage(),
