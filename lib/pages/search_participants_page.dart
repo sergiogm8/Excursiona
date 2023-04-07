@@ -10,8 +10,8 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 class SearchParticipantsPage extends StatefulWidget {
-  const SearchParticipantsPage({super.key});
-
+  final Set<UserModel> alreadyParticipants;
+  const SearchParticipantsPage({super.key, required this.alreadyParticipants});
   @override
   State<SearchParticipantsPage> createState() => _SearchParticipantsPageState();
 }
@@ -41,7 +41,10 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   }
 
   _addParticipant(UserModel user) {
-    bool isParticipant = _participants.contains(user);
+    bool isParticipant = _participants.contains(user) ||
+        widget.alreadyParticipants
+            .where((element) => element.uid == user.uid)
+            .isNotEmpty;
     if (!isParticipant) {
       setState(() {
         _participants.add(user);

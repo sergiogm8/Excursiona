@@ -46,8 +46,10 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
 
   _addParticipants() async {
     WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
-    Set<UserModel> result = await nextScreen(context,
-        const SearchParticipantsPage(), PageTransitionType.rightToLeftWithFade);
+    Set<UserModel> result = await nextScreen(
+        context,
+        SearchParticipantsPage(alreadyParticipants: _participants),
+        PageTransitionType.rightToLeftWithFade);
     setState(() {
       _participants.addAll(result);
     });
