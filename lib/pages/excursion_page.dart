@@ -29,7 +29,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
     distanceFilter: 5,
   );
 
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   StreamSubscription<Position>? positionStream;
 
   final Completer<GoogleMapController> _controller =
@@ -56,11 +55,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   loadData() {
     getCurrentPosition().then((value) async {
       _shareCurrentLocation(value);
-      const markerId = MarkerId('currentPos');
-      Marker marker = Marker(
-        markerId: markerId,
-        position: LatLng(value.latitude, value.longitude),
-      );
+
       CameraPosition cameraPosition = CameraPosition(
           target: LatLng(value.latitude, value.longitude), zoom: 15);
 
@@ -71,7 +66,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
       _finishedLocation = true;
       setState(() {
         _currentPosition = value;
-        markers[markerId] = marker;
       });
     }).catchError((error) {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
@@ -131,24 +125,25 @@ class _ExcursionPageState extends State<ExcursionPage> {
         controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
             target: LatLng(position!.latitude, position.longitude), zoom: 18)));
       }
-      const markerId = MarkerId('currentPos');
-      try {
-        final marker = markers[markerId];
-        Marker _marker = Marker(
-          markerId: marker!.markerId,
-          position: LatLng(position!.latitude, position.longitude),
-        );
-        setState(() {
-          markers[markerId] = _marker;
-          _currentPosition = position;
-        });
-        _shareCurrentLocation(_currentPosition!);
-      } catch (e) {}
     });
   }
 
-  Set<Marker> updateMarkers(snapshot) {
+  Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
     Set<Marker> markers = {};
+    if (snapshot.hasData) {
+      List<ExcursionParticipant> participants = snapshot.data;
+      participants.forEach((element) {
+        final markerId = MarkerId(element.uid);
+        Marker marker = Marker(
+          markerId: markerId,
+          position: LatLng(element.currentLocation.latitude,
+              element.currentLocation.longitude),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        );
+        markers.add(marker);
+      });
+    }
     return markers;
   }
 
