@@ -1,5 +1,8 @@
 import 'package:excursiona/controllers/excursion_controller.dart';
+import 'package:excursiona/controllers/user_controller.dart';
+import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/widgets/excursion_invitation_card.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -13,8 +16,8 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  _getExcursionNotifications() {
-    return ExcursionController().getExcursionInvitations();
+  Stream<List<Invitation>> _getExcursionNotifications() {
+    return UserController().getExcursionInvitations();
   }
 
   @override
@@ -96,8 +99,22 @@ class _LandingPageState extends State<LandingPage> {
                               StreamBuilder(
                                 stream: _getExcursionNotifications(),
                                 builder: (context, snapshot) {
-                                  return snapshot.hasData
-                                      ? Text("Tus n")
+                                  if (snapshot.data == null) {
+                                    return const Loader();
+                                  }
+                                  return snapshot.data!.isNotEmpty
+                                      ? ListView.builder(
+                                          // controller: scrollController,
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: snapshot.data!.length,
+                                          itemBuilder: (context, index) {
+                                            return ExcursionInvitationCard(
+                                              invitation: snapshot.data![index],
+                                            );
+                                          },
+                                        )
                                       : const Align(
                                           alignment: Alignment.center,
                                           child: Padding(
