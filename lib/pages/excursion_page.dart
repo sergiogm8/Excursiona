@@ -125,6 +125,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
         controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
             target: LatLng(position!.latitude, position.longitude), zoom: 18)));
       }
+      setState(() {
+        _currentPosition = position;
+      });
+      _shareCurrentLocation(_currentPosition!);
     });
   }
 
@@ -163,7 +167,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 onTap: (LatLng? latLng) {
                   _isDragging = true;
                 },
-                zoomControlsEnabled: false,
+                zoomControlsEnabled: true,
                 mapType: MapType.satellite,
               );
             }),
@@ -172,7 +176,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
             left: 10,
             child: FloatingActionButton.small(
               onPressed: () async {
-                _shareCurrentLocation(_currentPosition!);
                 _isDragging = false;
                 final GoogleMapController controller = await _controller.future;
                 controller.animateCamera(
