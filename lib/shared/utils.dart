@@ -10,7 +10,8 @@ void nextScreenReplace(context, page, PageTransitionType animation) {
       context, PageTransition(child: page, type: animation));
 }
 
-void showSnackBar(BuildContext context, Color color, String message) {
+void showSnackBar(BuildContext context, Color color, String message,
+    [int duration = 3]) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       backgroundColor: color,
@@ -18,7 +19,7 @@ void showSnackBar(BuildContext context, Color color, String message) {
         message,
         style: const TextStyle(fontSize: 14),
       ),
-      duration: const Duration(seconds: 3),
+      duration: Duration(seconds: duration),
       action: SnackBarAction(
         label: 'OK',
         textColor: Colors.white,
