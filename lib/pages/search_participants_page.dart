@@ -50,10 +50,10 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
         _participants.add(user);
       });
       showSnackBar(context, Colors.green,
-          "Se agregó a ${user.name} a la lista de participantes");
+          "Se agregó a ${user.name} a la lista de participantes", 2);
     } else {
       showSnackBar(context, Constants.indigoDye,
-          "El usuario ${user.name} ya está en la lista de participantes");
+          "El usuario ${user.name} ya está en la lista de participantes", 2);
     }
   }
 
