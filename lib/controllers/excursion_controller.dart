@@ -65,8 +65,4 @@ class ExcursionController {
   Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
     return _excursionService.getOthersLocation(excursionId);
   }
-
-  getExcursionInvitations() {
-    return;
-  }
 }

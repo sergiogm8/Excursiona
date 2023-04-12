@@ -2,6 +2,7 @@ import 'package:excursiona/enums/message_enums.dart';
 import 'package:excursiona/model/chat_contact.dart';
 import 'package:excursiona/model/contact.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
@@ -64,18 +65,44 @@ class UserService {
     return user;
   }
 
-  Future insertExcursionInvitation(Excursion excursion, String userId) async {
+  Future insertExcursionInvitation(Invitation invitation, String userId) async {
     try {
       await userCollection
           .doc(userId)
           .collection('invitations')
-          .doc(excursion.id)
-          .set(excursion.toMapForInvitation());
+          .doc(invitation.excursionId)
+          .set(invitation.toMap());
     } on FirebaseException {
       rethrow;
     }
   }
 
+  Future deleteExcursionInvitation(String excursionId, String userId) async {
+    try {
+      await userCollection
+          .doc(userId)
+          .collection('invitations')
+          .doc(excursionId)
+          .delete();
+    } on FirebaseException {
+      rethrow;
+    }
+  }
+
+  Stream<List<Invitation>> getExcursionInvitations() {
+    String userId = authService.firebaseAuth.currentUser!.uid;
+    return userCollection
+        .doc(userId)
+        .collection('invitations')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Invitation.fromMap(doc.data()))
+          .toList();
+    });
+  }
+
+  /// ------------------- CHAT ------------------- ///
   void _saveMessageToContactsSubcollection(
       UserModel senderUserData,
       UserModel recieverUserData,

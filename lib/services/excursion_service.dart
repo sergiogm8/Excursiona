@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,11 +30,16 @@ class ExcursionService {
 
   Future inviteUsersToExcursion(
       Excursion excursion, Set<UserModel> participants) async {
+    Invitation invitation = Invitation(
+        excursionTitle: excursion.title,
+        excursionId: excursion.id,
+        ownerName: excursion.ownerName,
+        ownerPic: excursion.ownerPic);
     try {
       for (var participant in participants) {
         if (participant.uid == currentUserId) continue;
         await UserService()
-            .insertExcursionInvitation(excursion, participant.uid);
+            .insertExcursionInvitation(invitation, participant.uid);
         sendExcursionNotificationToUser(excursion, participant.uid);
       }
       return true;
@@ -43,8 +49,13 @@ class ExcursionService {
   }
 
   Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
+    Invitation invitation = Invitation(
+        excursionTitle: excursion.title,
+        excursionId: excursion.id,
+        ownerName: excursion.ownerName,
+        ownerPic: excursion.ownerPic);
     try {
-      UserService().insertExcursionInvitation(excursion, userId);
+      UserService().insertExcursionInvitation(invitation, userId);
       return true;
     } on FirebaseException {
       return false;
@@ -56,7 +67,12 @@ class ExcursionService {
   }
 
   Future<bool> rejectExcursionInvitation(String excursionId) async {
-    return await deleteUserFromExcursion(excursionId, currentUserId!);
+    try {
+      UserService().deleteExcursionInvitation(excursionId, currentUserId!);
+      return true;
+    } on FirebaseException {
+      return false;
+    }
   }
 
   Future<bool> deleteUserFromExcursion(
