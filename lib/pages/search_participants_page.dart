@@ -4,6 +4,7 @@ import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -121,19 +122,32 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
                   return ListTile(
                       title: Text(_searchResults[index].name),
                       leading: _searchResults[index].profilePic.isEmpty
-                          ? const CircleAvatar(
+                          ? CircleAvatar(
                               foregroundColor: Colors.grey,
                               backgroundColor: Colors.transparent,
                               radius: 30,
-                              child: Icon(
-                                Icons.account_circle,
-                                size: 60,
-                              ))
+                              child: AccountAvatar(
+                                  radius: 30, name: _searchResults[index].name))
                           : CircleAvatar(
                               radius: 30,
-                              backgroundImage: CachedNetworkImageProvider(
-                                  _searchResults[index].profilePic),
-                            ),
+                              backgroundColor: Colors.transparent,
+                              // backgroundImage: CachedNetworkImageProvider(
+                              //     _searchResults[index].profilePic),
+                              child: CachedNetworkImage(
+                                imageUrl: _searchResults[index].profilePic,
+                                placeholder: (context, url) => const Loader(),
+                                placeholderFadeInDuration:
+                                    const Duration(milliseconds: 300),
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                              )),
                       trailing: TextButton(
                           onPressed: () =>
                               _addParticipant(_searchResults[index]),
