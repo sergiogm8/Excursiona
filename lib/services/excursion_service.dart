@@ -101,6 +101,18 @@ class ExcursionService {
     }
   }
 
+  Future<List<QueryDocumentSnapshot>> getParticipantsData(
+      String excursionId) async {
+    try {
+      var excursion = excursionCollection.doc(excursionId);
+      QuerySnapshot participants =
+          await excursion.collection('participants').get();
+      return participants.docs;
+    } on FirebaseException catch (e) {
+      return [];
+    }
+  }
+
   Future<List<QueryDocumentSnapshot>> getUserExcursions() async {
     //TODO: Modify this, it won't work
     String participantsSubcollection = 'participants';
@@ -148,7 +160,6 @@ class ExcursionService {
       for (var doc in snapshot.docs) {
         participantsInfo.add(ExcursionParticipant.fromMap(doc.data()));
       }
-      print(participantsInfo.length);
       return participantsInfo;
     });
   }

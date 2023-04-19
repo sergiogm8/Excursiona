@@ -44,6 +44,17 @@ class ExcursionController {
     return await _excursionService.deleteUserFromExcursion(excursionId, userId);
   }
 
+  Future getParticipantsData(String excursionId) async {
+    List<UserModel> participants = [];
+    await _excursionService.getParticipantsData(excursionId).then((query) {
+      for (var participant in query) {
+        participants
+            .add(UserModel.fromMap(participant.data() as Map<String, dynamic>));
+      }
+    });
+    return participants;
+  }
+
   List<Excursion>? getUserExcursions() {
     //TODO: Review later with the method of the service
     List<Excursion>? excursions = [];
