@@ -24,24 +24,24 @@ class CreateExcursionPage extends StatefulWidget {
 }
 
 class _CreateExcursionPageState extends State<CreateExcursionPage> {
-  final Set<UserModel> _participants = {};
-  final UserController _userController = UserController();
-  final _formKey = GlobalKey<FormState>();
+  UserModel? currentUser;
 
   String _excursionName = "";
-  UserModel? currentUser;
+  final _formKey = GlobalKey<FormState>();
+  final Set<UserModel> _participants = {};
+  final UserController _userController = UserController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeParticipants();
+  }
 
   _initializeParticipants() async {
     currentUser = await _userController.getUserBasicInfo();
     setState(() {
       _participants.add(currentUser!);
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeParticipants();
   }
 
   _addParticipants() async {
@@ -121,6 +121,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
           context,
           ExcursionPage(
             excursionId: excursion.id,
+            participants: _participants,
           ),
           PageTransitionType.fade);
     }
