@@ -1,20 +1,32 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 
 class ExcursionPage extends StatefulWidget {
-  const ExcursionPage({super.key, required this.excursionId});
+  const ExcursionPage(
+      {super.key, required this.excursionId, this.participants});
 
   final String excursionId;
+  final Set<UserModel>? participants;
 
   @override
   State<ExcursionPage> createState() => _ExcursionPageState();
@@ -34,11 +46,17 @@ class _ExcursionPageState extends State<ExcursionPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
   ExcursionController _excursionController = ExcursionController();
   var _finishedLocation = false;
   var _geoServiceEnabled;
+  bool _initializedMarkers = false;
   var _isDragging = false;
+  Set<UserModel> _participants = {};
+  Map<String, dynamic> _usersMarkers = {};
+  static const double _zoom = 20;
+  static const double _tilt = 30;
 
   @override
   void dispose() {
@@ -48,8 +66,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   @override
   void initState() {
-    super.initState();
+    _setCustomMarkerIcon();
+    _retrieveParticipantsData();
     loadData();
+    super.initState();
   }
 
   loadData() {
@@ -57,7 +77,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
       _shareCurrentLocation(value);
 
       CameraPosition cameraPosition = CameraPosition(
-          target: LatLng(value.latitude, value.longitude), zoom: 15);
+          target: LatLng(value.latitude, value.longitude), zoom: _zoom);
 
       final GoogleMapController controller = await _controller.future;
 
@@ -102,6 +122,52 @@ class _ExcursionPageState extends State<ExcursionPage> {
     return _excursionController.getOthersLocation(widget.excursionId);
   }
 
+  Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
+    Set<Marker> markers = {};
+    if (snapshot.hasData) {
+      List<ExcursionParticipant> participants = snapshot.data;
+      participants.forEach((element) {
+        final markerId = MarkerId(element.uid);
+        Marker marker = Marker(
+          markerId: markerId,
+          position: LatLng(element.currentLocation.latitude,
+              element.currentLocation.longitude),
+          icon: AuthController().isCurrentUser(uid: element.uid)
+              ? _currentLocationIcon
+              : BitmapDescriptor.fromBytes(_usersMarkers[element.uid]),
+        );
+        markers.add(marker);
+      });
+    }
+    return markers;
+  }
+
+  _setCustomMarkerIcon() {
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration.empty, Assets.resourceImagesMylocationicon)
+        .then((value) {
+      setState(() {
+        _currentLocationIcon = value;
+      });
+    });
+  }
+
+  _retrieveParticipantsData() {
+    if (widget.participants == null) {
+      _excursionController
+          .getParticipantsData(widget.excursionId)
+          .then((participants) {
+        setState(() {
+          _participants = participants.toSet();
+        });
+      });
+    } else {
+      setState(() {
+        _participants = widget.participants!;
+      });
+    }
+  }
+
   _shareCurrentLocation(Position coords) async {
     _excursionController.shareCurrentLocation(coords, widget.excursionId);
   }
@@ -123,7 +189,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
             .listen((Position? position) {
       if (!_isDragging) {
         controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-            target: LatLng(position!.latitude, position.longitude), zoom: 18)));
+            target: LatLng(position!.latitude, position.longitude),
+            zoom: _zoom)));
       }
       setState(() {
         _currentPosition = position;
@@ -132,29 +199,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
     });
   }
 
-  Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
-    Set<Marker> markers = {};
-    if (snapshot.hasData) {
-      List<ExcursionParticipant> participants = snapshot.data;
-      participants.forEach((element) {
-        final markerId = MarkerId(element.uid);
-        Marker marker = Marker(
-          markerId: markerId,
-          position: LatLng(element.currentLocation.latitude,
-              element.currentLocation.longitude),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        );
-        markers.add(marker);
-      });
-    }
-    return markers;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(
+  _buildMap() {
+    print("mapa");
+    return Stack(
       children: [
         StreamBuilder(
             stream: getOthersLocation(),
@@ -167,7 +214,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 onTap: (LatLng? latLng) {
                   _isDragging = true;
                 },
-                zoomControlsEnabled: true,
+                zoomControlsEnabled: false,
+                mapToolbarEnabled: false,
+                // myLocationEnabled: true,
                 mapType: MapType.satellite,
               );
             }),
@@ -183,7 +232,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     CameraPosition(
                         target: LatLng(_currentPosition!.latitude,
                             _currentPosition!.longitude),
-                        zoom: 18),
+                        zoom: _zoom),
                   ),
                 );
               },
@@ -194,9 +243,53 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 // size: 40,
               ),
             )),
+        Positioned(
+          bottom: 20,
+          right: 10,
+          child: FloatingActionButton(
+              heroTag: "reload",
+              onPressed: () {
+                print("capturing widgets");
+                _captureWidgets();
+              }),
+        ),
         if (!_finishedLocation) const Geolocating(),
       ],
-    ));
+    );
+  }
+
+  _buildLoading() {
+    while (_participants.isEmpty) {
+      return const Loader();
+    }
+
+    _captureWidgets();
+
+    setState(() {
+      _initializedMarkers = true;
+    });
+  }
+
+  _captureWidgets() {
+    ScreenshotController screenshotController = ScreenshotController();
+
+    for (var element in _participants) {
+      if (!AuthController().isCurrentUser(uid: element.uid)) {
+        screenshotController
+            .captureFromWidget(UserMarker(user: element),
+                delay: const Duration(milliseconds: 200))
+            .then((image) {
+          setState(() {
+            _usersMarkers[element.uid] = image;
+          });
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: _initializedMarkers ? _buildMap() : _buildLoading());
   }
 }
 
@@ -237,6 +330,54 @@ class Geolocating extends StatelessWidget {
                 ],
               ),
             )),
+      ),
+    );
+  }
+}
+
+class UserMarker extends StatelessWidget {
+  const UserMarker({super.key, required this.user});
+
+  final UserModel user;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 95,
+      width: 80,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Constants.darkWhite,
+            ),
+            child: user.profilePic.isEmpty
+                ? MediaQuery(
+                    data: new MediaQueryData(),
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.white,
+                      child: AccountAvatar(radius: 25, name: user.name),
+                    ),
+                  )
+                : MediaQuery(
+                    data: new MediaQueryData(),
+                    child: CircleAvatar(
+                        radius: 25,
+                        // backgroundColor: Colors.white,
+                        backgroundImage:
+                            CachedNetworkImageProvider(user.profilePic)),
+                  ),
+          ),
+          const Align(
+              alignment: Alignment.bottomCenter,
+              child: Icon(Icons.arrow_drop_down,
+                  color: Constants.darkWhite, size: 36)),
+        ],
       ),
     );
   }
