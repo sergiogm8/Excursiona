@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
@@ -23,7 +24,8 @@ class ParticipantAvatar extends StatelessWidget {
             user.profilePic.isNotEmpty
                 ? CircleAvatar(
                     radius: 25,
-                    backgroundImage: NetworkImage(user.profilePic),
+                    backgroundImage:
+                        CachedNetworkImageProvider(user.profilePic),
                     child: !AuthController().isCurrentUser(uid: user.uid)
                         ? Align(
                             alignment: Alignment.topRight,
@@ -53,9 +55,9 @@ class ParticipantAvatar extends StatelessWidget {
                     child: !AuthController().isCurrentUser(uid: user.uid)
                         ? Stack(
                             children: [
-                              const Icon(
-                                Icons.account_circle_rounded,
-                                size: 55,
+                              AccountAvatar(
+                                radius: 25,
+                                name: user.name,
                               ),
                               Align(
                                 alignment: Alignment.topRight,
