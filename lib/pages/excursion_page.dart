@@ -129,13 +129,13 @@ class _ExcursionPageState extends State<ExcursionPage> {
       participants.forEach((element) {
         final markerId = MarkerId(element.uid);
         Marker marker = Marker(
-          markerId: markerId,
-          position: LatLng(element.currentLocation.latitude,
-              element.currentLocation.longitude),
-          icon: AuthController().isCurrentUser(uid: element.uid)
-              ? _currentLocationIcon
-              : BitmapDescriptor.fromBytes(_usersMarkers[element.uid]),
-        );
+            markerId: markerId,
+            position: LatLng(element.currentLocation.latitude,
+                element.currentLocation.longitude),
+            icon: AuthController().isCurrentUser(uid: element.uid)
+                ? _currentLocationIcon
+                : BitmapDescriptor.fromBytes(_usersMarkers[element.uid]),
+            zIndex: AuthController().isCurrentUser(uid: element.uid) ? 2 : 1);
         markers.add(marker);
       });
     }
@@ -197,10 +197,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
       });
       _shareCurrentLocation(_currentPosition!);
     });
+    _captureWidgets();
   }
 
   _buildMap() {
-    print("mapa");
     return Stack(
       children: [
         StreamBuilder(
@@ -243,16 +243,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 // size: 40,
               ),
             )),
-        Positioned(
-          bottom: 20,
-          right: 10,
-          child: FloatingActionButton(
-              heroTag: "reload",
-              onPressed: () {
-                print("capturing widgets");
-                _captureWidgets();
-              }),
-        ),
         if (!_finishedLocation) const Geolocating(),
       ],
     );
