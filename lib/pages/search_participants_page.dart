@@ -23,39 +23,40 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   List<UserModel> _searchResults = [];
   final TextEditingController _textController = TextEditingController();
   final UserController _userController = UserController();
+  late final String currentId;
 
   @override
   void initState() {
     super.initState();
     _isLoading = true;
+    setState(() {
+      _participants.addAll(widget.alreadyParticipants);
+    });
     _fetchUsers();
   }
 
   _fetchUsers() async {
     var results = await _userController
         .getAllUsersBasicInfo(_textController.text.toLowerCase());
-    var uid = await HelperFunctions.getUserUID();
+    results = results
+        .where((element) => !_participants
+            .where(
+                (alreadyParticipant) => alreadyParticipant.uid == element.uid)
+            .isNotEmpty)
+        .toList();
     setState(() {
-      _searchResults = results.where((element) => element.uid != uid).toList();
+      _searchResults = results;
       _isLoading = false;
     });
   }
 
   _addParticipant(UserModel user) {
-    bool isParticipant = _participants.contains(user) ||
-        widget.alreadyParticipants
-            .where((element) => element.uid == user.uid)
-            .isNotEmpty;
-    if (!isParticipant) {
-      setState(() {
-        _participants.add(user);
-      });
-      showSnackBar(context, Colors.green,
-          "Se agregó a ${user.name} a la lista de participantes", 2);
-    } else {
-      showSnackBar(context, Constants.indigoDye,
-          "El usuario ${user.name} ya está en la lista de participantes", 2);
-    }
+    setState(() {
+      _participants.add(user);
+      _searchResults.remove(user);
+    });
+    showSnackBar(context, Colors.green,
+        "Se agregó a ${user.name} a la lista de participantes", 2);
   }
 
   @override
