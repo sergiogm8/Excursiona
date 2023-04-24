@@ -27,6 +27,8 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   UserModel? currentUser;
 
   String _excursionName = "";
+  String _dropdownValue = "Media";
+  String _description = "";
   final _formKey = GlobalKey<FormState>();
   final Set<UserModel> _participants = {};
   final UserController _userController = UserController();
@@ -105,6 +107,8 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       nParticipants: _participants.length,
       date: DateTime.now(),
       title: _excursionName,
+      description: _description,
+      difficulty: _dropdownValue,
     );
 
     var result =
@@ -116,7 +120,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     } else {
       Navigator.of(context).pop();
       showSnackBar(context, Colors.green, "Excursión creada con éxito");
-      // TODO: Redirect to excursion page (map)
       nextScreen(
           context,
           ExcursionPage(
@@ -143,15 +146,16 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Form(
                   key: _formKey,
                   child: TextFormField(
+                    maxLength: 40,
                     decoration: InputDecoration(
-                      labelText: "Nombre de la excursión",
+                      labelText: "Título de la excursión *",
                       labelStyle: GoogleFonts.inter(
                           textStyle: const TextStyle(
                               color: Colors.grey,
@@ -173,12 +177,12 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     },
                     validator: (value) {
                       return value!.isEmpty
-                          ? "Por favor ingrese un nombre"
+                          ? "Por favor ingrese un título"
                           : null;
                     },
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 15),
                 const Text(
                   "Participantes",
                   style: TextStyle(
@@ -232,14 +236,68 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: "Descripción de la excursión",
+                    alignLabelWithHint: true,
+                    labelStyle: GoogleFonts.inter(
+                        textStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Constants.indigoDye)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Constants.indigoDye)),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _description = value.trim();
+                    });
+                  },
+                  maxLines: 4,
+                  minLines: 1,
+                  maxLength: 200,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Dificultad de la excursión",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 20),
+                      DropdownButton(
+                          iconEnabledColor: Constants.indigoDye,
+                          value: _dropdownValue,
+                          style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                  fontSize: 16, color: Colors.black)),
+                          alignment: Alignment.centerLeft,
+                          items: const [
+                            DropdownMenuItem(
+                                value: "Fácil", child: Text("Fácil")),
+                            DropdownMenuItem(
+                                value: "Media", child: Text("Media")),
+                            DropdownMenuItem(
+                                value: "Difícil", child: Text("Difícil")),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _dropdownValue = value!;
+                            });
+                          }),
+                    ]),
+                const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 38.0),
                   child: FormButton(
                       text: "Empezar excursión",
                       onPressed: _createExcursion,
                       icon: Icons.play_arrow_rounded),
-                )
+                ),
               ],
             ),
           ),

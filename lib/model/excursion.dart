@@ -3,6 +3,8 @@ class Excursion {
   final String ownerPic;
   final String title;
   final String id;
+  final String description;
+  final String difficulty;
   final int nParticipants;
   final double duration;
   final double distance;
@@ -17,6 +19,8 @@ class Excursion {
     this.distance = 0,
     required this.title,
     required this.date,
+    required this.description,
+    required this.difficulty,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +33,8 @@ class Excursion {
       'duration': duration,
       'distance': distance,
       'date': date.millisecondsSinceEpoch,
+      'description': description,
+      'difficulty': difficulty,
     };
   }
 
@@ -51,6 +57,8 @@ class Excursion {
       duration: map['duration'] ?? 0.0,
       distance: map['distance'] ?? 0.0,
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
+      description: map['description'] ?? '',
+      difficulty: map['difficulty'] ?? '',
     );
   }
 }
