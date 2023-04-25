@@ -1,4 +1,5 @@
 import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/services/notification_service.dart';
 import 'package:excursiona/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +16,7 @@ class AuthService {
               email: email, password: password))
           .user!;
       await UserService(uid: user.uid).saveUserData(name, email);
+      NotificationService().initializeNotificationService();
       if (user != null) {
         result = true;
       }
@@ -47,6 +49,7 @@ class AuthService {
         QuerySnapshot snapshot =
             await UserService(uid: firebaseAuth.currentUser!.uid)
                 .getUserDataByEmail(email);
+        NotificationService().initializeNotificationService();
         return snapshot.docs[0];
       }
     } on FirebaseException catch (e) {
@@ -77,6 +80,7 @@ class AuthService {
       QuerySnapshot snapshot =
           await UserService(uid: firebaseAuth.currentUser!.uid)
               .getUserDataByEmail(user!.email!);
+      NotificationService().initializeNotificationService();
       return snapshot.docs[0];
       // } on FirebaseAuthException catch (e) {
       //   return e.message;

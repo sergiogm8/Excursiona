@@ -3,6 +3,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/notification_service.dart';
 import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -40,7 +41,8 @@ class ExcursionService {
         if (participant.uid == currentUserId) continue;
         await UserService()
             .insertExcursionInvitation(invitation, participant.uid);
-        sendExcursionNotificationToUser(excursion, participant.uid);
+        NotificationService()
+            .sendExcursionNotificationToUser(excursion, participant.uid);
       }
       return true;
     } on FirebaseException {
@@ -60,10 +62,6 @@ class ExcursionService {
     } on FirebaseException {
       return false;
     }
-  }
-
-  sendExcursionNotificationToUser(Excursion excursion, String userId) async {
-    //TODO: Implement the emission of a notification to the user
   }
 
   Future<bool> rejectExcursionInvitation(String excursionId) async {
