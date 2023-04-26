@@ -19,6 +19,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
 
 class ExcursionPage extends StatefulWidget {
@@ -32,7 +33,8 @@ class ExcursionPage extends StatefulWidget {
   State<ExcursionPage> createState() => _ExcursionPageState();
 }
 
-class _ExcursionPageState extends State<ExcursionPage> {
+class _ExcursionPageState extends State<ExcursionPage>
+    with TickerProviderStateMixin {
   static const CameraPosition initialCameraPosition =
       CameraPosition(target: LatLng(38.9842, -3.9275), zoom: 5);
 
@@ -42,6 +44,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
   );
 
   StreamSubscription<Position>? positionStream;
+
+  static const double _tilt = 30;
+  static const double _zoom = 20;
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -53,10 +58,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
   var _geoServiceEnabled;
   bool _initializedMarkers = false;
   var _isDragging = false;
+  var _mapType = MapType.satellite;
   Set<UserModel> _participants = {};
   Map<String, dynamic> _usersMarkers = {};
-  static const double _zoom = 20;
-  static const double _tilt = 30;
 
   @override
   void dispose() {
@@ -216,32 +220,64 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 },
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
-                // myLocationEnabled: true,
-                mapType: MapType.satellite,
+                mapType: _mapType,
               );
             }),
-        Positioned(
-            bottom: 30,
-            left: 10,
-            child: FloatingActionButton.small(
-              onPressed: () async {
-                _isDragging = false;
-                final GoogleMapController controller = await _controller.future;
-                controller.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                        target: LatLng(_currentPosition!.latitude,
-                            _currentPosition!.longitude),
-                        zoom: _zoom),
+        Align(
+            alignment: Alignment.centerRight,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FloatingActionButton.small(
+                    heroTag: 'mapType',
+                    backgroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).primaryColor,
+                    tooltip: "Cambiar tipo de mapa",
+                    child: const Icon(
+                      Icons.layers_rounded,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return _buildBottomSheet();
+                        },
+                      );
+                    }),
+                FloatingActionButton.small(
+                  heroTag: 'centerPosition',
+                  backgroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).primaryColor,
+                  tooltip: "Centrar en mi ubicación",
+                  child: const Icon(
+                    Icons.gps_fixed,
                   ),
-                );
-              },
-              backgroundColor: Constants.indigoDye,
-              tooltip: "Centrar en mi ubicación",
-              child: const Icon(
-                Icons.gps_fixed,
-                // size: 40,
-              ),
+                  onPressed: () async {
+                    _isDragging = false;
+                    final GoogleMapController controller =
+                        await _controller.future;
+                    controller.animateCamera(
+                      CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: LatLng(_currentPosition!.latitude,
+                                _currentPosition!.longitude),
+                            zoom: _zoom),
+                      ),
+                    );
+                  },
+                ),
+                FloatingActionButton.small(
+                  heroTag: 'reloadImages',
+                  backgroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).primaryColor,
+                  tooltip: "Recargar imágenes de usuario",
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                  ),
+                  onPressed: () => _captureWidgets(),
+                ),
+              ],
             )),
         if (!_finishedLocation) const Geolocating(),
       ],
@@ -275,6 +311,64 @@ class _ExcursionPageState extends State<ExcursionPage> {
         });
       }
     }
+  }
+
+  void _changeMapType(MapType mapType) {
+    setState(() {
+      _mapType = mapType;
+    });
+    Navigator.pop(context);
+  }
+
+  _buildBottomSheet() {
+    return BottomSheet(
+        backgroundColor: Constants.darkWhite,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        onClosing: () {},
+        constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.20),
+        animationController: AnimationController(
+            vsync: this, duration: const Duration(milliseconds: 500)),
+        builder: (context) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text(
+                  "Tipo de mapa",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    MapTypeButton(
+                        selectedMapType: _mapType,
+                        onTap: _changeMapType,
+                        mapType: MapType.satellite,
+                        icon: Icons.satellite_alt,
+                        label: "Satélite"),
+                    MapTypeButton(
+                        selectedMapType: _mapType,
+                        onTap: _changeMapType,
+                        mapType: MapType.normal,
+                        icon: Icons.map,
+                        label: "Normal"),
+                    MapTypeButton(
+                        selectedMapType: _mapType,
+                        onTap: _changeMapType,
+                        mapType: MapType.terrain,
+                        icon: Icons.terrain,
+                        label: "Terreno")
+                  ],
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   @override
@@ -320,6 +414,63 @@ class Geolocating extends StatelessWidget {
                 ],
               ),
             )),
+      ),
+    );
+  }
+}
+
+class MapTypeButton extends StatelessWidget {
+  const MapTypeButton(
+      {super.key,
+      required this.selectedMapType,
+      required this.onTap,
+      required this.mapType,
+      required this.icon,
+      required this.label});
+
+  final IconData icon;
+  final String label;
+  final MapType mapType;
+  final Function onTap;
+  final MapType selectedMapType;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap(mapType),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: selectedMapType == mapType
+                    ? Constants.steelBlue
+                    : Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(10),
+            color: selectedMapType == mapType
+                ? Constants.lapisLazuli
+                : Colors.white),
+        width: 85,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 30,
+                color: selectedMapType == mapType ? Colors.white : Colors.black,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 14,
+                    color: selectedMapType == mapType
+                        ? Colors.white
+                        : Colors.black),
+              )
+            ]),
       ),
     );
   }
