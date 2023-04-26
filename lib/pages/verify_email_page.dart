@@ -1,13 +1,10 @@
 import 'dart:async';
 
 import 'package:excursiona/controllers/auth_controller.dart';
-import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/pages/home_page.dart';
-import 'package:excursiona/services/user_service.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/form_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:page_transition/page_transition.dart';
 

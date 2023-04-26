@@ -19,10 +19,17 @@ class AuthController {
   Future signInWithEmailAndPassword(String email, String password) async {
     bool result = false;
     try {
-      var name = await _authService.signInWithEmailAndPassword(email, password);
+      var user = await _authService.signInWithEmailAndPassword(email, password);
       HelperFunctions.saveUserEmail(email);
-      HelperFunctions.saveUserName(name);
-      isEmailVerified() ? result = true : result = false;
+      HelperFunctions.saveUserName(user.get("name"));
+      HelperFunctions.saveUserProfilePic(user.get("profilePic"));
+      HelperFunctions.saveUserUID(user.get("uid"));
+      if (isEmailVerified()) {
+        result = true;
+        HelperFunctions.saveUserLoggedInStatus(true);
+      } else {
+        result = false;
+      }
     } on FirebaseException catch (e) {
       return e.message;
     }
@@ -47,6 +54,7 @@ class AuthController {
       HelperFunctions.saveUserLoggedInStatus(true);
       HelperFunctions.saveUserEmail(user.email);
       HelperFunctions.saveUserName(user.name);
+      HelperFunctions.saveUserUID(user.uid);
       HelperFunctions.saveUserProfilePic(user.profilePic);
       return true;
     } on FirebaseAuthException catch (e) {
@@ -74,5 +82,9 @@ class AuthController {
 
   setUserLoggedIn() async {
     await HelperFunctions.saveUserLoggedInStatus(true);
+  }
+
+  bool isCurrentUser({required String uid}) {
+    return _authService.firebaseAuth.currentUser?.uid == uid;
   }
 }

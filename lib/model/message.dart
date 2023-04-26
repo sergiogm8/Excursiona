@@ -18,18 +18,6 @@ class Message {
       required this.messageID,
       required this.isRead});
 
-  factory Message.fromMap(Map<String, dynamic> map) {
-    return Message(
-      senderID: map['senderID'] ?? '',
-      recieverID: map['recieverID'] ?? '',
-      text: map['text'] ?? '',
-      timeSent: DateTime.fromMillisecondsSinceEpoch(map['timeSent']),
-      type: (map['type'] as String).toEnum(),
-      messageID: map['messageID'] ?? '',
-      isRead: map['isRead'] ?? false,
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'senderID': senderID,
@@ -40,5 +28,17 @@ class Message {
       'messageID': messageID,
       'isRead': isRead,
     };
+  }
+
+  factory Message.fromMap(Map<String, dynamic> map) {
+    return Message(
+      senderID: map['senderID'] ?? '',
+      recieverID: map['recieverID'] ?? '',
+      text: map['text'] ?? '',
+      timeSent: DateTime.fromMillisecondsSinceEpoch(map['timeSent']),
+      type: (map['type'] as String).toEnum(),
+      messageID: map['messageID'] ?? '',
+      isRead: map['isRead'] ?? false,
+    );
   }
 }

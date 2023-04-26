@@ -1,6 +1,8 @@
 import 'package:excursiona/enums/message_enums.dart';
 import 'package:excursiona/model/chat_contact.dart';
 import 'package:excursiona/model/contact.dart';
+import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
@@ -33,7 +35,7 @@ class UserService {
     });
   }
 
-  Future getUserData(String email) async {
+  Future getUserDataByEmail(String email) async {
     try {
       QuerySnapshot snapshot =
           await userCollection.where('email', isEqualTo: email).get();
@@ -63,6 +65,44 @@ class UserService {
     return user;
   }
 
+  Future insertExcursionInvitation(Invitation invitation, String userId) async {
+    try {
+      await userCollection
+          .doc(userId)
+          .collection('invitations')
+          .doc(invitation.excursionId)
+          .set(invitation.toMap());
+    } on FirebaseException {
+      rethrow;
+    }
+  }
+
+  Future deleteExcursionInvitation(String excursionId, String userId) async {
+    try {
+      await userCollection
+          .doc(userId)
+          .collection('invitations')
+          .doc(excursionId)
+          .delete();
+    } on FirebaseException {
+      rethrow;
+    }
+  }
+
+  Stream<List<Invitation>> getExcursionInvitations() {
+    String userId = authService.firebaseAuth.currentUser!.uid;
+    return userCollection
+        .doc(userId)
+        .collection('invitations')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Invitation.fromMap(doc.data()))
+          .toList();
+    });
+  }
+
+  /// ------------------- CHAT ------------------- ///
   void _saveMessageToContactsSubcollection(
       UserModel senderUserData,
       UserModel recieverUserData,
@@ -178,5 +218,19 @@ class UserService {
       }
       return messages;
     });
+  }
+
+  Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
+    //if a name is given filter by name
+    //if no name is given return all users
+    List<UserModel> users = [];
+    QuerySnapshot snapshot =
+        await userCollection.orderBy('name').limit(25).get();
+    for (var doc in snapshot.docs) {
+      if (doc['name'].toString().toLowerCase().contains(name.toLowerCase())) {
+        users.add(UserModel.fromMap(doc.data() as Map<String, dynamic>));
+      }
+    }
+    return users;
   }
 }
