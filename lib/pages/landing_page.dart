@@ -1,4 +1,3 @@
-import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/shared/constants.dart';
@@ -51,7 +50,7 @@ class _LandingPageState extends State<LandingPage> {
                 builder: (context, scrollController) {
                   return Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Constants.darkWhite,
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(25)),
                         boxShadow: [
@@ -59,8 +58,7 @@ class _LandingPageState extends State<LandingPage> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 5,
                             blurRadius: 7,
-                            offset: const Offset(
-                                0, 3), // changes position of shadow
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -104,7 +102,6 @@ class _LandingPageState extends State<LandingPage> {
                                   }
                                   return snapshot.data!.isNotEmpty
                                       ? ListView.builder(
-                                          // controller: scrollController,
                                           shrinkWrap: true,
                                           physics:
                                               const NeverScrollableScrollPhysics(),
