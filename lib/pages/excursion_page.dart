@@ -19,6 +19,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -33,8 +34,7 @@ class ExcursionPage extends StatefulWidget {
   State<ExcursionPage> createState() => _ExcursionPageState();
 }
 
-class _ExcursionPageState extends State<ExcursionPage>
-    with TickerProviderStateMixin {
+class _ExcursionPageState extends State<ExcursionPage> {
   static const CameraPosition initialCameraPosition =
       CameraPosition(target: LatLng(38.9842, -3.9275), zoom: 5);
 
@@ -53,6 +53,12 @@ class _ExcursionPageState extends State<ExcursionPage>
 
   BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
+  Position? _previousPosition;
+  double _currentSpeed = 0.0;
+  double _currentDistance = 0.0;
+  Duration? _timeElapsed;
+  final DateTime _startTime = DateTime.now();
+  Timer? _durationTimer;
   ExcursionController _excursionController = ExcursionController();
   var _finishedLocation = false;
   var _geoServiceEnabled;
@@ -66,14 +72,24 @@ class _ExcursionPageState extends State<ExcursionPage>
   void dispose() {
     super.dispose();
     if (positionStream != null) positionStream!.cancel();
+    if (_durationTimer != null) _durationTimer!.cancel();
   }
 
   @override
   void initState() {
     _setCustomMarkerIcon();
     _retrieveParticipantsData();
+    _initializeDurationTimer();
     loadData();
     super.initState();
+  }
+
+  _initializeDurationTimer() {
+    _durationTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      setState(() {
+        _timeElapsed = DateTime.now().difference(_startTime);
+      });
+    });
   }
 
   loadData() {
@@ -197,11 +213,28 @@ class _ExcursionPageState extends State<ExcursionPage>
             zoom: _zoom)));
       }
       setState(() {
+        _previousPosition = _currentPosition;
         _currentPosition = position;
       });
       _shareCurrentLocation(_currentPosition!);
+      _recalculateDistanceAndSpeed();
     });
     _captureWidgets();
+  }
+
+  _recalculateDistanceAndSpeed() {
+    if (_previousPosition != null) {
+      var distance = Geolocator.distanceBetween(
+          _previousPosition!.latitude,
+          _previousPosition!.longitude,
+          _currentPosition!.latitude,
+          _currentPosition!.longitude);
+      double speed = _currentPosition!.speed;
+      setState(() {
+        _currentDistance += distance / 1000;
+        _currentSpeed = speed;
+      });
+    }
   }
 
   _buildMap() {
@@ -287,6 +320,82 @@ class _ExcursionPageState extends State<ExcursionPage>
                 ),
               ],
             )),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            heroTag: 'addMarker',
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            child: const Icon(MdiIcons.flagVariantPlusOutline, size: 30),
+            onPressed: () {},
+          ),
+        ),
+        Positioned(
+          top: 28,
+          left: 16,
+          child: FloatingActionButton(
+            heroTag: 'menu',
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            child: const Icon(Icons.menu_rounded, size: 30),
+            onPressed: () {},
+          ),
+        ),
+        Positioned(
+          bottom: 30,
+          left: 16,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.min,
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(children: [
+                      Text(
+                        "Velocidad: ",
+                        style: GoogleFonts.inter(
+                            fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "${_currentSpeed.toStringAsFixed(2)} m/s",
+                        style: GoogleFonts.inter(fontSize: 12),
+                      )
+                    ])),
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 10),
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(children: [
+                      Text(
+                        "Distancia: ",
+                        style: GoogleFonts.inter(
+                            fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "${_currentDistance.toStringAsFixed(2)} km",
+                        style: GoogleFonts.inter(fontSize: 12),
+                      )
+                    ])),
+              ),
+            ],
+          ),
+        ),
         if (!_finishedLocation) const Geolocating(),
       ],
     );
