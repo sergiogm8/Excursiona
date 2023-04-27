@@ -238,8 +238,16 @@ class _ExcursionPageState extends State<ExcursionPage>
                       Icons.layers_rounded,
                     ),
                     onPressed: () {
-                      showDialog(
+                      showModalBottomSheet(
                         context: context,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        backgroundColor: Constants.darkWhite,
+                        constraints: BoxConstraints(
+                            maxHeight:
+                                MediaQuery.of(context).size.height * 0.20),
                         builder: (context) {
                           return _buildBottomSheet();
                         },
@@ -321,54 +329,41 @@ class _ExcursionPageState extends State<ExcursionPage>
   }
 
   _buildBottomSheet() {
-    return BottomSheet(
-        backgroundColor: Constants.darkWhite,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-        ),
-        onClosing: () {},
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.20),
-        animationController: AnimationController(
-            vsync: this, duration: const Duration(milliseconds: 500)),
-        builder: (context) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text(
-                  "Tipo de mapa",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    MapTypeButton(
-                        selectedMapType: _mapType,
-                        onTap: _changeMapType,
-                        mapType: MapType.satellite,
-                        icon: Icons.satellite_alt,
-                        label: "Satélite"),
-                    MapTypeButton(
-                        selectedMapType: _mapType,
-                        onTap: _changeMapType,
-                        mapType: MapType.normal,
-                        icon: Icons.map,
-                        label: "Normal"),
-                    MapTypeButton(
-                        selectedMapType: _mapType,
-                        onTap: _changeMapType,
-                        mapType: MapType.terrain,
-                        icon: Icons.terrain,
-                        label: "Terreno")
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          const Text(
+            "Tipo de mapa",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.satellite,
+                  icon: Icons.satellite_alt,
+                  label: "Satélite"),
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.normal,
+                  icon: Icons.map,
+                  label: "Normal"),
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.terrain,
+                  icon: Icons.terrain,
+                  label: "Terreno")
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
