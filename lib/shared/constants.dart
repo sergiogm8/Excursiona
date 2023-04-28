@@ -4,7 +4,7 @@ class Constants {
   static const Color indigoDye = Color(0xFF004C6D);
   static const Color lapisLazuli = Color(0xFF05668D);
   static const Color steelBlue = Color(0xFF4B89B6);
-  static const Color secondaryColor = Color(0xFFB44444);
+  static const Color redColor = Color(0xFFFF4848);
   static const Color aliceBlue = Color(0xFFEBF2FA);
   static const Color darkWhite = Color(0xFFFAFAFA);
 
