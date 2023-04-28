@@ -7,6 +7,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -51,12 +53,14 @@ class _ExcursionPageState extends State<ExcursionPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  bool _isPlaying = false;
+
   BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
   Position? _previousPosition;
   double _currentSpeed = 0.0;
   double _currentDistance = 0.0;
-  Duration? _timeElapsed;
+  Duration _timeElapsed = Duration.zero;
   final DateTime _startTime = DateTime.now();
   Timer? _durationTimer;
   ExcursionController _excursionController = ExcursionController();
@@ -67,6 +71,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
   var _mapType = MapType.satellite;
   Set<UserModel> _participants = {};
   Map<String, dynamic> _usersMarkers = {};
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void dispose() {
@@ -85,7 +91,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   _initializeDurationTimer() {
-    _durationTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+    _durationTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
       setState(() {
         _timeElapsed = DateTime.now().difference(_startTime);
       });
@@ -229,7 +235,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
           _previousPosition!.longitude,
           _currentPosition!.latitude,
           _currentPosition!.longitude);
-      double speed = _currentPosition!.speed;
+      double speed = _currentPosition!.speed; // m/s
+      speed = speed * 3.6; // km/h
       setState(() {
         _currentDistance += distance / 1000;
         _currentSpeed = speed;
@@ -323,23 +330,50 @@ class _ExcursionPageState extends State<ExcursionPage> {
         Positioned(
           bottom: 16,
           right: 16,
-          child: FloatingActionButton(
+          child: SpeedDial(
             heroTag: 'addMarker',
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
-            child: const Icon(MdiIcons.flagVariantPlusOutline, size: 30),
-            onPressed: () {},
+            icon: MdiIcons.flagVariantPlusOutline,
+            activeIcon: Icons.close,
+            useRotationAnimation: true,
+            children: [
+              SpeedDialChild(
+                child: const Icon(MdiIcons.flagVariant,
+                    color: Constants.indigoDye, size: 30),
+                label: 'Pin Personalizado',
+              ),
+              SpeedDialChild(
+                child: const Icon(Icons.info,
+                    color: Constants.indigoDye, size: 30),
+                label: 'Punto de interés',
+              ),
+              SpeedDialChild(
+                child: const Icon(Icons.warning_rounded,
+                    color: Constants.indigoDye, size: 30),
+                label: 'Zona peligrosa',
+              ),
+              SpeedDialChild(
+                child: const Icon(MdiIcons.bed,
+                    color: Constants.indigoDye, size: 30),
+                label: 'Zona de descanso',
+              )
+            ],
           ),
         ),
         Positioned(
-          top: 28,
+          top: 40,
           left: 16,
           child: FloatingActionButton(
             heroTag: 'menu',
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
-            child: const Icon(Icons.menu_rounded, size: 30),
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                _scaffoldKey.currentState!.openDrawer();
+              });
+            },
+            child: Icon(Icons.menu_rounded),
           ),
         ),
         Positioned(
@@ -366,7 +400,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                             fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        "${_currentSpeed.toStringAsFixed(2)} m/s",
+                        "${_currentSpeed.toStringAsFixed(2)} km/h",
                         style: GoogleFonts.inter(fontSize: 12),
                       )
                     ])),
@@ -475,9 +509,157 @@ class _ExcursionPageState extends State<ExcursionPage> {
     );
   }
 
+  _buildDrawer() {
+    return Drawer(
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              // padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        child: const Icon(Icons.arrow_back, size: 24),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              '${_timeElapsed.inHours.toString()}h ${(_timeElapsed.inMinutes % 60).toString()}min',
+                              style: GoogleFonts.inter(
+                                  fontSize: 36, fontWeight: FontWeight.w300)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text("Has recorrido: ",
+                              style: GoogleFonts.inter(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text("${_currentDistance.toStringAsFixed(2)} km",
+                              style: GoogleFonts.inter(fontSize: 14)),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text("Velocidad: ",
+                              style: GoogleFonts.inter(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text("${_currentSpeed.toStringAsFixed(2)} km/h",
+                              style: GoogleFonts.inter(fontSize: 14)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                DrawerItem(
+                    title: 'Añadir participante',
+                    icon: Icons.person_add_outlined,
+                    onTap: () {}),
+                DrawerItem(
+                    title: 'Compartir imagen',
+                    icon: Icons.add_photo_alternate_outlined,
+                    onTap: () {
+                      nextScreen(context, ShareImagePage(),
+                          PageTransitionType.rightToLeft);
+                    }),
+                DrawerItem(
+                    title: 'Galería de imágenes',
+                    icon: Icons.photo_library_outlined,
+                    onTap: () {}),
+                DrawerItem(
+                    title: 'Sala de chat',
+                    icon: Icons.forum_outlined,
+                    onTap: () {}),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 40),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Constants.redColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const Icon(Icons.exit_to_app_rounded, size: 26),
+                  const SizedBox(width: 10),
+                  Text("Salir de la excursión",
+                      style: GoogleFonts.inter(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
+                ],
+              ),
+              onPressed: () {},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _initializedMarkers ? _buildMap() : _buildLoading());
+    return Scaffold(
+        key: _scaffoldKey,
+        drawer: _buildDrawer(),
+        body: _initializedMarkers ? _buildMap() : _buildLoading());
+  }
+}
+
+class DrawerItem extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Function onTap;
+  const DrawerItem(
+      {super.key,
+      required this.title,
+      required this.icon,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          leading: Icon(
+            icon,
+            color: Colors.black,
+          ),
+          minLeadingWidth: 0,
+          title: Text(title,
+              style:
+                  GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400)),
+          onTap: () => onTap(),
+        ),
+        Divider(
+          color: Colors.grey,
+          thickness: 0.5,
+          endIndent: MediaQuery.of(context).size.width * 0.05,
+          indent: MediaQuery.of(context).size.width * 0.05,
+          height: 3,
+        ),
+      ],
+    );
   }
 }
 
@@ -613,7 +795,6 @@ class UserMarker extends StatelessWidget {
                     data: new MediaQueryData(),
                     child: CircleAvatar(
                         radius: 25,
-                        // backgroundColor: Colors.white,
                         backgroundImage:
                             CachedNetworkImageProvider(user.profilePic)),
                   ),
