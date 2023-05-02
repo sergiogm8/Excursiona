@@ -7,6 +7,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
@@ -604,12 +605,38 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 children: [
                   const Icon(Icons.exit_to_app_rounded, size: 26),
                   const SizedBox(width: 10),
-                  Text("Salir de la excursión",
+                  Text("Abandonar excursión",
                       style: GoogleFonts.inter(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                 ],
               ),
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          title: const Text("Abandonar la excursión"),
+                          content: const Text(
+                              "¿Seguro que quieres abandonar la excursión?"),
+                          actions: [
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.cancel)),
+                            IconButton(
+                              onPressed: () {
+                                //TODO: This will redirect to the excursion statistics page
+                                nextScreenReplace(context, const HomePage(),
+                                    PageTransitionType.fade);
+                              },
+                              icon: const Icon(Icons.check),
+                            ),
+                          ]);
+                    });
+              },
             ),
           ),
         ],
