@@ -1,4 +1,6 @@
+import 'package:excursiona/shared/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 
 Future nextScreen(context, page, PageTransitionType animation) {
@@ -30,3 +32,13 @@ void showSnackBar(BuildContext context, Color color, String message,
     ),
   );
 }
+
+final blueTextInputDecoration = InputDecoration(
+  hintStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400),
+  enabledBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: Constants.indigoDye),
+      borderRadius: BorderRadius.circular(15)),
+  focusedBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: Constants.steelBlue, width: 2),
+      borderRadius: BorderRadius.circular(15)),
+);
