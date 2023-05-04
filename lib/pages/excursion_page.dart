@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/constants/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
+import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/home_page.dart';
@@ -22,6 +24,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
@@ -343,21 +346,27 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 child: const Icon(MdiIcons.flagVariant,
                     color: Constants.indigoDye, size: 30),
                 label: 'Pin Personalizado',
+                onTap: () =>
+                    _showAddMarkerDialog(markerType: MarkerType.custom),
               ),
               SpeedDialChild(
                 child: const Icon(Icons.info,
                     color: Constants.indigoDye, size: 30),
                 label: 'Punto de interés',
+                onTap: () => _showAddMarkerDialog(markerType: MarkerType.info),
               ),
               SpeedDialChild(
                 child: const Icon(Icons.warning_rounded,
                     color: Constants.indigoDye, size: 30),
                 label: 'Zona peligrosa',
+                onTap: () =>
+                    _showAddMarkerDialog(markerType: MarkerType.warning),
               ),
               SpeedDialChild(
                 child: const Icon(MdiIcons.bed,
                     color: Constants.indigoDye, size: 30),
                 label: 'Zona de descanso',
+                onTap: () => _showAddMarkerDialog(markerType: MarkerType.rest),
               )
             ],
           ),
@@ -644,12 +653,404 @@ class _ExcursionPageState extends State<ExcursionPage> {
     );
   }
 
+  _showAddMarkerDialog({required MarkerType markerType}) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AddMarkerDialog(
+            markerType: markerType,
+            currentPosition: _currentPosition!,
+            excursionId: widget.excursionId,
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
+        resizeToAvoidBottomInset: false,
         drawer: _buildDrawer(),
         body: _initializedMarkers ? _buildMap() : _buildLoading());
+  }
+}
+
+class AddMarkerDialog extends StatefulWidget {
+  final MarkerType markerType;
+  final Position currentPosition;
+  final String excursionId;
+  const AddMarkerDialog(
+      {super.key,
+      required this.markerType,
+      required this.currentPosition,
+      required this.excursionId});
+
+  @override
+  State<AddMarkerDialog> createState() => _AddMarkerDialogState();
+}
+
+class _AddMarkerDialogState extends State<AddMarkerDialog> {
+  IconData? _icon;
+  String? _title;
+  String _markerTitle = "";
+  File? _image;
+  Color color = Constants.indigoDye;
+  TextEditingController titleController = TextEditingController();
+  bool _useDefaultCoords = true;
+  bool _canEditCoords = false;
+  bool _uploadingMarker = false;
+  final _formKey = GlobalKey<FormState>();
+  final _latKey = GlobalKey<FormFieldState>();
+  final _lngKey = GlobalKey<FormFieldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    switch (widget.markerType) {
+      case MarkerType.info:
+        _icon = Icons.info_rounded;
+        _title = "punto de interés";
+        break;
+
+      case MarkerType.warning:
+        _icon = Icons.warning_rounded;
+        _title = "zona de peligro";
+        break;
+
+      case MarkerType.rest:
+        _icon = MdiIcons.bed;
+        _title = "zona de descanso";
+        break;
+
+      case MarkerType.custom:
+        _icon = MdiIcons.flagVariant;
+        _title = "pin personalizado";
+        break;
+    }
+  }
+
+  _addMarker() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _uploadingMarker = true;
+    });
+    var uploaded;
+    if (_image != null) {
+      uploaded = ExcursionController().uploadMarker(
+          excursionId: widget.excursionId,
+          title: _markerTitle,
+          markerType: widget.markerType,
+          position: widget.currentPosition,
+          image: _image!);
+    } else {
+      uploaded = ExcursionController().uploadMarker(
+          excursionId: widget.excursionId,
+          title: _markerTitle,
+          markerType: widget.markerType,
+          position: widget.currentPosition);
+    }
+
+    await Future.delayed(Duration(seconds: 3));
+    Navigator.pop(context);
+  }
+
+  _pickImage() {
+    ImagePicker imagePicker = ImagePicker();
+    imagePicker
+        .pickImage(source: ImageSource.camera, imageQuality: 70)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          _image = File(value.path);
+        });
+        print(value.path);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Constants.darkWhite,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          width: MediaQuery.of(context).size.width * 0.9,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: Constants.darkWhite,
+          ),
+          padding:
+              const EdgeInsets.only(left: 20, right: 20, top: 25, bottom: 10),
+          child: _uploadingMarker
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Loader(),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Compartiendo ${_title}... ",
+                      style: GoogleFonts.inter(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                )
+              : Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(children: [
+                          Icon(
+                            _icon,
+                            color: color,
+                            size: 35,
+                          ),
+                          const SizedBox(width: 10),
+                          Text("Compartir $_title",
+                              style: GoogleFonts.inter(fontSize: 20)),
+                        ]),
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: titleController,
+                        maxLength: 50,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value!.isNotEmpty) {
+                            return null;
+                          } else {
+                            return "Por favor ingrese un título";
+                          }
+                        },
+                        onChanged: (value) => setState(() {
+                          _markerTitle = value;
+                        }),
+                        decoration: blueTextInputDecoration.copyWith(
+                          hintText: "Título*",
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          focusedErrorBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.red, width: 2),
+                              borderRadius: BorderRadius.circular(15)),
+                          errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.red),
+                              borderRadius: BorderRadius.circular(15)),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(mainAxisSize: MainAxisSize.max, children: [
+                        Flexible(
+                          child: TextFormField(
+                              key: _latKey,
+                              keyboardType: TextInputType.number,
+                              initialValue:
+                                  widget.currentPosition.latitude.toString(),
+                              enabled: _canEditCoords,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              validator: (value) {
+                                if (value!.isNotEmpty) {
+                                  return null;
+                                } else {
+                                  return "Campo obligatorio";
+                                }
+                              },
+                              decoration: blueTextInputDecoration.copyWith(
+                                  labelText: "Latitud*",
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 10),
+                                  disabledBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                          color: Constants.indigoDye),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  focusedErrorBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                          color: Colors.red, width: 2),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  errorBorder: OutlineInputBorder(
+                                      borderSide:
+                                          const BorderSide(color: Colors.red),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  filled: !_canEditCoords,
+                                  fillColor: _canEditCoords
+                                      ? Constants.darkWhite
+                                      : Colors.grey[200]),
+                              style: _canEditCoords
+                                  ? TextStyle(color: Colors.black)
+                                  : TextStyle(color: Constants.darkGrey)),
+                        ),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: TextFormField(
+                            key: _lngKey,
+                            keyboardType: TextInputType.number,
+                            initialValue:
+                                widget.currentPosition.longitude.toString(),
+                            enabled: _canEditCoords,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value!.isNotEmpty) {
+                                return null;
+                              } else {
+                                return "Campo obligatorio";
+                              }
+                            },
+                            decoration: blueTextInputDecoration.copyWith(
+                                labelText: "Longitud*",
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 10),
+                                focusedErrorBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.red, width: 2),
+                                    borderRadius: BorderRadius.circular(15)),
+                                errorBorder: OutlineInputBorder(
+                                    borderSide:
+                                        const BorderSide(color: Colors.red),
+                                    borderRadius: BorderRadius.circular(15)),
+                                disabledBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Constants.indigoDye),
+                                    borderRadius: BorderRadius.circular(15)),
+                                filled: !_canEditCoords,
+                                fillColor: _canEditCoords
+                                    ? Constants.darkWhite
+                                    : Colors.grey[200]),
+                            style: _canEditCoords
+                                ? TextStyle(color: Colors.black)
+                                : TextStyle(color: Constants.darkGrey),
+                          ),
+                        ),
+                      ]),
+                      const SizedBox(height: 15),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 10,
+                              width: 20,
+                              child: Checkbox(
+                                value: _useDefaultCoords,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _useDefaultCoords = value!;
+                                    _canEditCoords = !value;
+                                  });
+                                  if (value == true) {
+                                    _latKey.currentState!.reset();
+                                    _lngKey.currentState!.reset();
+                                  }
+                                },
+                                side: const BorderSide(
+                                    color: Constants.indigoDye, width: 2),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(2)),
+                                fillColor: MaterialStateProperty.all(
+                                    Constants.indigoDye),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text("Usar coordenadas automáticas",
+                                style: GoogleFonts.inter(
+                                    fontSize: 14, fontWeight: FontWeight.w400))
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: GestureDetector(
+                            onTap: () => _pickImage(),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  border:
+                                      Border.all(color: Constants.indigoDye)),
+                              child: _image == null
+                                  ? Center(
+                                      child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Icon(
+                                          Icons.add_a_photo_rounded,
+                                          color: Constants.lapisLazuli,
+                                          size: 50,
+                                        ),
+                                        Text(
+                                          "Pulsa aquí para añadir una imagen a tu marcador",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.grey[600]),
+                                        ),
+                                      ],
+                                    ))
+                                  : Image.file(
+                                      _image!,
+                                      // fit: BoxFit.fitHeight_title,
+                                      alignment: Alignment.center,
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              fixedSize: const Size(105, 30),
+                              // side: const BorderSide(color: Colors.black, width: 1),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                            ),
+                            child: Text('Cancelar',
+                                style: GoogleFonts.inter(
+                                    fontSize: 16, fontWeight: FontWeight.w500)),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _addMarker(),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              fixedSize: const Size(105, 30),
+                              backgroundColor: Constants.indigoDye,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text('Aceptar',
+                                style: GoogleFonts.inter(
+                                    fontSize: 16, fontWeight: FontWeight.w500)),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }
 
