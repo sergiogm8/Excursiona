@@ -80,11 +80,17 @@ class ExcursionController {
   }
 
   shareCurrentLocation(Position coords, String excursionId) async {
-    await _excursionService.shareCurrentLocation(coords, excursionId);
+    var userId = await HelperFunctions.getUserUID();
+    var marker = MarkerModel(
+        id: userId!,
+        position: LatLng(coords.latitude, coords.longitude),
+        markerType: MarkerType.participant,
+        userId: userId);
+    await _excursionService.shareCurrentLocation(marker, excursionId);
   }
 
-  Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
-    return _excursionService.getOthersLocation(excursionId);
+  Stream<List<MarkerModel>> getMarkers(String excursionId) {
+    return _excursionService.getMarkers(excursionId);
   }
 
   uploadMarker(

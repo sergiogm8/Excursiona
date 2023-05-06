@@ -132,31 +132,29 @@ class ExcursionService {
     }
   }
 
-  shareCurrentLocation(Position coords, String excursionId) async {
+  shareCurrentLocation(MarkerModel marker, String excursionId) async {
     try {
       await excursionCollection
           .doc(excursionId)
-          .collection('participants')
-          .doc(currentUserId)
-          .update({
-        'currentLocation': GeoPoint(coords.latitude, coords.longitude),
-      });
+          .collection('markers')
+          .doc(marker.id)
+          .set(marker.toMap());
     } on FirebaseFirestore catch (e) {
       print(e);
     }
   }
 
-  Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
+  Stream<List<MarkerModel>> getMarkers(String excursionId) {
     return excursionCollection
         .doc(excursionId)
-        .collection('participants')
+        .collection('markers')
         .snapshots()
         .map((snapshot) {
-      List<ExcursionParticipant> participantsInfo = [];
+      List<MarkerModel> markers = [];
       for (var doc in snapshot.docs) {
-        participantsInfo.add(ExcursionParticipant.fromMap(doc.data()));
+        markers.add(MarkerModel.fromMap(doc.data()));
       }
-      return participantsInfo;
+      return markers;
     });
   }
 

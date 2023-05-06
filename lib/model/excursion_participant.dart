@@ -5,14 +5,12 @@ class ExcursionParticipant {
   final String uid;
   final String name;
   final String profilePic;
-  final LatLng currentLocation;
   final bool isInExcursion;
 
   ExcursionParticipant({
     required this.uid,
     required this.name,
     required this.profilePic,
-    required this.currentLocation,
     required this.isInExcursion,
   });
 
@@ -21,8 +19,6 @@ class ExcursionParticipant {
       'uid': uid,
       'name': name,
       'profilePic': profilePic,
-      'currentLocation':
-          GeoPoint(currentLocation.latitude, currentLocation.longitude),
       'isInExcursion': isInExcursion,
     };
   }
@@ -32,8 +28,6 @@ class ExcursionParticipant {
       uid: map['uid'] as String,
       name: map['name'] as String,
       profilePic: map['profilePic'] as String,
-      currentLocation: LatLng(
-          map['currentLocation'].latitude, map['currentLocation'].longitude),
       isInExcursion: map['isInExcursion'] as bool,
     );
   }

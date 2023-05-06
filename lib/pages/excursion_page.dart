@@ -8,6 +8,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
@@ -28,6 +29,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:uuid/uuid.dart';
 
 class ExcursionPage extends StatefulWidget {
   const ExcursionPage(
@@ -57,26 +59,24 @@ class _ExcursionPageState extends State<ExcursionPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  bool _isPlaying = false;
-
+  double _currentDistance = 0.0;
   BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
-  Position? _previousPosition;
   double _currentSpeed = 0.0;
-  double _currentDistance = 0.0;
-  Duration _timeElapsed = Duration.zero;
-  final DateTime _startTime = DateTime.now();
   Timer? _durationTimer;
   ExcursionController _excursionController = ExcursionController();
   var _finishedLocation = false;
   var _geoServiceEnabled;
   bool _initializedMarkers = false;
   var _isDragging = false;
+  bool _isPlaying = false;
   var _mapType = MapType.satellite;
   Set<UserModel> _participants = {};
-  Map<String, dynamic> _usersMarkers = {};
-
+  Position? _previousPosition;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final DateTime _startTime = DateTime.now();
+  Duration _timeElapsed = Duration.zero;
+  Map<String, dynamic> _usersMarkers = {};
 
   @override
   void dispose() {
@@ -92,14 +92,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _initializeDurationTimer();
     loadData();
     super.initState();
-  }
-
-  _initializeDurationTimer() {
-    _durationTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      setState(() {
-        _timeElapsed = DateTime.now().difference(_startTime);
-      });
-    });
   }
 
   loadData() {
@@ -136,40 +128,61 @@ class _ExcursionPageState extends State<ExcursionPage> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+        return Future.error('Permisos de ubicación denegados');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+          'Permisos de ubicación denegados permanentemente, no se pueden solicitar los permisos.');
     }
 
     return await Geolocator.getCurrentPosition();
   }
 
-  Stream<List<ExcursionParticipant>> getOthersLocation() {
-    return _excursionController.getOthersLocation(widget.excursionId);
+  Stream<List<MarkerModel>> getMarkers() {
+    return _excursionController.getMarkers(widget.excursionId);
   }
 
   Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
     Set<Marker> markers = {};
     if (snapshot.hasData) {
-      List<ExcursionParticipant> participants = snapshot.data;
-      participants.forEach((element) {
-        final markerId = MarkerId(element.uid);
-        Marker marker = Marker(
-            markerId: markerId,
-            position: LatLng(element.currentLocation.latitude,
-                element.currentLocation.longitude),
-            icon: AuthController().isCurrentUser(uid: element.uid)
-                ? _currentLocationIcon
-                : BitmapDescriptor.fromBytes(_usersMarkers[element.uid]),
-            zIndex: AuthController().isCurrentUser(uid: element.uid) ? 2 : 1);
-        markers.add(marker);
+      List<MarkerModel> markersData = snapshot.data;
+      markersData.forEach((MarkerModel markerModel) {
+        final markerId = MarkerId(markerModel.id);
+        if (markerModel.markerType == MarkerType.participant) {
+          Marker marker = Marker(
+              markerId: markerId,
+              position: LatLng(markerModel.position.latitude,
+                  markerModel.position.longitude),
+              icon: AuthController().isCurrentUser(uid: markerModel.id)
+                  ? _currentLocationIcon
+                  : BitmapDescriptor.fromBytes(_usersMarkers[markerModel.id]),
+              zIndex:
+                  AuthController().isCurrentUser(uid: markerModel.id) ? 2 : 1);
+          markers.add(marker);
+        } else {
+          Marker marker = Marker(
+              markerId: markerId,
+              position: LatLng(markerModel.position.latitude,
+                  markerModel.position.longitude),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  //TODO: Custom Marker icon depending on type
+                  BitmapDescriptor.hueGreen),
+              infoWindow: InfoWindow()); //TODO: Custom InfoWindow
+          markers.add(marker);
+        }
       });
     }
     return markers;
+  }
+
+  _initializeDurationTimer() {
+    _durationTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      setState(() {
+        _timeElapsed = DateTime.now().difference(_startTime);
+      });
+    });
   }
 
   _setCustomMarkerIcon() {
@@ -211,6 +224,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
             'La ubicación no está activada');
       } else {
         _geoServiceEnabled = true;
+        getCurrentPosition();
       }
     });
 
@@ -252,7 +266,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     return Stack(
       children: [
         StreamBuilder(
-            stream: getOthersLocation(),
+            stream: getMarkers(),
             builder: (context, snapshot) {
               return GoogleMap(
                 initialCameraPosition: initialCameraPosition,
@@ -676,32 +690,35 @@ class _ExcursionPageState extends State<ExcursionPage> {
 }
 
 class AddMarkerDialog extends StatefulWidget {
-  final MarkerType markerType;
-  final Position currentPosition;
-  final String excursionId;
   const AddMarkerDialog(
       {super.key,
       required this.markerType,
       required this.currentPosition,
       required this.excursionId});
 
+  final Position currentPosition;
+  final String excursionId;
+  final MarkerType markerType;
+
   @override
   State<AddMarkerDialog> createState() => _AddMarkerDialogState();
 }
 
 class _AddMarkerDialogState extends State<AddMarkerDialog> {
-  IconData? _icon;
-  String? _title;
-  String _markerTitle = "";
-  File? _image;
   Color color = Constants.indigoDye;
   TextEditingController titleController = TextEditingController();
-  bool _useDefaultCoords = true;
+
   bool _canEditCoords = false;
-  bool _uploadingMarker = false;
   final _formKey = GlobalKey<FormState>();
+  IconData? _icon;
+  File? _image;
   final _latKey = GlobalKey<FormFieldState>();
   final _lngKey = GlobalKey<FormFieldState>();
+  String _markerTitle = "";
+  String? _title;
+  bool _uploadedSuccessfully = true;
+  bool _uploadingMarker = false;
+  bool _useDefaultCoords = true;
 
   @override
   void initState() {
@@ -738,22 +755,30 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
     });
     var uploaded;
     if (_image != null) {
-      uploaded = ExcursionController().uploadMarker(
+      uploaded = await ExcursionController().uploadMarker(
           excursionId: widget.excursionId,
           title: _markerTitle,
           markerType: widget.markerType,
           position: widget.currentPosition,
           image: _image!);
     } else {
-      uploaded = ExcursionController().uploadMarker(
+      uploaded = await ExcursionController().uploadMarker(
           excursionId: widget.excursionId,
           title: _markerTitle,
           markerType: widget.markerType,
           position: widget.currentPosition);
     }
-
-    await Future.delayed(Duration(seconds: 3));
-    Navigator.pop(context);
+    setState(() {
+      _uploadingMarker = false;
+    });
+    if (uploaded) {
+      Navigator.pop(context);
+      showSnackBar(context, Colors.green, "Marcador compartido correctamente.");
+    } else {
+      setState(() {
+        _uploadedSuccessfully = false;
+      });
+    }
   }
 
   _pickImage() {
@@ -1044,7 +1069,13 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
                                     fontSize: 16, fontWeight: FontWeight.w500)),
                           ),
                         ],
-                      )
+                      ),
+                      const SizedBox(height: 5),
+                      if (!_uploadedSuccessfully)
+                        const Text(
+                          "Hubo un error al compartir el marcador. Inténtalo de nuevo.",
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        )
                     ],
                   ),
                 ),
@@ -1055,14 +1086,15 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
 }
 
 class DrawerItem extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Function onTap;
   const DrawerItem(
       {super.key,
       required this.title,
       required this.icon,
       required this.onTap});
+
+  final IconData icon;
+  final Function onTap;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
