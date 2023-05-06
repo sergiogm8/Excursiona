@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/invitation.dart';
+import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/notification_service.dart';
 import 'package:excursiona/services/user_service.dart';
@@ -20,9 +22,6 @@ class ExcursionService {
     try {
       await excursionCollection.doc(excursion.id).set(excursion.toMap());
       await joinExcursion(excursion.id, userInfo);
-      // await excursionCollection.doc(excursion.id).collection('participants').doc(currentUserId).set({
-      //   'isInExcursion': true,
-      // });
       return true;
     } on FirebaseException {
       return false;
@@ -134,7 +133,6 @@ class ExcursionService {
   }
 
   shareCurrentLocation(Position coords, String excursionId) async {
-    print("Sharing location: ${coords.latitude}, ${coords.longitude}");
     try {
       await excursionCollection
           .doc(excursionId)
@@ -160,5 +158,16 @@ class ExcursionService {
       }
       return participantsInfo;
     });
+  }
+
+  addMarkerToExcursion({
+    required MarkerModel marker,
+    required String excursionId,
+  }) {
+    excursionCollection
+        .doc(excursionId)
+        .collection('markers')
+        .doc(marker.id)
+        .set(marker.toMap());
   }
 }

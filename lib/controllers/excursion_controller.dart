@@ -1,9 +1,19 @@
+import 'dart:io';
+
 import 'package:excursiona/controllers/user_controller.dart';
+import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
+import 'package:excursiona/services/storage_service.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class ExcursionController {
   final ExcursionService _excursionService = ExcursionService();
@@ -75,5 +85,38 @@ class ExcursionController {
 
   Stream<List<ExcursionParticipant>> getOthersLocation(String excursionId) {
     return _excursionService.getOthersLocation(excursionId);
+  }
+
+  uploadMarker(
+      {required String excursionId,
+      required String title,
+      required MarkerType markerType,
+      required Position position,
+      File? image}) async {
+    String imageDownloadURL = "";
+    if (image != null) {
+      // Upload the image
+      // If the image was succesfully uploaded, create the marker
+      imageDownloadURL = await StorageService().uploadMarkerImage(
+          image: image, excursionId: excursionId, title: title);
+      if (imageDownloadURL.isEmpty) {
+        return false;
+      }
+    }
+    var userId = await HelperFunctions.getUserUID();
+    var userName = await HelperFunctions.getUserName();
+    var userPic = await HelperFunctions.getUserProfilePic();
+
+    var marker = MarkerModel(
+        id: Uuid().v1(),
+        userId: userId!,
+        ownerName: userName!,
+        ownerPic: userPic!,
+        title: title,
+        position: LatLng(position.latitude, position.longitude),
+        markerType: markerType,
+        imageUrl: imageDownloadURL);
+    return await _excursionService.addMarkerToExcursion(
+        marker: marker, excursionId: excursionId);
   }
 }
