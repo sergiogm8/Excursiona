@@ -163,11 +163,16 @@ class ExcursionService {
   addMarkerToExcursion({
     required MarkerModel marker,
     required String excursionId,
-  }) {
-    excursionCollection
-        .doc(excursionId)
-        .collection('markers')
-        .doc(marker.id)
-        .set(marker.toMap());
+  }) async {
+    try {
+      await excursionCollection
+          .doc(excursionId)
+          .collection('markers')
+          .doc(marker.id)
+          .set(marker.toMap());
+      return true;
+    } on FirebaseException {
+      return false;
+    }
   }
 }
