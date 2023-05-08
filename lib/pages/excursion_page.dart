@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:excursiona/constants/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
-import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/home_page.dart';
@@ -16,20 +15,16 @@ import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:icon_decoration/icon_decoration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:uuid/uuid.dart';
 
 class ExcursionPage extends StatefulWidget {
   const ExcursionPage(
@@ -59,8 +54,15 @@ class _ExcursionPageState extends State<ExcursionPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  CustomInfoWindowController _customInfoWindowController =
+      CustomInfoWindowController();
+
   double _currentDistance = 0.0;
   BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _warningMarkerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _restMarkerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _customMarkerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _interestMarkerIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
   double _currentSpeed = 0.0;
   Timer? _durationTimer;
@@ -83,6 +85,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     super.dispose();
     if (positionStream != null) positionStream!.cancel();
     if (_durationTimer != null) _durationTimer!.cancel();
+    _customInfoWindowController.dispose();
   }
 
   @override
@@ -162,19 +165,123 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   AuthController().isCurrentUser(uid: markerModel.id) ? 2 : 1);
           markers.add(marker);
         } else {
+          var icon = _getIconByMarkerType(markerModel.markerType);
           Marker marker = Marker(
-              markerId: markerId,
-              position: LatLng(markerModel.position.latitude,
-                  markerModel.position.longitude),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  //TODO: Custom Marker icon depending on type
-                  BitmapDescriptor.hueGreen),
-              infoWindow: InfoWindow()); //TODO: Custom InfoWindow
+            markerId: markerId,
+            position: LatLng(
+                markerModel.position.latitude, markerModel.position.longitude),
+            icon: icon,
+            onTap: () => showModalBottomSheet(
+                barrierColor: Colors.transparent,
+                constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height * 0.3,
+                    minWidth: MediaQuery.of(context).size.width),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                ),
+                context: context,
+                builder: (context) {
+                  return Text("Ventana marcador");
+                }),
+            // onTap: _customInfoWindowController.addInfoWindow!(
+            //   Stack(
+            //     alignment: Alignment.center,
+            //     children: [
+            //       Container(
+            //         decoration: BoxDecoration(
+            //             borderRadius: BorderRadius.circular(15),
+            //             color: Constants.darkWhite),
+            //         height: 200,
+            //         width: 300,
+            //         margin: const EdgeInsets.only(bottom: 25),
+            //         padding: const EdgeInsets.all(8),
+            //         child: Column(
+            //           children: [
+            //             Expanded(
+            //               child: Padding(
+            //                 padding: const EdgeInsets.all(5.0),
+            //                 child: Container(
+            //                   decoration: BoxDecoration(
+            //                     borderRadius: BorderRadius.circular(15),
+            //                   ),
+            //                   child: markerModel.imageUrl!.isNotEmpty
+            //                       ? GestureDetector(
+            //                           onTap: () {}, //OPEN FULL SCREEN IMAGE
+            //                           child: Stack(
+            //                             children: [
+            //                               CachedNetworkImage(
+            //                                 imageUrl: markerModel.imageUrl!,
+            //                                 fit: BoxFit.fill,
+            //                               ),
+            //                               Positioned(
+            //                                   bottom: 4,
+            //                                   right: 4,
+            //                                   child: Icon(
+            //                                       MdiIcons.arrowExpandAll,
+            //                                       color: Constants.darkWhite))
+            //                             ],
+            //                           ),
+            //                         )
+            //                       : Container(
+            //                           color: Colors.grey[300],
+            //                           child: Column(
+            //                             mainAxisAlignment:
+            //                                 MainAxisAlignment.center,
+            //                             children: [
+            //                               Icon(
+            //                                 Icons.image_not_supported_outlined,
+            //                                 color: Colors.grey,
+            //                                 size: 50,
+            //                               ),
+            //                               Text(
+            //                                 'No hay imagen',
+            //                                 style: TextStyle(
+            //                                     color: Constants.darkWhite),
+            //                               )
+            //                             ],
+            //                           )),
+            //                 ),
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //       const Align(
+            //           alignment: Alignment.bottomCenter,
+            //           child: Icon(
+            //             Icons.arrow_drop_down_rounded,
+            //             color: Constants.darkWhite,
+            //             size: 46,
+            //           )),
+            //     ],
+            //   ),
+            //   LatLng(markerModel.position.latitude,
+            //       markerModel.position.longitude),
+            // ),
+          );
+
           markers.add(marker);
         }
       });
     }
     return markers;
+  }
+
+  _getIconByMarkerType(MarkerType markerType) {
+    switch (markerType) {
+      case MarkerType.info:
+        return _interestMarkerIcon;
+      case MarkerType.rest:
+        return _restMarkerIcon;
+      case MarkerType.warning:
+        return _warningMarkerIcon;
+      case MarkerType.custom:
+        return _customMarkerIcon;
+      default:
+        return _interestMarkerIcon;
+    }
   }
 
   _initializeDurationTimer() {
@@ -217,6 +324,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
+    _customInfoWindowController.googleMapController = controller;
     Geolocator.getServiceStatusStream().listen((status) {
       if (status == ServiceStatus.disabled) {
         _geoServiceEnabled = false;
@@ -224,7 +332,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
             'La ubicación no está activada');
       } else {
         _geoServiceEnabled = true;
-        getCurrentPosition();
+        loadData();
       }
     });
 
@@ -275,12 +383,22 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     _onMapCreated(controller),
                 onTap: (LatLng? latLng) {
                   _isDragging = true;
+                  _customInfoWindowController.hideInfoWindow!();
+                },
+                onCameraMove: (position) {
+                  _customInfoWindowController.onCameraMove!();
                 },
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
                 mapType: _mapType,
               );
             }),
+        CustomInfoWindow(
+          controller: _customInfoWindowController,
+          height: 200,
+          width: 300,
+          offset: 50,
+        ),
         Align(
             alignment: Alignment.centerRight,
             child: Column(
@@ -414,18 +532,18 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   borderRadius: BorderRadius.circular(5),
                   color: Colors.white,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Row(children: [
                       Text(
                         "Velocidad: ",
                         style: GoogleFonts.inter(
-                            fontSize: 12, fontWeight: FontWeight.w600),
+                            fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "${_currentSpeed.toStringAsFixed(2)} km/h",
-                        style: GoogleFonts.inter(fontSize: 12),
+                        style: GoogleFonts.inter(fontSize: 13),
                       )
                     ])),
               ),
@@ -436,18 +554,18 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   borderRadius: BorderRadius.circular(5),
                   color: Colors.white,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Row(children: [
                       Text(
                         "Distancia: ",
                         style: GoogleFonts.inter(
-                            fontSize: 12, fontWeight: FontWeight.w600),
+                            fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "${_currentDistance.toStringAsFixed(2)} km",
-                        style: GoogleFonts.inter(fontSize: 12),
+                        style: GoogleFonts.inter(fontSize: 13),
                       )
                     ])),
               ),
@@ -486,6 +604,31 @@ class _ExcursionPageState extends State<ExcursionPage> {
         });
       }
     }
+
+    screenshotController
+        .captureFromWidget(const IconMarker(
+            icon: Icons.warning_rounded, color: Constants.warningMarkerColor))
+        .then((image) => setState(() {
+              _warningMarkerIcon = BitmapDescriptor.fromBytes(image);
+            })); // Warning marker
+    screenshotController
+        .captureFromWidget(const IconMarker(
+            icon: MdiIcons.bed, color: Constants.restMarkerColor))
+        .then((image) => setState(() {
+              _restMarkerIcon = BitmapDescriptor.fromBytes(image);
+            })); // Rest marker
+    screenshotController
+        .captureFromWidget(const IconMarker(
+            icon: Icons.info_rounded, color: Constants.interestMarkerColor))
+        .then((image) => setState(() {
+              _interestMarkerIcon = BitmapDescriptor.fromBytes(image);
+            })); // Interest marker
+    screenshotController
+        .captureFromWidget(const IconMarker(
+            icon: MdiIcons.flagVariant, color: Constants.customMarkerColor))
+        .then((image) => setState(() {
+              _customMarkerIcon = BitmapDescriptor.fromBytes(image);
+            })); // Custom marker
   }
 
   void _changeMapType(MapType mapType) {
@@ -689,6 +832,36 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 }
 
+class IconMarker extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  const IconMarker({super.key, required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 75,
+      width: 75,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: DecoratedIcon(
+                icon: Icon(icon, color: color, size: 46),
+                decoration: IconDecoration(border: IconBorder(width: 2))),
+          ),
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: DecoratedIcon(
+                  icon: Icon(Icons.arrow_drop_down, color: color, size: 38),
+                  decoration: IconDecoration(border: IconBorder(width: 2)))),
+        ],
+      ),
+    );
+  }
+}
+
 class AddMarkerDialog extends StatefulWidget {
   const AddMarkerDialog(
       {super.key,
@@ -742,6 +915,8 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
       case MarkerType.custom:
         _icon = MdiIcons.flagVariant;
         _title = "pin personalizado";
+        break;
+      default:
         break;
     }
   }
