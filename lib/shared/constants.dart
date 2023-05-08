@@ -8,6 +8,11 @@ class Constants {
   static const Color aliceBlue = Color(0xFFEBF2FA);
   static const Color darkWhite = Color(0xFFFAFAFA);
 
+  static const Color warningMarkerColor = Color(0xFFFFEA7E);
+  static const Color interestMarkerColor = Color(0xFFDBF0FF);
+  static const Color restMarkerColor = Color(0xFFE8FFA5);
+  static const Color customMarkerColor = Color(0xFFE2CCFF);
+
   static const Color lightChatColor = Color.fromARGB(255, 255, 210, 210);
   static const Color darkGrey = Color(0xFF757575);
   static const Color lightGrey = Color(0xFFE0E0E0);
