@@ -48,6 +48,7 @@ dependencies:
   google_fonts: ^4.0.3
   google_maps_flutter: ^2.2.3
   google_sign_in: ^6.0.2
+  icon_decoration: ^1.0.1
   image_picker: ^0.8.6+1
   intl: ^0.17.0
   material_design_icons_flutter: ^6.0.7096
