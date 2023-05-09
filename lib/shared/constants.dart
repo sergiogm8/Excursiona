@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class Constants {
   static const Color indigoDye = Color(0xFF004C6D);
@@ -16,4 +17,14 @@ class Constants {
   static const Color lightChatColor = Color.fromARGB(255, 255, 210, 210);
   static const Color darkGrey = Color(0xFF757575);
   static const Color lightGrey = Color(0xFFE0E0E0);
+
+  static const IconData warningMarkerIcon = Icons.warning_rounded;
+  static const IconData restMarkerIcon = MdiIcons.bed;
+  static const IconData interestMarkerIcon = Icons.info_rounded;
+  static const IconData customMarkerIcon = MdiIcons.flagVariant;
+
+  static const String warningMarkerText = 'Zona de peligro';
+  static const String restMarkerText = 'Zona de descanso';
+  static const String interestMarkerText = 'Punto de interés';
+  static const String customMarkerText = 'Punto personalizado';
 }
