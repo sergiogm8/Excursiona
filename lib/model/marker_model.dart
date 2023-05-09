@@ -12,16 +12,19 @@ class MarkerModel {
   final String userId;
   final LatLng position;
   final MarkerType markerType;
+  final DateTime timestamp;
 
-  MarkerModel(
-      {required this.id,
-      required this.position,
-      required this.markerType,
-      required this.userId,
-      this.title,
-      this.imageUrl,
-      this.ownerName,
-      this.ownerPic});
+  MarkerModel({
+    required this.id,
+    required this.position,
+    required this.markerType,
+    required this.userId,
+    this.title,
+    this.imageUrl,
+    this.ownerName,
+    this.ownerPic,
+    required this.timestamp,
+  });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -33,6 +36,7 @@ class MarkerModel {
       'ownerName': ownerName,
       'ownerPic': ownerPic,
       'userId': userId,
+      'timestamp': timestamp.millisecondsSinceEpoch
     };
   }
 
@@ -45,6 +49,7 @@ class MarkerModel {
         title: map['title'] as String?,
         imageUrl: map['imageUrl'] as String?,
         position: LatLng(map['position'].latitude, map['position'].longitude),
-        markerType: MarkerType.fromString(map['markerType']));
+        markerType: MarkerType.fromString(map['markerType']),
+        timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']));
   }
 }

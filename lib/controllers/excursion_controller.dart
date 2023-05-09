@@ -85,7 +85,8 @@ class ExcursionController {
         id: userId!,
         position: LatLng(coords.latitude, coords.longitude),
         markerType: MarkerType.participant,
-        userId: userId);
+        userId: userId,
+        timestamp: DateTime.now());
     await _excursionService.shareCurrentLocation(marker, excursionId);
   }
 
@@ -121,7 +122,8 @@ class ExcursionController {
         title: title,
         position: LatLng(position.latitude, position.longitude),
         markerType: markerType,
-        imageUrl: imageDownloadURL);
+        imageUrl: imageDownloadURL,
+        timestamp: DateTime.now());
     return await _excursionService.addMarkerToExcursion(
         marker: marker, excursionId: excursionId);
   }
