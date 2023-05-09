@@ -186,7 +186,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   _showMarkerInfo(MarkerModel markerModel) {
     showModalBottomSheet(
-        barrierColor: Colors.transparent,
+        barrierColor: Colors.black.withOpacity(0.2),
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.35,
         ),
@@ -195,6 +195,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
             top: Radius.circular(15),
           ),
         ),
+        elevation: 1,
         context: context,
         builder: (context) {
           return MarkerInfoSheet(markerModel: markerModel);
