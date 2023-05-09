@@ -425,7 +425,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
           ),
         ),
         Positioned(
-          top: 40,
+          top: 50,
           left: 16,
           child: FloatingActionButton(
             heroTag: 'menu',
