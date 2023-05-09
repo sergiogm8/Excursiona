@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -85,7 +86,7 @@ class ParticipantAvatar extends StatelessWidget {
             Text(
               AuthController().isCurrentUser(uid: user.uid)
                   ? 'Tú'
-                  : _getNameAbbreviation(),
+                  : getNameAbbreviation(user.name),
               style: const TextStyle(fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -93,13 +94,5 @@ class ParticipantAvatar extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getNameAbbreviation() {
-    // Get the user's name and the first letter of the second word,
-    // if there is one
-    return user.name.split(' ').length > 1
-        ? '${user.name.split(' ')[0]} ${user.name.split(' ')[1][0]}.'
-        : user.name;
   }
 }
