@@ -1,3 +1,5 @@
+import 'package:excursiona/controllers/auth_controller.dart';
+import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,3 +44,30 @@ final blueTextInputDecoration = InputDecoration(
       borderSide: const BorderSide(color: Constants.steelBlue, width: 2),
       borderRadius: BorderRadius.circular(15)),
 );
+
+getIconByMarkerType(MarkerType markerType) {
+  switch (markerType) {
+    case MarkerType.info:
+      return Constants.interestMarkerIcon;
+    case MarkerType.rest:
+      return Constants.restMarkerIcon;
+    case MarkerType.warning:
+      return Constants.warningMarkerIcon;
+    case MarkerType.custom:
+      return Constants.customMarkerIcon;
+    default:
+      return Constants.interestMarkerIcon;
+  }
+}
+
+String getNameAbbreviation(String name) {
+  // Get the user's name and the first letter of the second word,
+  // if there is one
+  return name.split(' ').length > 1
+      ? '${name.split(' ')[0]} ${name.split(' ')[1][0]}.'
+      : name;
+}
+
+bool isCurrentUser(String uid) {
+  return AuthController().isCurrentUser(uid: uid);
+}
