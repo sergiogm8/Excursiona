@@ -32,6 +32,14 @@ class MarkerInfoSheet extends StatelessWidget {
                 border: Border.all(
                   color: Constants.indigoDye,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.6),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(2, 3),
+                  ),
+                ],
               ),
               child: markerModel.imageUrl!.isNotEmpty
                   ? GestureDetector(
