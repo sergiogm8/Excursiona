@@ -107,8 +107,16 @@ class _LandingPageState extends State<LandingPage> {
                                               const NeverScrollableScrollPhysics(),
                                           itemCount: snapshot.data!.length,
                                           itemBuilder: (context, index) {
-                                            return ExcursionInvitationCard(
-                                              invitation: snapshot.data![index],
+                                            return Column(
+                                              children: [
+                                                ExcursionInvitationCard(
+                                                  invitation:
+                                                      snapshot.data![index],
+                                                ),
+                                                const SizedBox(
+                                                  height: 15,
+                                                )
+                                              ],
                                             );
                                           },
                                         )
