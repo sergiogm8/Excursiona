@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/helper/helper_functions.dart';
@@ -17,6 +19,10 @@ import 'package:uuid/uuid.dart';
 
 class ExcursionController {
   final ExcursionService _excursionService = ExcursionService();
+
+  Timer? timer;
+  Battery battery = Battery();
+  int batteryLevel = 0;
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
@@ -79,14 +85,23 @@ class ExcursionController {
     return excursions;
   }
 
-  shareCurrentLocation(Position coords, String excursionId) async {
+  shareCurrentLocation(Position coords, double speed, double distance,
+      String excursionId) async {
     var userId = await HelperFunctions.getUserUID();
+    var userPic = await HelperFunctions.getUserProfilePic();
+    var userName = await HelperFunctions.getUserName();
     var marker = MarkerModel(
         id: userId!,
         position: LatLng(coords.latitude, coords.longitude),
         markerType: MarkerType.participant,
         userId: userId,
-        timestamp: DateTime.now());
+        ownerPic: userPic!,
+        ownerName: userName!,
+        timestamp: DateTime.now(),
+        altitude: coords.altitude,
+        speed: speed,
+        distance: distance,
+        batteryLevel: batteryLevel);
     await _excursionService.shareCurrentLocation(marker, excursionId);
   }
 
@@ -126,5 +141,12 @@ class ExcursionController {
         timestamp: DateTime.now());
     return await _excursionService.addMarkerToExcursion(
         marker: marker, excursionId: excursionId);
+  }
+
+  initializeBatteryTimer() async {
+    batteryLevel = await battery.batteryLevel;
+    timer = Timer.periodic(const Duration(minutes: 10), (timer) {
+      battery.batteryLevel.then((value) => batteryLevel = value);
+    });
   }
 }
