@@ -19,6 +19,7 @@ import 'package:excursiona/widgets/change_map_type_button.dart';
 import 'package:excursiona/widgets/drawer_item.dart';
 import 'package:excursiona/widgets/icon_marker.dart';
 import 'package:excursiona/widgets/marker_info_sheet.dart';
+import 'package:excursiona/widgets/user_marker_sheet.dart';
 import 'package:excursiona/widgets/user_marker.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   Position? _currentPosition;
   double _currentSpeed = 0.0;
   Timer? _durationTimer;
-  ExcursionController _excursionController = ExcursionController();
+  final ExcursionController _excursionController = ExcursionController();
   var _finishedLocation = false;
   var _geoServiceEnabled;
   bool _initializedMarkers = false;
@@ -89,6 +90,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     super.dispose();
     if (positionStream != null) positionStream!.cancel();
     if (_durationTimer != null) _durationTimer!.cancel();
+    _excursionController.timer!.cancel();
   }
 
   @override
@@ -97,13 +99,12 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _retrieveParticipantsData();
     _initializeDurationTimer();
     loadData();
+    _excursionController.initializeBatteryTimer();
     super.initState();
   }
 
   loadData() {
     getCurrentPosition().then((value) async {
-      _shareCurrentLocation(value);
-
       CameraPosition cameraPosition = CameraPosition(
           target: LatLng(value.latitude, value.longitude), zoom: _zoom);
 
@@ -115,6 +116,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
       setState(() {
         _currentPosition = value;
       });
+      _shareCurrentLocation();
     }).catchError((error) {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
       _finishedLocation = true;
@@ -161,9 +163,21 @@ class _ExcursionPageState extends State<ExcursionPage> {
               markerId: markerId,
               position: LatLng(markerModel.position.latitude,
                   markerModel.position.longitude),
-              icon: AuthController().isCurrentUser(uid: markerModel.id)
+              icon: isCurrentUser(markerModel.id)
                   ? _currentLocationIcon
                   : BitmapDescriptor.fromBytes(_usersMarkers[markerModel.id]),
+              onTap: isCurrentUser(markerModel.id)
+                  ? null
+                  : () {
+                      _showMarkerInfo(markerModel);
+                      _controller.future.then((controller) {
+                        controller.animateCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(markerModel.position.latitude,
+                                    markerModel.position.longitude),
+                                zoom: _zoom)));
+                      });
+                    },
               zIndex:
                   AuthController().isCurrentUser(uid: markerModel.id) ? 2 : 1);
           markers.add(marker);
@@ -188,7 +202,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
     showModalBottomSheet(
         barrierColor: Colors.black.withOpacity(0.2),
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.35,
+          maxHeight: markerModel.markerType == MarkerType.participant
+              ? MediaQuery.of(context).size.height * 0.3
+              : MediaQuery.of(context).size.height * 0.35,
         ),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
@@ -198,7 +214,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
         elevation: 1,
         context: context,
         builder: (context) {
-          return MarkerInfoSheet(markerModel: markerModel);
+          return markerModel.markerType == MarkerType.participant
+              ? UserMarkerSheet(markerModel: markerModel)
+              : MarkerInfoSheet(markerModel: markerModel);
         });
   }
 
@@ -251,8 +269,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
     }
   }
 
-  _shareCurrentLocation(Position coords) async {
-    _excursionController.shareCurrentLocation(coords, widget.excursionId);
+  _shareCurrentLocation() async {
+    _excursionController.shareCurrentLocation(
+        _currentPosition!, _currentSpeed, _currentDistance, widget.excursionId);
   }
 
   _onMapCreated(GoogleMapController controller) {
@@ -280,7 +299,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
         _previousPosition = _currentPosition;
         _currentPosition = position;
       });
-      _shareCurrentLocation(_currentPosition!);
+      _shareCurrentLocation();
       _recalculateDistanceAndSpeed();
     });
     _captureWidgets();
@@ -374,15 +393,18 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   },
                 ),
                 FloatingActionButton.small(
-                  heroTag: 'reloadImages',
-                  backgroundColor: Colors.white,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  tooltip: "Recargar imágenes de usuario",
-                  child: const Icon(
-                    Icons.refresh_rounded,
-                  ),
-                  onPressed: () => _captureWidgets(),
-                ),
+                    heroTag: 'reloadImages',
+                    backgroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).primaryColor,
+                    tooltip: "Recargar imágenes de usuario",
+                    child: const Icon(
+                      Icons.refresh_rounded,
+                    ),
+                    onPressed: () {
+                      _captureWidgets();
+                      showSnackBar(context, Constants.indigoDye,
+                          "Las imágenes de los usuarios han sido recargadas");
+                    }),
               ],
             )),
         Positioned(
@@ -675,6 +697,60 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     title: 'Sala de chat',
                     icon: Icons.forum_outlined,
                     onTap: () {}),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(Icons.exit_to_app_rounded, size: 26),
+                        const SizedBox(width: 10),
+                        Text("Abandonar excursión",
+                            style: GoogleFonts.inter(
+                                fontSize: 16, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15)),
+                                title: const Text("Abandonar la excursión"),
+                                content: const Text(
+                                    "¿Seguro que quieres abandonar la excursión?"),
+                                actions: [
+                                  IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Icons.cancel)),
+                                  IconButton(
+                                    onPressed: () {
+                                      //TODO: This will redirect to the excursion statistics page
+                                      nextScreenReplace(
+                                          context,
+                                          const HomePage(),
+                                          PageTransitionType.fade);
+                                    },
+                                    icon: const Icon(Icons.check),
+                                  ),
+                                ]);
+                          });
+                    },
+                  ),
+                )
               ],
             ),
           ),
@@ -693,9 +769,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 mainAxisSize: MainAxisSize.min,
                 // mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  const Icon(Icons.exit_to_app_rounded, size: 26),
+                  const Icon(Icons.warning, size: 26),
                   const SizedBox(width: 10),
-                  Text("Abandonar excursión",
+                  Text("AVISO EMERGENCIA",
                       style: GoogleFonts.inter(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                 ],
@@ -707,9 +783,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
                       return AlertDialog(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15)),
-                          title: const Text("Abandonar la excursión"),
+                          title: const Text("Enviar aviso de emergencia"),
                           content: const Text(
-                              "¿Seguro que quieres abandonar la excursión?"),
+                              "Se enviará un aviso de emergencia a todos los participantes de la excursión. ¿Estás seguro?"),
                           actions: [
                             IconButton(
                                 onPressed: () {
@@ -718,9 +794,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                 icon: const Icon(Icons.cancel)),
                             IconButton(
                               onPressed: () {
-                                //TODO: This will redirect to the excursion statistics page
-                                nextScreenReplace(context, const HomePage(),
-                                    PageTransitionType.fade);
+                                //TODO: Send emergency message to participants
                               },
                               icon: const Icon(Icons.check),
                             ),
