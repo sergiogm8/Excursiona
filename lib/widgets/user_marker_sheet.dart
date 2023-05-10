@@ -58,30 +58,32 @@ class UserMarkerSheet extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               InfoItem(
                 icon: MdiIcons.runFast,
                 title: "Velocidad:",
-                content: "${(markerModel.speed!).toStringAsFixed(2)} km/h",
+                content: "${(markerModel.speed!).toStringAsFixed(1)} km/h",
               ),
+              const SizedBox(width: 40),
               InfoItem(
                 icon: MdiIcons.arrowUpDown,
                 title: "Altitud:",
-                content: "${(markerModel.altitude!).toStringAsFixed(2)} m",
+                content: "${(markerModel.altitude!).toStringAsFixed(0)} m",
               ),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               InfoItem(
                 icon: MdiIcons.mapMarkerDistance,
                 title: "Ha recorrido:",
-                content: "${(markerModel.distance!).toStringAsFixed(2)} km",
+                content: "${(markerModel.distance!).toStringAsFixed(1)} km",
               ),
+              const SizedBox(width: 40),
               InfoItem(
                 icon: MdiIcons.battery,
                 title: "Batería:",
@@ -119,8 +121,9 @@ class InfoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min,
-        // mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Icon(
             icon,
@@ -130,16 +133,22 @@ class InfoItem extends StatelessWidget {
           const SizedBox(width: 10),
           Row(
             children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                    fontSize: 16, fontWeight: FontWeight.w600),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                      fontSize: 14, fontWeight: FontWeight.w600),
+                ),
               ),
               const SizedBox(width: 4),
-              Text(
-                content,
-                style: GoogleFonts.inter(
-                    fontSize: 16, fontWeight: FontWeight.w400),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  content,
+                  style: GoogleFonts.inter(
+                      fontSize: 14, fontWeight: FontWeight.w400),
+                ),
               ),
             ],
           ),
