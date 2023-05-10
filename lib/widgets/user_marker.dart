@@ -20,9 +20,17 @@ class UserMarker extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 20),
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Constants.darkWhite,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: Offset(2, 3),
+                ),
+              ],
             ),
             child: user.profilePic.isEmpty
                 ? MediaQuery(
