@@ -142,16 +142,21 @@ class MarkerInfoSheet extends StatelessWidget {
                   child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: markerModel.ownerPic!.isNotEmpty
-                          ? NetworkImage(markerModel.ownerPic!)
-                          : null,
-                      child: markerModel.ownerPic!.isEmpty
-                          ? AccountAvatar(
-                              radius: 20, name: markerModel.ownerName!)
-                          : null),
+                  Container(
+                    padding: const EdgeInsets.all(1),
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Constants.indigoDye),
+                    child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.transparent,
+                        backgroundImage: markerModel.ownerPic!.isNotEmpty
+                            ? CachedNetworkImageProvider(markerModel.ownerPic!)
+                            : null,
+                        child: markerModel.ownerPic!.isEmpty
+                            ? AccountAvatar(
+                                radius: 20, name: markerModel.ownerName!)
+                            : null),
+                  ),
                   const SizedBox(width: 15),
                   Text(
                       isCurrentUser(markerModel.userId)
