@@ -342,70 +342,73 @@ class _ExcursionPageState extends State<ExcursionPage> {
             }),
         Align(
             alignment: Alignment.centerRight,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FloatingActionButton.small(
-                    heroTag: 'mapType',
-                    backgroundColor: Colors.white,
-                    foregroundColor: Theme.of(context).primaryColor,
-                    tooltip: "Cambiar tipo de mapa",
-                    child: const Icon(
-                      Icons.layers_rounded,
-                    ),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        backgroundColor: Constants.darkWhite,
-                        constraints: BoxConstraints(
-                            maxHeight:
-                                MediaQuery.of(context).size.height * 0.20),
-                        builder: (context) {
-                          return _buildBottomSheet();
-                        },
-                      );
-                    }),
-                FloatingActionButton.small(
-                  heroTag: 'centerPosition',
-                  backgroundColor: Colors.white,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  tooltip: "Centrar en mi ubicación",
-                  child: const Icon(
-                    Icons.gps_fixed,
-                  ),
-                  onPressed: () async {
-                    _isDragging = false;
-                    final GoogleMapController controller =
-                        await _controller.future;
-                    controller.animateCamera(
-                      CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                            target: LatLng(_currentPosition!.latitude,
-                                _currentPosition!.longitude),
-                            zoom: _zoom),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FloatingActionButton.small(
+                      heroTag: 'mapType',
+                      backgroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).primaryColor,
+                      tooltip: "Cambiar tipo de mapa",
+                      child: const Icon(
+                        Icons.layers_rounded,
                       ),
-                    );
-                  },
-                ),
-                FloatingActionButton.small(
-                    heroTag: 'reloadImages',
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          backgroundColor: Constants.darkWhite,
+                          constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.20),
+                          builder: (context) {
+                            return _buildBottomSheet();
+                          },
+                        );
+                      }),
+                  FloatingActionButton.small(
+                    heroTag: 'centerPosition',
                     backgroundColor: Colors.white,
                     foregroundColor: Theme.of(context).primaryColor,
-                    tooltip: "Recargar imágenes de usuario",
+                    tooltip: "Centrar en mi ubicación",
                     child: const Icon(
-                      Icons.refresh_rounded,
+                      Icons.gps_fixed,
                     ),
-                    onPressed: () {
-                      _captureWidgets();
-                      showSnackBar(context, Constants.indigoDye,
-                          "Las imágenes de los usuarios han sido recargadas");
-                    }),
-              ],
+                    onPressed: () async {
+                      _isDragging = false;
+                      final GoogleMapController controller =
+                          await _controller.future;
+                      controller.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                              target: LatLng(_currentPosition!.latitude,
+                                  _currentPosition!.longitude),
+                              zoom: _zoom),
+                        ),
+                      );
+                    },
+                  ),
+                  FloatingActionButton.small(
+                      heroTag: 'reloadImages',
+                      backgroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).primaryColor,
+                      tooltip: "Recargar imágenes de usuario",
+                      child: const Icon(
+                        Icons.refresh_rounded,
+                      ),
+                      onPressed: () {
+                        _captureWidgets();
+                        showSnackBar(context, Constants.indigoDye,
+                            "Las imágenes de los usuarios han sido recargadas");
+                      }),
+                ],
+              ),
             )),
         Positioned(
           bottom: 16,
