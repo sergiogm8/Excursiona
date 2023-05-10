@@ -740,8 +740,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                       },
                                       icon: const Icon(Icons.cancel)),
                                   IconButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       //TODO: This will redirect to the excursion statistics page
+                                      _excursionController
+                                          .leaveExcursion(widget.excursionId);
                                       nextScreenReplace(
                                           context,
                                           const HomePage(),

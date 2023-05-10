@@ -125,7 +125,12 @@ class ExcursionService {
           .doc(excursionID)
           .collection('participants')
           .doc(currentUserId)
-          .set({'isInExcursion': false});
+          .update({'isInExcursion': false});
+      await excursionCollection
+          .doc(excursionID)
+          .collection('markers')
+          .doc(currentUserId)
+          .delete();
       return true;
     } on FirebaseException {
       return false;
