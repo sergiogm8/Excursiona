@@ -20,4 +20,8 @@ class UserController {
   Stream<List<Invitation>> getExcursionInvitations() {
     return _userService.getExcursionInvitations();
   }
+
+  deleteExcursionInvitation(String invitationId) {
+    _userService.deleteExcursionInvitation(invitationId);
+  }
 }

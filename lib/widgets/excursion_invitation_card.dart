@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
+import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/pages/excursion_page.dart';
+import 'package:excursiona/services/user_service.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
@@ -22,6 +24,7 @@ class ExcursionInvitationCard extends StatelessWidget {
     }
     nextScreen(context, ExcursionPage(excursionId: invitation.excursionId),
         PageTransitionType.fade);
+    UserController().deleteExcursionInvitation(invitation.excursionId);
   }
 
   _rejectInvitation(context) async {

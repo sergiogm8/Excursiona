@@ -65,7 +65,7 @@ class ExcursionService {
 
   Future<bool> rejectExcursionInvitation(String excursionId) async {
     try {
-      UserService().deleteExcursionInvitation(excursionId, currentUserId!);
+      UserService().deleteExcursionInvitation(excursionId);
       return true;
     } on FirebaseException {
       return false;

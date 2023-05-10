@@ -77,10 +77,11 @@ class UserService {
     }
   }
 
-  Future deleteExcursionInvitation(String excursionId, String userId) async {
+  Future deleteExcursionInvitation(String excursionId) async {
     try {
+      var currentUserId = authService.firebaseAuth.currentUser!.uid;
       await userCollection
-          .doc(userId)
+          .doc(currentUserId)
           .collection('invitations')
           .doc(excursionId)
           .delete();
