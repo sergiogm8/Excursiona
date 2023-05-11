@@ -22,7 +22,8 @@ class ExcursionController {
 
   final String? excursionId;
   final ExcursionService _excursionService = ExcursionService();
-  Timer? timer;
+  int batteryLevel = 0;
+  Timer? batteryTimer;
   Battery battery = Battery();
 
   Future createExcursion(
@@ -41,7 +42,6 @@ class ExcursionController {
   }
 
   Future<bool> leaveExcursion() async {
-    var currentUser = await UserController().getUserBasicInfo();
     return await _excursionService.leaveExcursion(excursionId!);
   }
 
@@ -89,8 +89,7 @@ class ExcursionController {
     return excursions;
   }
 
-  shareCurrentLocation(Position coords, double speed, double distance,
-      String excursionId) async {
+  shareCurrentLocation(Position coords, double speed, double distance) async {
     var userId = await HelperFunctions.getUserUID();
     var userPic = await HelperFunctions.getUserProfilePic();
     var userName = await HelperFunctions.getUserName();
@@ -104,8 +103,9 @@ class ExcursionController {
         timestamp: DateTime.now(),
         altitude: coords.altitude,
         speed: speed,
-        distance: distance);
-    _excursionService.shareCurrentLocation(marker, excursionId);
+        distance: distance,
+        batteryLevel: batteryLevel);
+    _excursionService.shareCurrentLocation(marker, excursionId!);
   }
 
   Stream<List<MarkerModel>> getMarkers(String excursionId) {
@@ -131,29 +131,24 @@ class ExcursionController {
     var userId = await HelperFunctions.getUserUID();
     var userName = await HelperFunctions.getUserName();
     var userPic = await HelperFunctions.getUserProfilePic();
-
     var marker = MarkerModel(
-        id: Uuid().v1(),
-        userId: userId!,
-        ownerName: userName!,
-        ownerPic: userPic!,
-        title: title,
-        position: LatLng(position.latitude, position.longitude),
-        markerType: markerType,
-        imageUrl: imageDownloadURL,
-        timestamp: DateTime.now());
+      id: Uuid().v1(),
+      userId: userId!,
+      ownerName: userName!,
+      ownerPic: userPic!,
+      title: title,
+      position: LatLng(position.latitude, position.longitude),
+      markerType: markerType,
+      imageUrl: imageDownloadURL,
+      timestamp: DateTime.now(),
+    );
     return await _excursionService.addMarkerToExcursion(
         marker: marker, excursionId: excursionId);
   }
 
   initializeBatteryTimer() {
-    battery.batteryLevel.then((value) async {
-      await Future.delayed(const Duration(seconds: 3));
-      _excursionService.shareBatteryLevel(value, excursionId!);
-    });
-    timer = Timer.periodic(const Duration(minutes: 5), (timer) {
-      battery.batteryLevel.then(
-          (value) => _excursionService.shareBatteryLevel(value, excursionId!));
+    batteryTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      battery.batteryLevel.then((value) => batteryLevel = value);
     });
   }
 }

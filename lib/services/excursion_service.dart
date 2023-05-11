@@ -147,7 +147,7 @@ class ExcursionService {
           .collection('markers')
           .doc(marker.id)
           .set(marker.toMap());
-    } on FirebaseException catch (e) {
+    } catch (e) {
       print(e);
     }
   }
@@ -182,15 +182,15 @@ class ExcursionService {
     }
   }
 
-  shareBatteryLevel(int batteryLevel, String excursionId) {
-    try {
-      excursionCollection
-          .doc(excursionId)
-          .collection('markers')
-          .doc(currentUserId)
-          .update({'batteryLevel': batteryLevel});
-    } on FirebaseException catch (e) {
-      print(e);
-    }
-  }
+  // shareBatteryLevel(int batteryLevel, String excursionId) {
+  //   try {
+  //     excursionCollection
+  //         .doc(excursionId)
+  //         .collection('markers')
+  //         .doc(currentUserId)
+  //         .update({'batteryLevel': batteryLevel});
+  //   } on FirebaseException catch (e) {
+  //     print(e);
+  //   }
+  // }
 }

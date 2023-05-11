@@ -51,10 +51,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   final LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: 5,
+    distanceFilter: 10,
   );
 
-  StreamSubscription<Position>? positionStream;
+  StreamSubscription<Position>? _positionStream;
 
   static const double _tilt = 30;
   static const double _zoom = 19;
@@ -86,14 +86,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
   Map<String, dynamic> _usersMarkers = {};
 
   @override
-  void dispose() {
-    super.dispose();
-    if (positionStream != null) positionStream!.cancel();
-    if (_durationTimer != null) _durationTimer!.cancel();
-    _excursionController!.timer!.cancel();
-  }
-
-  @override
   void initState() {
     _excursionController = ExcursionController(excursionId: widget.excursionId);
     _setCustomMarkerIcon();
@@ -102,6 +94,14 @@ class _ExcursionPageState extends State<ExcursionPage> {
     loadData();
     _excursionController!.initializeBatteryTimer();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _excursionController!.batteryTimer!.cancel();
+    if (_positionStream != null) _positionStream!.cancel();
+    if (_durationTimer != null) _durationTimer!.cancel();
+    super.dispose();
   }
 
   loadData() {
@@ -273,7 +273,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   _shareCurrentLocation() async {
     _excursionController!.shareCurrentLocation(
-        _currentPosition!, _currentSpeed, _currentDistance, widget.excursionId);
+        _currentPosition!, _currentSpeed, _currentDistance);
   }
 
   _onMapCreated(GoogleMapController controller) {
@@ -289,7 +289,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
       }
     });
 
-    positionStream =
+    _positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position? position) {
       if (!_isDragging) {
@@ -742,9 +742,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                       },
                                       icon: const Icon(Icons.cancel)),
                                   IconButton(
-                                    onPressed: () async {
+                                    onPressed: () {
                                       //TODO: This will redirect to the excursion statistics page
                                       _excursionController!.leaveExcursion();
+                                      Navigator.pop(context);
                                       nextScreenReplace(
                                           context,
                                           const HomePage(),
