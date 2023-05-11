@@ -18,7 +18,8 @@ class ExcursionService {
 
   final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  Future createExcursion(Excursion excursion, UserModel userInfo) async {
+  Future createExcursion(
+      Excursion excursion, ExcursionParticipant userInfo) async {
     try {
       await excursionCollection.doc(excursion.id).set(excursion.toMap());
       await joinExcursion(excursion.id, userInfo);
@@ -83,15 +84,14 @@ class ExcursionService {
     }
   }
 
-  Future<bool> joinExcursion(String excursionID, UserModel userInfo) async {
+  Future<bool> joinExcursion(
+      String excursionID, ExcursionParticipant userInfo) async {
     try {
       var excursion = excursionCollection.doc(excursionID);
-      var userInfoMap = userInfo.toMapShort();
-      userInfoMap.addAll({'isInExcursion': true});
       await excursion
           .collection('participants')
           .doc(currentUserId)
-          .set(userInfoMap);
+          .set(userInfo.toMap());
       return true;
     } on FirebaseException {
       return false;
@@ -125,7 +125,10 @@ class ExcursionService {
           .doc(excursionID)
           .collection('participants')
           .doc(currentUserId)
-          .update({'isInExcursion': false});
+          .update({
+        'isInExcursion': false,
+        'leftAt': DateTime.now().millisecondsSinceEpoch
+      });
       await excursionCollection
           .doc(excursionID)
           .collection('markers')
@@ -139,12 +142,12 @@ class ExcursionService {
 
   shareCurrentLocation(MarkerModel marker, String excursionId) async {
     try {
-      await excursionCollection
+      excursionCollection
           .doc(excursionId)
           .collection('markers')
           .doc(marker.id)
           .set(marker.toMap());
-    } on FirebaseFirestore catch (e) {
+    } on FirebaseException catch (e) {
       print(e);
     }
   }
@@ -176,6 +179,18 @@ class ExcursionService {
       return true;
     } on FirebaseException {
       return false;
+    }
+  }
+
+  shareBatteryLevel(int batteryLevel, String excursionId) {
+    try {
+      excursionCollection
+          .doc(excursionId)
+          .collection('markers')
+          .doc(currentUserId)
+          .update({'batteryLevel': batteryLevel});
+    } on FirebaseException catch (e) {
+      print(e);
     }
   }
 }

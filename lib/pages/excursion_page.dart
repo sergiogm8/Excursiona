@@ -57,7 +57,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   StreamSubscription<Position>? positionStream;
 
   static const double _tilt = 30;
-  static const double _zoom = 20;
+  static const double _zoom = 19;
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -71,7 +71,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   Position? _currentPosition;
   double _currentSpeed = 0.0;
   Timer? _durationTimer;
-  final ExcursionController _excursionController = ExcursionController();
+  ExcursionController? _excursionController;
   var _finishedLocation = false;
   var _geoServiceEnabled;
   bool _initializedMarkers = false;
@@ -90,21 +90,27 @@ class _ExcursionPageState extends State<ExcursionPage> {
     super.dispose();
     if (positionStream != null) positionStream!.cancel();
     if (_durationTimer != null) _durationTimer!.cancel();
-    _excursionController.timer!.cancel();
+    _excursionController!.timer!.cancel();
   }
 
   @override
   void initState() {
+    _excursionController = ExcursionController(excursionId: widget.excursionId);
     _setCustomMarkerIcon();
     _retrieveParticipantsData();
     _initializeDurationTimer();
     loadData();
-    _excursionController.initializeBatteryTimer();
+    _excursionController!.initializeBatteryTimer();
     super.initState();
   }
 
   loadData() {
     getCurrentPosition().then((value) async {
+      setState(() {
+        _currentPosition = value;
+      });
+      _shareCurrentLocation();
+
       CameraPosition cameraPosition = CameraPosition(
           target: LatLng(value.latitude, value.longitude), zoom: _zoom);
 
@@ -113,10 +119,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
       _finishedLocation = true;
-      setState(() {
-        _currentPosition = value;
-      });
-      _shareCurrentLocation();
     }).catchError((error) {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
       _finishedLocation = true;
@@ -149,7 +151,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   Stream<List<MarkerModel>> getMarkers() {
-    return _excursionController.getMarkers(widget.excursionId);
+    return _excursionController!.getMarkers(widget.excursionId);
   }
 
   Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
@@ -255,7 +257,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   _retrieveParticipantsData() {
     if (widget.participants == null) {
-      _excursionController
+      _excursionController!
           .getParticipantsData(widget.excursionId)
           .then((participants) {
         setState(() {
@@ -270,7 +272,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   _shareCurrentLocation() async {
-    _excursionController.shareCurrentLocation(
+    _excursionController!.shareCurrentLocation(
         _currentPosition!, _currentSpeed, _currentDistance, widget.excursionId);
   }
 
@@ -742,8 +744,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                   IconButton(
                                     onPressed: () async {
                                       //TODO: This will redirect to the excursion statistics page
-                                      _excursionController
-                                          .leaveExcursion(widget.excursionId);
+                                      _excursionController!.leaveExcursion();
                                       nextScreenReplace(
                                           context,
                                           const HomePage(),

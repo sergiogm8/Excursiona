@@ -18,17 +18,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class ExcursionController {
-  final ExcursionService _excursionService = ExcursionService();
+  ExcursionController({this.excursionId});
 
+  final String? excursionId;
+  final ExcursionService _excursionService = ExcursionService();
   Timer? timer;
   Battery battery = Battery();
-  int batteryLevel = 0;
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
     bool result = false;
+    var currentUser = await UserController().getUserBasicInfo();
     result = await _excursionService.createExcursion(
-        excursion, await UserController().getUserBasicInfo());
+        excursion, ExcursionParticipant.fromUserModel(currentUser));
     if (!result) return 'Hubo un error al crear la excursión';
 
     result =
@@ -38,13 +40,15 @@ class ExcursionController {
     return result;
   }
 
-  Future<bool> leaveExcursion(String excursionID) async {
-    return await _excursionService.leaveExcursion(excursionID);
+  Future<bool> leaveExcursion() async {
+    var currentUser = await UserController().getUserBasicInfo();
+    return await _excursionService.leaveExcursion(excursionId!);
   }
 
   Future<bool> joinExcursion(String excursionID) async {
+    var currentUser = await UserController().getUserBasicInfo();
     return await _excursionService.joinExcursion(
-        excursionID, await UserController().getUserBasicInfo());
+        excursionID, ExcursionParticipant.fromUserModel(currentUser));
   }
 
   Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
@@ -100,9 +104,8 @@ class ExcursionController {
         timestamp: DateTime.now(),
         altitude: coords.altitude,
         speed: speed,
-        distance: distance,
-        batteryLevel: batteryLevel);
-    await _excursionService.shareCurrentLocation(marker, excursionId);
+        distance: distance);
+    _excursionService.shareCurrentLocation(marker, excursionId);
   }
 
   Stream<List<MarkerModel>> getMarkers(String excursionId) {
@@ -143,10 +146,14 @@ class ExcursionController {
         marker: marker, excursionId: excursionId);
   }
 
-  initializeBatteryTimer() async {
-    batteryLevel = await battery.batteryLevel;
-    timer = Timer.periodic(const Duration(minutes: 10), (timer) {
-      battery.batteryLevel.then((value) => batteryLevel = value);
+  initializeBatteryTimer() {
+    battery.batteryLevel.then((value) async {
+      await Future.delayed(const Duration(seconds: 3));
+      _excursionService.shareBatteryLevel(value, excursionId!);
+    });
+    timer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      battery.batteryLevel.then(
+          (value) => _excursionService.shareBatteryLevel(value, excursionId!));
     });
   }
 }
