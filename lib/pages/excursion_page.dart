@@ -711,10 +711,10 @@ class _ExcursionPageState extends State<ExcursionPage> {
                             widget.excursion!, newParticipants);
                       }),
                 DrawerItem(
-                    title: 'Compartir imagen',
+                    title: 'Compartir imágenes',
                     icon: Icons.add_photo_alternate_outlined,
                     onTap: () {
-                      nextScreen(context, ShareImagePage(),
+                      nextScreen(context, const ShareImagePage(),
                           PageTransitionType.rightToLeft);
                     }),
                 DrawerItem(
