@@ -7,9 +7,11 @@ import 'package:excursiona/constants/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/home_page.dart';
+import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
@@ -36,9 +38,13 @@ import 'package:screenshot/screenshot.dart';
 
 class ExcursionPage extends StatefulWidget {
   const ExcursionPage(
-      {super.key, required this.excursionId, this.participants});
+      {super.key,
+      required this.excursionId,
+      this.excursion,
+      this.participants});
 
   final String excursionId;
+  final Excursion? excursion;
   final Set<UserModel>? participants;
 
   @override
@@ -50,8 +56,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
       CameraPosition(target: LatLng(38.9842, -3.9275), zoom: 5);
 
   final LocationSettings locationSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high,
-    distanceFilter: 10,
+    accuracy: LocationAccuracy.bestForNavigation,
   );
 
   StreamSubscription<Position>? _positionStream;
@@ -171,6 +176,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
               onTap: isCurrentUser(markerModel.id)
                   ? null
                   : () {
+                      _isDragging = true;
                       _showMarkerInfo(markerModel);
                       _controller.future.then((controller) {
                         controller.animateCamera(CameraUpdate.newCameraPosition(
@@ -184,6 +190,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   AuthController().isCurrentUser(uid: markerModel.id) ? 2 : 1);
           markers.add(marker);
         } else {
+          _isDragging = true;
           var icon = _getBitmapByMarkerType(markerModel.markerType);
           Marker marker = Marker(
             markerId: markerId,
@@ -663,16 +670,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text("Has recorrido: ",
-                              style: GoogleFonts.inter(
-                                  fontSize: 14, fontWeight: FontWeight.w600)),
-                          Text("${_currentDistance.toStringAsFixed(2)} km",
-                              style: GoogleFonts.inter(fontSize: 14)),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
                           Text("Velocidad: ",
                               style: GoogleFonts.inter(
                                   fontSize: 14, fontWeight: FontWeight.w600)),
@@ -680,13 +677,39 @@ class _ExcursionPageState extends State<ExcursionPage> {
                               style: GoogleFonts.inter(fontSize: 14)),
                         ],
                       ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text("Has recorrido: ",
+                              style: GoogleFonts.inter(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text("${_currentDistance.toStringAsFixed(2)} km",
+                              style: GoogleFonts.inter(fontSize: 14)),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-                DrawerItem(
-                    title: 'Añadir participante',
-                    icon: Icons.person_add_outlined,
-                    onTap: () {}),
+                if (widget.excursion != null)
+
+                  /// Only the excursion owner will have this parameter not null,
+                  /// so only the owner will be able to add new participants
+                  DrawerItem(
+                      title: 'Añadir participantes',
+                      icon: Icons.person_add_outlined,
+                      onTap: () async {
+                        Set<UserModel> newParticipants = await nextScreen(
+                            context,
+                            SearchParticipantsPage(
+                                alreadyParticipants: _participants),
+                            PageTransitionType.rightToLeft);
+                        setState(() {
+                          _participants.addAll(newParticipants);
+                        });
+                        _captureWidgets();
+                        _excursionController!.inviteUsersToExcursion(
+                            widget.excursion!, newParticipants);
+                      }),
                 DrawerItem(
                     title: 'Compartir imagen',
                     icon: Icons.add_photo_alternate_outlined,

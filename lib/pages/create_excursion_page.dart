@@ -120,10 +120,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     } else {
       Navigator.of(context).pop();
       showSnackBar(context, Colors.green, "Excursión creada con éxito");
-      nextScreen(
+      nextScreenReplace(
           context,
           ExcursionPage(
             excursionId: excursion.id,
+            excursion: excursion,
             participants: _participants,
           ),
           PageTransitionType.fade);
@@ -134,8 +135,8 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Crear excursión",
-            style: TextStyle(color: Colors.black)),
+        title: Text("Crear excursión",
+            style: GoogleFonts.inter(color: Colors.black)),
         backgroundColor: const Color(0xFFFAFAFA),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

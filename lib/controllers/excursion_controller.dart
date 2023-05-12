@@ -55,6 +55,14 @@ class ExcursionController {
     return await _excursionService.inviteUserToExcursion(excursion, userId);
   }
 
+  Future<bool> inviteUsersToExcursion(
+      Excursion excursion, Set<UserModel> users) async {
+    return await _excursionService.inviteUsersToExcursion(
+      excursion,
+      users,
+    );
+  }
+
   Future<bool> rejectExcursionInvitation(String excursionId) async {
     return await _excursionService.rejectExcursionInvitation(excursionId);
   }
