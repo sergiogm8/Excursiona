@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
@@ -182,15 +183,16 @@ class ExcursionService {
     }
   }
 
-  // shareBatteryLevel(int batteryLevel, String excursionId) {
-  //   try {
-  //     excursionCollection
-  //         .doc(excursionId)
-  //         .collection('markers')
-  //         .doc(currentUserId)
-  //         .update({'batteryLevel': batteryLevel});
-  //   } on FirebaseException catch (e) {
-  //     print(e);
-  //   }
-  // }
+  Future<bool> addImageToExcursion(
+      {required String excursionId, required ImageModel imageModel}) async {
+    try {
+      await excursionCollection
+          .doc(excursionId)
+          .collection('images')
+          .add(imageModel.toMap());
+      return true;
+    } on FirebaseException {
+      return false;
+    }
+  }
 }

@@ -7,11 +7,13 @@ import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -152,6 +154,32 @@ class ExcursionController {
     );
     return await _excursionService.addMarkerToExcursion(
         marker: marker, excursionId: excursionId);
+  }
+
+  Future<bool> uploadImages(List<XFile> images) async {
+    int imagesUploaded = 0;
+    var userName = await HelperFunctions.getUserName();
+    var userPic = await HelperFunctions.getUserProfilePic();
+
+    for (var image in images) {
+      String imageDownloadURL = await StorageService().uploadExcursionImage(
+          image: File(image.path), excursionId: excursionId!);
+      if (imageDownloadURL.isEmpty) {
+        break;
+      }
+      ImageModel imageModel = ImageModel(
+          imageUrl: imageDownloadURL,
+          ownerName: userName!,
+          ownerPic: userPic!,
+          timestamp: DateTime.now());
+
+      var uploaded = await _excursionService.addImageToExcursion(
+          excursionId: excursionId!, imageModel: imageModel);
+      if (uploaded) {
+        imagesUploaded++;
+      }
+    }
+    return true;
   }
 
   initializeBatteryTimer() {
