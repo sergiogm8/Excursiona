@@ -3,6 +3,7 @@ import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
 
 Future nextScreen(context, page, PageTransitionType animation) {
@@ -70,4 +71,11 @@ String getNameAbbreviation(String name) {
 
 bool isCurrentUser(String uid) {
   return AuthController().isCurrentUser(uid: uid);
+}
+
+Future<XFile?> pickImageFromCamera() async {
+  final ImagePicker _picker = ImagePicker();
+  var image =
+      await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+  return image;
 }
