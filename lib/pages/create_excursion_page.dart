@@ -66,9 +66,9 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
 
   _showLoadingDialog() {
     showDialog(
-        barrierColor: const Color(0xFFFAFAFA).withOpacity(0.8),
-        context: context,
+        barrierColor: Constants.darkWhite.withOpacity(0.8),
         barrierDismissible: false,
+        context: context,
         builder: (context) {
           return Scaffold(
               backgroundColor: Colors.transparent,
