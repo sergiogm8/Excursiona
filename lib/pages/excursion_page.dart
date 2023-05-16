@@ -11,6 +11,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/home_page.dart';
+import 'package:excursiona/pages/image_gallery_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/shared/constants.dart';
@@ -601,9 +602,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const Text(
+          Text(
             "Tipo de mapa",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -723,7 +724,13 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 DrawerItem(
                     title: 'Galería de imágenes',
                     icon: Icons.photo_library_outlined,
-                    onTap: () {}),
+                    onTap: () {
+                      nextScreen(
+                          context,
+                          ImageGalleryPage(
+                              excursionController: _excursionController!),
+                          PageTransitionType.rightToLeft);
+                    }),
                 DrawerItem(
                     title: 'Sala de chat',
                     icon: Icons.forum_outlined,
