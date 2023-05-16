@@ -136,7 +136,8 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Crear excursión",
-            style: GoogleFonts.inter(color: Colors.black)),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        foregroundColor: Colors.black,
         backgroundColor: const Color(0xFFFAFAFA),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -184,11 +185,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Participantes",
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 15),

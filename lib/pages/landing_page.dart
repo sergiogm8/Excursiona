@@ -6,6 +6,7 @@ import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -89,10 +90,10 @@ class _LandingPageState extends State<LandingPage> {
                               Text(
                                 "Notificaciones",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(
+                                style: GoogleFonts.inter(
                                     color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600),
                               ),
                               StreamBuilder(
                                 stream: _getExcursionNotifications(),
