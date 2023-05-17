@@ -321,11 +321,18 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
                             onTap: () => _pickImage(),
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(10),
+                              padding: _image == null
+                                  ? const EdgeInsets.all(10)
+                                  : null,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
                                   border:
-                                      Border.all(color: Constants.indigoDye)),
+                                      Border.all(color: Constants.indigoDye),
+                                  image: _image != null
+                                      ? DecorationImage(
+                                          image: FileImage(_image!),
+                                          fit: BoxFit.cover)
+                                      : null),
                               child: _image == null
                                   ? Center(
                                       child: Column(
@@ -347,11 +354,7 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
                                         ),
                                       ],
                                     ))
-                                  : Image.file(
-                                      _image!,
-                                      // fit: BoxFit.fitHeight_title,
-                                      alignment: Alignment.center,
-                                    ),
+                                  : null,
                             ),
                           ),
                         ),
