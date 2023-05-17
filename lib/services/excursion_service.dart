@@ -195,4 +195,23 @@ class ExcursionService {
       return false;
     }
   }
+
+  Stream<List<ImageModel>> getImagesFromExcursion(String excursionId) {
+    try {
+      return excursionCollection
+          .doc(excursionId)
+          .collection('images')
+          .orderBy('timestamp')
+          .snapshots()
+          .map((snapshots) {
+        List<ImageModel> images = [];
+        for (var doc in snapshots.docs) {
+          images.add(ImageModel.fromMap(doc.data()));
+        }
+        return images;
+      });
+    } catch (e) {
+      return Stream.empty();
+    }
+  }
 }
