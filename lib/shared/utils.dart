@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
@@ -61,6 +64,21 @@ getIconByMarkerType(MarkerType markerType) {
   }
 }
 
+getMarkerText(MarkerType markerType) {
+  switch (markerType) {
+    case MarkerType.info:
+      return Constants.interestMarkerText;
+    case MarkerType.rest:
+      return Constants.restMarkerText;
+    case MarkerType.warning:
+      return Constants.warningMarkerText;
+    case MarkerType.custom:
+      return Constants.customMarkerText;
+    default:
+      return Constants.interestMarkerText;
+  }
+}
+
 String getNameAbbreviation(String name) {
   // Get the user's name and the first letter of the second word,
   // if there is one
@@ -78,4 +96,21 @@ Future<XFile?> pickImageFromCamera() async {
   var image =
       await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
   return image;
+}
+
+void showFullscreenImage(BuildContext context, String imagePath) {
+  showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (context) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child:
+                imagePath.contains("https://") || imagePath.contains("http://")
+                    ? CachedNetworkImage(imageUrl: imagePath)
+                    : Image.file(File(imagePath)),
+          ),
+        );
+      });
 }
