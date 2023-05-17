@@ -43,22 +43,8 @@ class MarkerInfoSheet extends StatelessWidget {
               ),
               child: markerModel.imageUrl!.isNotEmpty
                   ? GestureDetector(
-                      onTap: () {
-                        //OPEN FULL SCREEN IMAGE
-                        showDialog(
-                            context: context,
-                            barrierColor: Colors.black.withOpacity(0.9),
-                            builder: (context) {
-                              return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: CachedNetworkImage(
-                                    imageUrl: markerModel.imageUrl!,
-                                  ),
-                                ),
-                              );
-                            });
-                      },
+                      onTap: () =>
+                          showFullscreenImage(context, markerModel.imageUrl!),
                       child: Stack(
                         children: [
                           CachedNetworkImage(

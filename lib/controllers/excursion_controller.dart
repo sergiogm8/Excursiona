@@ -118,8 +118,9 @@ class ExcursionController {
     _excursionService.shareCurrentLocation(marker, excursionId!);
   }
 
-  Stream<List<MarkerModel>> getMarkers(String excursionId) {
-    return _excursionService.getMarkers(excursionId);
+  Stream<List<MarkerModel>> getMarkers({String? excursionId}) {
+    excursionId ??= this.excursionId;
+    return _excursionService.getMarkers(excursionId!);
   }
 
   uploadMarker(
@@ -158,6 +159,7 @@ class ExcursionController {
 
   Future<bool> uploadImages(List<XFile> images) async {
     int imagesUploaded = 0;
+    var userId = await HelperFunctions.getUserUID();
     var userName = await HelperFunctions.getUserName();
     var userPic = await HelperFunctions.getUserProfilePic();
 
@@ -168,9 +170,10 @@ class ExcursionController {
         break;
       }
       ImageModel imageModel = ImageModel(
-          imageUrl: imageDownloadURL,
+          ownerId: userId!,
           ownerName: userName!,
           ownerPic: userPic!,
+          imageUrl: imageDownloadURL,
           timestamp: DateTime.now());
 
       var uploaded = await _excursionService.addImageToExcursion(
@@ -180,6 +183,11 @@ class ExcursionController {
       }
     }
     return true;
+  }
+
+  Stream<List<ImageModel>> getImagesFromExcursion({String? excursionId}) {
+    excursionId ??= this.excursionId;
+    return _excursionService.getImagesFromExcursion(excursionId!);
   }
 
   initializeBatteryTimer() {

@@ -43,7 +43,7 @@ class _ShareImagePageState extends State<ShareImagePage> {
       return;
     }
     showDialog(
-      barrierColor: Constants.darkWhite.withOpacity(0.8),
+      barrierColor: Constants.darkWhite.withOpacity(0.9),
       barrierDismissible: false,
       context: context,
       builder: (context) {
@@ -96,35 +96,10 @@ class _ShareImagePageState extends State<ShareImagePage> {
                   activeColor: Constants.indigoDye,
                   disableColor: Colors.grey,
                   viewportFraction: 0.90,
-                  onTap: (id) {
-                    showDialog(
-                        context: context,
-                        barrierColor: Colors.black.withOpacity(0.9),
-                        builder: (context) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child:
-                                  Image.file(File(_images[int.parse(id)].path)),
-                            ),
-                          );
-                        });
-                  },
                   customizedBanners: [
                     for (var image in _images)
                       GestureDetector(
-                        onTap: () {
-                          showDialog(
-                              context: context,
-                              barrierColor: Colors.black.withOpacity(0.9),
-                              builder: (context) {
-                                return Center(
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Image.file(File(image.path))),
-                                );
-                              });
-                        },
+                        onTap: () => showFullscreenImage(context, image.path),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(

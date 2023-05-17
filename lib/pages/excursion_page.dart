@@ -58,6 +58,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   final LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.bestForNavigation,
+    distanceFilter: 10,
   );
 
   StreamSubscription<Position>? _positionStream;
@@ -157,7 +158,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   Stream<List<MarkerModel>> getMarkers() {
-    return _excursionController!.getMarkers(widget.excursionId);
+    return _excursionController!.getMarkers();
   }
 
   Set<Marker> updateMarkers(AsyncSnapshot snapshot) {

@@ -59,7 +59,7 @@ class MarkerModel {
       ownerName: map['ownerName'] as String?,
       ownerPic: map['ownerPic'] as String?,
       title: map['title'] as String?,
-      imageUrl: map['imageUrl'] as String?,
+      imageUrl: map['imageUrl'] ?? '',
       position: LatLng(map['position'].latitude, map['position'].longitude),
       altitude: map['altitude'] as double?,
       markerType: MarkerType.fromString(map['markerType']),
