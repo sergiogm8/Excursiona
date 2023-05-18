@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/enums/message_type.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/marker_model.dart';
+import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
 import 'package:excursiona/shared/utils.dart';
@@ -24,6 +27,8 @@ class ExcursionController {
 
   final String? excursionId;
   final ExcursionService _excursionService = ExcursionService();
+  final ChatService _chatService = ChatService();
+
   int batteryLevel = 0;
   Timer? batteryTimer;
   Battery battery = Battery();
@@ -194,5 +199,25 @@ class ExcursionController {
     batteryTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       battery.batteryLevel.then((value) => batteryLevel = value);
     });
+  }
+
+  sendTextMessage(String text) async {
+    var userId = await HelperFunctions.getUserUID();
+    var userName = await HelperFunctions.getUserName();
+    var userPic = await HelperFunctions.getUserProfilePic();
+
+    Message message = Message(
+        senderID: userId!,
+        senderName: userName!,
+        senderPic: userPic!,
+        text: text,
+        timeSent: DateTime.now(),
+        type: MessageType.text);
+    await _chatService.sendGroupMessage(
+        excursionId: excursionId!, message: message);
+  }
+
+  Stream<List<Message>> getMessages() {
+    return _chatService.getGroupMessages(excursionId!);
   }
 }
