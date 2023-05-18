@@ -10,6 +10,7 @@ import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/pages/chat_room_page.dart';
 import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/pages/image_gallery_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
@@ -735,7 +736,15 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 DrawerItem(
                     title: 'Sala de chat',
                     icon: Icons.forum_outlined,
-                    onTap: () {}),
+                    onTap: () {
+                      nextScreen(
+                          context,
+                          ChatRoomPage(
+                            excursionController: _excursionController!,
+                            users: _participants,
+                          ),
+                          PageTransitionType.rightToLeft);
+                    }),
                 const SizedBox(height: 20),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 35),
