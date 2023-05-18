@@ -59,8 +59,8 @@ class _ChatPageState extends State<ChatPage> {
         ),
         body: Column(
           children: [
-            Expanded(child: ChatList(receiverUserId: widget.contactID)),
-            BottomChatField(receiverUserId: widget.contactID)
+            // Expanded(child: ChatList(receiverUserId: widget.contactID)),
+            // BottomChatField(receiverUserId: widget.contactID)
           ],
         ));
   }
