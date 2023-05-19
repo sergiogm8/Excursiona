@@ -136,8 +136,6 @@ class ExcursionController {
       File? image}) async {
     String imageDownloadURL = "";
     if (image != null) {
-      // Upload the image
-      // If the image was succesfully uploaded, create the marker
       imageDownloadURL = await StorageService().uploadMarkerImage(
           image: image, excursionId: excursionId, title: title);
       if (imageDownloadURL.isEmpty) {
@@ -219,5 +217,29 @@ class ExcursionController {
 
   Stream<List<Message>> getMessages() {
     return _chatService.getGroupMessages(excursionId!);
+  }
+
+  sendAudioMessage(String path) async {
+    var userId = await HelperFunctions.getUserUID();
+    var userName = await HelperFunctions.getUserName();
+    var userPic = await HelperFunctions.getUserProfilePic();
+
+    var audioUrl = await StorageService()
+        .uploadAudioFile(audio: File(path), excursionId: excursionId!);
+    if (audioUrl.isEmpty) {
+      return false;
+    }
+
+    Message message = Message(
+      senderID: userId!,
+      senderName: userName!,
+      senderPic: userPic!,
+      text: audioUrl,
+      timeSent: DateTime.now(),
+      type: MessageType.audio,
+    );
+
+    return await _chatService.sendGroupMessage(
+        excursionId: excursionId!, message: message);
   }
 }
