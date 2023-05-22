@@ -8,6 +8,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/location_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/chat_room_page.dart';
@@ -81,10 +82,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
   Timer? _durationTimer;
   ExcursionController? _excursionController;
   var _finishedLocation = false;
-  var _geoServiceEnabled;
   bool _initializedMarkers = false;
   var _isDragging = false;
-  bool _isPlaying = false;
   var _mapType = MapType.satellite;
   Set<UserModel> _participants = {};
   Position? _previousPosition;
@@ -290,11 +289,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _controller.complete(controller);
     Geolocator.getServiceStatusStream().listen((status) {
       if (status == ServiceStatus.disabled) {
-        _geoServiceEnabled = false;
         showSnackBar(context, Theme.of(context).primaryColor,
             'La ubicación no está activada');
       } else {
-        _geoServiceEnabled = true;
         loadData();
       }
     });
@@ -637,6 +634,14 @@ class _ExcursionPageState extends State<ExcursionPage> {
     );
   }
 
+  _leaveExcursion() {
+    //TODO: This will redirect to the excursion statistics page
+    _excursionController!.saveUserRoute();
+    _excursionController!.leaveExcursion();
+    Navigator.pop(context);
+    nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+  }
+
   _buildDrawer() {
     return Drawer(
       child: Column(
@@ -785,15 +790,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                       },
                                       icon: const Icon(Icons.cancel)),
                                   IconButton(
-                                    onPressed: () {
-                                      //TODO: This will redirect to the excursion statistics page
-                                      _excursionController!.leaveExcursion();
-                                      Navigator.pop(context);
-                                      nextScreenReplace(
-                                          context,
-                                          const HomePage(),
-                                          PageTransitionType.fade);
-                                    },
+                                    onPressed: () => _leaveExcursion(),
                                     icon: const Icon(Icons.check),
                                   ),
                                 ]);

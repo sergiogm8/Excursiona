@@ -9,14 +9,13 @@ import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
+import 'package:excursiona/model/location_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
-import 'package:excursiona/shared/utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,6 +31,7 @@ class ExcursionController {
   int batteryLevel = 0;
   Timer? batteryTimer;
   Battery battery = Battery();
+  final List<LocationModel> _route = [];
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
@@ -108,6 +108,8 @@ class ExcursionController {
     var userId = await HelperFunctions.getUserUID();
     var userPic = await HelperFunctions.getUserProfilePic();
     var userName = await HelperFunctions.getUserName();
+    var batteryLevel =
+        this.batteryLevel == 0 ? await battery.batteryLevel : this.batteryLevel;
     var marker = MarkerModel(
         id: userId!,
         position: LatLng(coords.latitude, coords.longitude),
@@ -121,6 +123,13 @@ class ExcursionController {
         distance: distance,
         batteryLevel: batteryLevel);
     _excursionService.shareCurrentLocation(marker, excursionId!);
+    _route.add(LocationModel(
+        position: LatLng(coords.latitude, coords.longitude),
+        timestamp: DateTime.now()));
+  }
+
+  saveUserRoute() async {
+    _excursionService.saveUserRoute(_route, excursionId!);
   }
 
   Stream<List<MarkerModel>> getMarkers({String? excursionId}) {

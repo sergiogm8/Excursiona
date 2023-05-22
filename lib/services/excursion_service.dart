@@ -4,6 +4,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/invitation.dart';
+import 'package:excursiona/model/location_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/notification_service.dart';
@@ -148,6 +149,19 @@ class ExcursionService {
           .collection('markers')
           .doc(marker.id)
           .set(marker.toMap());
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  saveUserRoute(List<LocationModel> route, String excursionId) async {
+    try {
+      var serializedRoute = route.map((location) => location.toMap()).toList();
+      excursionCollection
+          .doc(excursionId)
+          .collection('routes')
+          .doc(currentUserId)
+          .set({'route': serializedRoute});
     } catch (e) {
       print(e);
     }
