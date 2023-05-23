@@ -1,24 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/user_model.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class ExcursionParticipant {
-  final String uid;
-  final String name;
-  final String profilePic;
+class ExcursionParticipant extends UserModel {
   final bool isInExcursion;
   final DateTime? joinedAt;
   final DateTime? leftAt;
 
   ExcursionParticipant({
-    required this.uid,
-    required this.name,
-    required this.profilePic,
+    required super.uid,
+    required super.name,
+    required super.profilePic,
     required this.isInExcursion,
     this.joinedAt,
     this.leftAt,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'uid': uid,
