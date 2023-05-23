@@ -1,4 +1,4 @@
-import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion.dart';

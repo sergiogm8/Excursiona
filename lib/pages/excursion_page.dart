@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:custom_info_window/custom_info_window.dart';
-import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
