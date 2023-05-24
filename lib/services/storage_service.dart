@@ -56,4 +56,15 @@ class StorageService {
       return '';
     }
   }
+
+  getNumberOfImages(String excursionId) async {
+    Reference referenceDirExcursion =
+        referenceDirImages.child(excursionsFolder).child(excursionId);
+    try {
+      var list = await referenceDirExcursion.listAll();
+      return list.items.length;
+    } on FirebaseException {
+      return 0;
+    }
+  }
 }
