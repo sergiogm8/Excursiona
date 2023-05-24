@@ -9,9 +9,10 @@ import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
-import 'package:excursiona/model/location_model.dart';
+import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/message.dart';
+import 'package:excursiona/model/statistic_recap.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
@@ -31,7 +32,7 @@ class ExcursionController {
   int batteryLevel = 0;
   Timer? batteryTimer;
   Battery battery = Battery();
-  final List<LocationModel> _route = [];
+  RouteModel _route = RouteModel();
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
@@ -79,9 +80,10 @@ class ExcursionController {
     return await _excursionService.deleteUserFromExcursion(excursionId, userId);
   }
 
-  Future getParticipantsData(String excursionId) async {
+  Future<List<UserModel>> getParticipantsData({String? excursionId}) async {
+    excursionId ??= this.excursionId;
     List<UserModel> participants = [];
-    await _excursionService.getParticipantsData(excursionId).then((query) {
+    await _excursionService.getParticipantsData(excursionId!).then((query) {
       for (var participant in query) {
         participants
             .add(UserModel.fromMap(participant.data() as Map<String, dynamic>));
@@ -123,13 +125,8 @@ class ExcursionController {
         distance: distance,
         batteryLevel: batteryLevel);
     _excursionService.shareCurrentLocation(marker, excursionId!);
-    _route.add(LocationModel(
-        position: LatLng(coords.latitude, coords.longitude),
-        timestamp: DateTime.now()));
-  }
-
-  saveUserRoute() async {
-    _excursionService.saveUserRoute(_route, excursionId!);
+    _route.addLocation(
+        coords.latitude, coords.longitude, speed, coords.altitude, distance);
   }
 
   Stream<List<MarkerModel>> getMarkers({String? excursionId}) {
@@ -250,5 +247,39 @@ class ExcursionController {
 
     return await _chatService.sendGroupMessage(
         excursionId: excursionId!, message: message);
+  }
+
+  saveUserRoute() async {
+    _excursionService.saveUserRoute(_route, excursionId!);
+  }
+
+  // Future<RouteModel> getRoute() async {
+  //   return await _excursionService.getUserRoute(excursionId!);
+  // }
+
+  Future<RouteModel> getUserRoute() async {
+    var route = await _excursionService.getUserRoute(excursionId!);
+    _route = route;
+    return route;
+  }
+
+  Future<StatisticRecap> getExcursionData({String? excursionId}) async {
+    excursionId ??= this.excursionId;
+    var participant = await _excursionService.getParticipantData(excursionId!);
+    var participants = await getParticipantsData();
+    var nParticipants = participants.length;
+    var nPhotos = await StorageService().getNumberOfImages(excursionId);
+    var nMarkers = await _excursionService.getNumberOfMarkers(excursionId);
+    var statistics = StatisticRecap(
+        startTime: participant.joinedAt!,
+        endTime: participant.leftAt!,
+        nParticipants: nParticipants,
+        nPhotos: nPhotos,
+        nMarkers: nMarkers,
+        avgAltitude: _route.avgAltitude,
+        avgSpeed: _route.avgSpeed,
+        distance: _route.distance);
+
+    return statistics;
   }
 }

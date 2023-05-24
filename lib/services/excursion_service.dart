@@ -4,7 +4,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/invitation.dart';
-import 'package:excursiona/model/location_model.dart';
+import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/notification_service.dart';
@@ -112,6 +112,21 @@ class ExcursionService {
     }
   }
 
+  Future<ExcursionParticipant> getParticipantData(String excursionId,
+      {String? userId}) {
+    userId ??= currentUserId;
+    return excursionCollection
+        .doc(excursionId)
+        .collection('participants')
+        .doc(userId)
+        .get()
+        .then((doc) {
+      return ExcursionParticipant.fromMap(doc.data()!);
+    }).catchError((e) {
+      return Future.error('Error getting participant data');
+    });
+  }
+
   Future<List<QueryDocumentSnapshot>> getUserExcursions() async {
     //TODO: Modify this, it won't work
     String participantsSubcollection = 'participants';
@@ -154,17 +169,28 @@ class ExcursionService {
     }
   }
 
-  saveUserRoute(List<LocationModel> route, String excursionId) async {
+  saveUserRoute(RouteModel route, String excursionId) async {
     try {
-      var serializedRoute = route.map((location) => location.toMap()).toList();
       excursionCollection
           .doc(excursionId)
           .collection('routes')
           .doc(currentUserId)
-          .set({'route': serializedRoute});
+          .set(route.toMap());
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<RouteModel> getUserRoute(String excursionId, {String? userId}) async {
+    userId ??= currentUserId;
+    return excursionCollection
+        .doc(excursionId)
+        .collection('routes')
+        .doc(userId)
+        .get()
+        .then((doc) {
+      return RouteModel.fromMap(doc.data()!);
+    });
   }
 
   Stream<List<MarkerModel>> getMarkers(String excursionId) {
@@ -227,5 +253,23 @@ class ExcursionService {
     } catch (e) {
       return Stream.empty();
     }
+  }
+
+  Future<int> getNumberOfMarkers(String excursionId) async {
+    return await excursionCollection
+        .doc(excursionId)
+        .collection('markers')
+        .get()
+        .then((query) {
+      var data = query.docs;
+      var markers = data.map((e) => MarkerModel.fromMap(e.data())).toList();
+      // filter markers which markerType is not participant
+      markers = markers
+          .where((element) => element.markerType != MarkerType.participant)
+          .toList();
+      return markers.length;
+    }).catchError((e) {
+      return Future.error('Error getting number of markers');
+    });
   }
 }
