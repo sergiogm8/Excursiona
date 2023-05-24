@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:custom_info_window/custom_info_window.dart';
+import 'package:excursiona/pages/statistics_page.dart';
 import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/location_model.dart';
+import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/chat_room_page.dart';
@@ -266,9 +267,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
 
   _retrieveParticipantsData() {
     if (widget.participants == null) {
-      _excursionController!
-          .getParticipantsData(widget.excursionId)
-          .then((participants) {
+      _excursionController!.getParticipantsData().then((participants) {
         setState(() {
           _participants = participants.toSet();
         });
@@ -639,7 +638,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _excursionController!.saveUserRoute();
     _excursionController!.leaveExcursion();
     Navigator.pop(context);
-    nextScreenReplace(context, const HomePage(), PageTransitionType.fade);
+    nextScreenReplace(context, StatisticsPage(excursionId: widget.excursionId),
+        PageTransitionType.fade);
   }
 
   _buildDrawer() {
