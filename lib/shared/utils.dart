@@ -18,6 +18,10 @@ void nextScreenReplace(context, page, PageTransitionType animation) {
       context, PageTransition(child: page, type: animation));
 }
 
+heroNextScreen(context, page) {
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
+}
+
 void showSnackBar(BuildContext context, Color color, String message,
     [int duration = 3]) {
   ScaffoldMessenger.of(context).showSnackBar(
