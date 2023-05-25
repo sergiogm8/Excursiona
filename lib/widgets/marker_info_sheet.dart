@@ -84,6 +84,7 @@ class MarkerInfoSheet extends StatelessWidget {
                             color: Colors.grey,
                             fontWeight: FontWeight.w500,
                           ),
+                          textAlign: TextAlign.center,
                         )
                       ],
                     ),
