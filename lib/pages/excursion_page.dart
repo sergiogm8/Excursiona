@@ -1,41 +1,32 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:custom_info_window/custom_info_window.dart';
-import 'package:excursiona/pages/statistics_page.dart';
-import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/chat_room_page.dart';
-import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/pages/image_gallery_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
+import 'package:excursiona/pages/statistics_page.dart';
+import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/add_marker_dialog.dart';
 import 'package:excursiona/widgets/change_map_type_button.dart';
 import 'package:excursiona/widgets/drawer_item.dart';
 import 'package:excursiona/widgets/icon_marker.dart';
 import 'package:excursiona/widgets/marker_info_sheet.dart';
-import 'package:excursiona/widgets/user_marker_sheet.dart';
 import 'package:excursiona/widgets/user_marker.dart';
+import 'package:excursiona/widgets/user_marker_sheet.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:icon_decoration/icon_decoration.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
@@ -345,6 +336,13 @@ class _ExcursionPageState extends State<ExcursionPage> {
                 },
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
+                compassEnabled: true,
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
+                scrollGesturesEnabled: true,
+                tiltGesturesEnabled: true,
+                rotateGesturesEnabled: true,
+                zoomGesturesEnabled: true,
                 mapType: _mapType,
               );
             }),
@@ -389,7 +387,9 @@ class _ExcursionPageState extends State<ExcursionPage> {
                       Icons.gps_fixed,
                     ),
                     onPressed: () async {
-                      _isDragging = false;
+                      setState(() {
+                        _isDragging = false;
+                      });
                       final GoogleMapController controller =
                           await _controller.future;
                       controller.animateCamera(
