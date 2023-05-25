@@ -57,7 +57,7 @@ class RouteModel {
         timestamp: DateTime.now(),
         speed: speed,
         altitude: altitude));
-    this.distance = this.distance! + distance;
+    this.distance = distance;
   }
 
   LocationModel getMidPoint() {
@@ -68,6 +68,7 @@ class RouteModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'route': route!.map((location) => location.toMap()).toList(),
+      'distance': distance,
     };
   }
 
@@ -76,6 +77,7 @@ class RouteModel {
       route: map['route']
           .map<LocationModel>((location) => LocationModel.fromMap(location))
           .toList(),
+      distance: map['distance'],
     );
   }
 }
