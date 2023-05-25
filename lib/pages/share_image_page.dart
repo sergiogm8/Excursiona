@@ -77,7 +77,7 @@ class _ShareImagePageState extends State<ShareImagePage> {
         foregroundColor: Colors.black,
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Constants.lapisLazuli,
+        backgroundColor: Constants.indigoDye,
         child: const Icon(Icons.upload_rounded, size: 28),
         onPressed: () => _uploadImages(),
       ),
@@ -100,15 +100,32 @@ class _ShareImagePageState extends State<ShareImagePage> {
                     for (var image in _images)
                       GestureDetector(
                         onTap: () => showFullscreenImage(context, image.path),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            image: DecorationImage(
-                              image: FileImage(File(image.path)),
-                              fit: BoxFit.cover,
+                        child: Stack(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                  image: FileImage(File(image.path)),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          ),
+                            Positioned(
+                                top: 0,
+                                right: 0,
+                                child: IconButton(
+                                    icon: Icon(Icons.cancel),
+                                    iconSize: 32,
+                                    color: Colors.red,
+                                    onPressed: () {
+                                      setState(() {
+                                        _images.remove(image);
+                                      });
+                                      setState(() {});
+                                    })),
+                          ],
                         ),
                       )
                   ],
