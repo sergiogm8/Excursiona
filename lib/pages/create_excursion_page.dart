@@ -119,6 +119,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       showSnackBar(context, Colors.red, "Hubo un error al crear la excursión");
     } else {
       Navigator.of(context).pop();
+      Navigator.of(context).pop();
       showSnackBar(context, Colors.green, "Excursión creada con éxito");
       nextScreenReplace(
           context,
