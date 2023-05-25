@@ -71,6 +71,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
   BitmapDescriptor _interestMarkerIcon = BitmapDescriptor.defaultMarker;
   Position? _currentPosition;
   double _currentSpeed = 0.0;
+  double _currentAlitude = 0.0;
   Timer? _durationTimer;
   ExcursionController? _excursionController;
   var _finishedLocation = false;
@@ -170,7 +171,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
               onTap: isCurrentUser(markerModel.id)
                   ? null
                   : () {
-                      _isDragging = true;
                       _showMarkerInfo(markerModel);
                       _controller.future.then((controller) {
                         controller.animateCamera(CameraUpdate.newCameraPosition(
@@ -184,7 +184,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
                   AuthController().isCurrentUser(uid: markerModel.id) ? 2 : 1);
           markers.add(marker);
         } else {
-          _isDragging = true;
           var icon = _getBitmapByMarkerType(markerModel.markerType);
           Marker marker = Marker(
             markerId: markerId,
@@ -202,6 +201,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   _showMarkerInfo(MarkerModel markerModel) {
+    _isDragging = true;
+
     showModalBottomSheet(
         barrierColor: Colors.black.withOpacity(0.2),
         constraints: BoxConstraints(
@@ -294,8 +295,8 @@ class _ExcursionPageState extends State<ExcursionPage> {
             target: LatLng(position!.latitude, position.longitude),
             zoom: _zoom)));
       }
+      _previousPosition = _currentPosition;
       setState(() {
-        _previousPosition = _currentPosition;
         _currentPosition = position;
       });
       _shareCurrentLocation();
@@ -316,6 +317,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
       setState(() {
         _currentDistance += distance / 1000;
         _currentSpeed = speed;
+        _currentAlitude = _currentPosition!.altitude;
       });
     }
   }
@@ -475,55 +477,83 @@ class _ExcursionPageState extends State<ExcursionPage> {
         ),
         Positioned(
           bottom: 30,
-          left: 16,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.white,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(children: [
-                      Text(
-                        "Velocidad: ",
-                        style: GoogleFonts.inter(
-                            fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "${_currentSpeed.toStringAsFixed(2)} km/h",
-                        style: GoogleFonts.inter(fontSize: 13),
-                      )
-                    ])),
+          left: 5,
+          child: Container(
+            // width: MediaQuery.of(context).size.width * 0.75,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 30,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(children: [
+                          Text(
+                            "Vel.: ",
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            "${_currentSpeed.toStringAsFixed(2)} km/h",
+                            style: GoogleFonts.inter(fontSize: 13),
+                          )
+                        ])),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 10),
+                    height: 30,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(children: [
+                          Text(
+                            "Dist.: ",
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            "${_currentDistance.toStringAsFixed(2)} km",
+                            style: GoogleFonts.inter(fontSize: 13),
+                          )
+                        ])),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 10),
+                    height: 30,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(children: [
+                          Text(
+                            "Alt.: ",
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            "${_currentAlitude.toStringAsFixed(0)} m",
+                            style: GoogleFonts.inter(fontSize: 13),
+                          )
+                        ])),
+                  ),
+                ],
               ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.white,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(children: [
-                      Text(
-                        "Distancia: ",
-                        style: GoogleFonts.inter(
-                            fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "${_currentDistance.toStringAsFixed(2)} km",
-                        style: GoogleFonts.inter(fontSize: 13),
-                      )
-                    ])),
-              ),
-            ],
+            ),
           ),
         ),
         if (!_finishedLocation) const Geolocating(),
