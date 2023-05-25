@@ -25,10 +25,6 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
   }
 
   Stream<List<MarkerModel>> _getMarkers() {
-    /// I need to filter this stream _excursionController.getMarkers() to only return markers that are not
-    /// of type MarkerType.participant and those that have an imageUrl
-    ///
-    ///
     return _excursionController.getMarkers().map((markerList) =>
         markerList.where((marker) => _hasImage(marker)).toList());
   }
