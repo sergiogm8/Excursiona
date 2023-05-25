@@ -127,25 +127,52 @@ class MarkerImageCard extends StatelessWidget {
       child: Row(mainAxisSize: MainAxisSize.max, children: [
         Expanded(
           flex: 5,
-          child: GestureDetector(
-            onTap: () => showFullscreenImage(context, marker.imageUrl!),
-            child: CachedNetworkImage(
-              imageUrl: marker.imageUrl!,
-              placeholder: (context, url) => const Loader(),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              imageBuilder: (context, imageProvider) {
-                return Container(
+          child: marker.imageUrl!.isNotEmpty
+              ? GestureDetector(
+                  onTap: () => showFullscreenImage(context, marker.imageUrl!),
+                  child: CachedNetworkImage(
+                    imageUrl: marker.imageUrl!,
+                    placeholder: (context, url) => const Loader(),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                    imageBuilder: (context, imageProvider) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                )
+              : Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
+                    color: Constants.lightGrey,
                   ),
-                );
-              },
-            ),
-          ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Colors.grey,
+                        size: 30,
+                      ),
+                      Text(
+                        'No hay imagen asociada',
+                        style: GoogleFonts.inter(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    ],
+                  ),
+                ),
         ),
         Expanded(
           flex: 6,
