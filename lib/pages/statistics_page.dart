@@ -9,6 +9,8 @@ import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/gallery_page_widgets.dart';
+import 'package:excursiona/widgets/icon_marker.dart';
+import 'package:excursiona/widgets/marker_info_sheet.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -137,43 +139,36 @@ class _StatisticsPageState extends State<StatisticsPage> {
       children: [
         Expanded(
           flex: 3,
-          child: GestureDetector(
-            onTap: () {},
-            child: Container(
-              // height: MediaQuery.of(context).size.height * 0.3,
-              child: Stack(
-                children: [
-                  GoogleMap(
-                    zoomControlsEnabled: false,
-                    zoomGesturesEnabled: false,
-                    myLocationButtonEnabled: false,
-                    myLocationEnabled: false,
-                    compassEnabled: false,
-                    scrollGesturesEnabled: false,
-                    tiltGesturesEnabled: false,
-                    rotateGesturesEnabled: false,
-                    markers: _markers,
-                    mapType: MapType.satellite,
-                    initialCameraPosition: cameraPosition,
-                    polylines: {polylineRoute},
-                    onMapCreated: (controller) async {
-                      await _generateMarkers();
-                      // Future.delayed(const Duration(microseconds: 100));
-                      controller.animateCamera(
-                          CameraUpdate.newLatLngBounds(bounds, 40));
-                    },
-                  ),
-                  const Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: Icon(
-                      MdiIcons.arrowExpandAll,
-                      color: Colors.white,
-                    ),
-                  )
-                ],
-              ),
-            ),
+          child: GoogleMap(
+            zoomControlsEnabled: false,
+            zoomGesturesEnabled: true,
+            myLocationButtonEnabled: false,
+            myLocationEnabled: false,
+            compassEnabled: false,
+            scrollGesturesEnabled: true,
+            tiltGesturesEnabled: false,
+            rotateGesturesEnabled: false,
+            mapToolbarEnabled: false,
+            // onTap: (argument) => nextScreen(
+            //   context,
+            //   MapViewRecap(
+            //       route: polylineRoute,
+            //       initialCamera: cameraPosition,
+            //       bounds: bounds,
+            //       routeDelimiters: _markers,
+            //       excursionController: _excursionController),
+            //   PageTransitionType.rightToLeft,
+            // ),
+            markers: _markers,
+            mapType: MapType.satellite,
+            initialCameraPosition: cameraPosition,
+            polylines: {polylineRoute},
+            onMapCreated: (controller) async {
+              await _generateMarkers();
+              Future.delayed(const Duration(microseconds: 100));
+              controller
+                  .animateCamera(CameraUpdate.newLatLngBounds(bounds, 40));
+            },
           ),
         ),
         const SizedBox(height: 26),
@@ -190,7 +185,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     ImagesView(excursionController: _excursionController),
                     MarkersView(excursionController: _excursionController)
                   ],
-                ))
+                ),
+              )
       ],
     );
   }
@@ -454,3 +450,160 @@ class StatisticRow extends StatelessWidget {
     );
   }
 }
+
+// class MapViewRecap extends StatefulWidget {
+//   final Polyline route;
+//   final CameraPosition initialCamera;
+//   final LatLngBounds bounds;º
+//   final Set<Marker> routeDelimiters;
+//   final ExcursionController excursionController;
+//   const MapViewRecap(
+//       {super.key,
+//       required this.route,
+//       required this.initialCamera,
+//       required this.bounds,
+//       required this.routeDelimiters,
+//       required this.excursionController});
+
+//   @override
+//   State<MapViewRecap> createState() => _MapViewRecapState();
+// }
+
+// class _MapViewRecapState extends State<MapViewRecap> {
+//   Polyline get _route => widget.route;
+//   CameraPosition get _initialCamera => widget.initialCamera;
+//   LatLngBounds get _bounds => widget.bounds;
+//   Set<Marker> _markers = {};
+//   ExcursionController get _excursionController => widget.excursionController;
+
+//   BitmapDescriptor _warningMarkerIcon = BitmapDescriptor.defaultMarker;
+//   BitmapDescriptor _restMarkerIcon = BitmapDescriptor.defaultMarker;
+//   BitmapDescriptor _customMarkerIcon = BitmapDescriptor.defaultMarker;
+//   BitmapDescriptor _interestMarkerIcon = BitmapDescriptor.defaultMarker;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     var aux = widget.routeDelimiters;
+//     setState(() {
+//       _markers = aux;
+//     });
+//   }
+
+//   _captureWidgets() {
+//     ScreenshotController screenshotController = ScreenshotController();
+
+//     screenshotController
+//         .captureFromWidget(const IconMarker(
+//             icon: Constants.warningMarkerIcon,
+//             color: Constants.warningMarkerColor))
+//         .then((image) => setState(() {
+//               _warningMarkerIcon = BitmapDescriptor.fromBytes(image);
+//             })); // Warning marker
+//     screenshotController
+//         .captureFromWidget(const IconMarker(
+//             icon: Constants.restMarkerIcon, color: Constants.restMarkerColor))
+//         .then((image) => setState(() {
+//               _restMarkerIcon = BitmapDescriptor.fromBytes(image);
+//             })); // Rest marker
+//     screenshotController
+//         .captureFromWidget(const IconMarker(
+//             icon: Constants.interestMarkerIcon,
+//             color: Constants.interestMarkerColor))
+//         .then((image) => setState(() {
+//               _interestMarkerIcon = BitmapDescriptor.fromBytes(image);
+//             })); // Interest marker
+//     screenshotController
+//         .captureFromWidget(const IconMarker(
+//             icon: Constants.customMarkerIcon,
+//             color: Constants.customMarkerColor))
+//         .then((image) => setState(() {
+//               _customMarkerIcon = BitmapDescriptor.fromBytes(image);
+//             })); // Custom marker
+//   }
+
+//   _getBitmapByMarkerType(MarkerType markerType) {
+//     switch (markerType) {
+//       case MarkerType.info:
+//         return _interestMarkerIcon;
+//       case MarkerType.rest:
+//         return _restMarkerIcon;
+//       case MarkerType.warning:
+//         return _warningMarkerIcon;
+//       case MarkerType.custom:
+//         return _customMarkerIcon;
+//       default:
+//         return _interestMarkerIcon;
+//     }
+//   }
+
+//   _showMarkerInfo(MarkerModel markerModel) {
+//     showModalBottomSheet(
+//         barrierColor: Colors.black.withOpacity(0.2),
+//         constraints: BoxConstraints(
+//           maxHeight: markerModel.markerType == MarkerType.participant
+//               ? MediaQuery.of(context).size.height * 0.3
+//               : MediaQuery.of(context).size.height * 0.35,
+//         ),
+//         shape: const RoundedRectangleBorder(
+//           borderRadius: BorderRadius.vertical(
+//             top: Radius.circular(15),
+//           ),
+//         ),
+//         elevation: 1,
+//         context: context,
+//         builder: (context) {
+//           return MarkerInfoSheet(markerModel: markerModel);
+//         });
+//   }
+
+//   _retrieveUserMarkers() {
+//     Set<Marker> markers = {};
+//     _excursionController.getUserMarkers().then((markerList) {
+//       for (var marker in markerList) {
+//         markers.add(Marker(
+//           markerId: MarkerId(marker.id),
+//           position: marker.position,
+//           icon: _getBitmapByMarkerType(marker.markerType),
+//           onTap: () => _showMarkerInfo(marker),
+//         ));
+//       }
+//       setState(() {
+//         _markers.addAll(markers.toSet());
+//       });
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+//       floatingActionButton: FloatingActionButton(
+//           child: const Icon(Icons.arrow_back),
+//           backgroundColor: Colors.white,
+//           foregroundColor: Colors.black,
+//           onPressed: () => Navigator.pop(context)),
+//       body: GoogleMap(
+//         initialCameraPosition: _initialCamera,
+//         zoomControlsEnabled: false,
+//         zoomGesturesEnabled: true,
+//         myLocationButtonEnabled: false,
+//         myLocationEnabled: false,
+//         compassEnabled: true,
+//         scrollGesturesEnabled: true,
+//         tiltGesturesEnabled: true,
+//         rotateGesturesEnabled: true,
+//         mapToolbarEnabled: false,
+//         polylines: {_route},
+//         markers: _markers,
+//         mapType: MapType.satellite,
+//         onMapCreated: (controller) async {
+//           Future.delayed(const Duration(microseconds: 300));
+//           controller.animateCamera(CameraUpdate.newLatLngBounds(_bounds, 40));
+//           _captureWidgets();
+//           _retrieveUserMarkers();
+//         },
+//       ),
+//     );
+//   }
+// }
