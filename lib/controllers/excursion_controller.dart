@@ -6,6 +6,7 @@ import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/enums/message_type.dart';
 import 'package:excursiona/helper/helper_functions.dart';
+import 'package:excursiona/model/emergency_alert.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
@@ -286,5 +287,27 @@ class ExcursionController {
         distance: _route.distance);
 
     return statistics;
+  }
+
+  sendEmergencyAlert({required Position myPosition}) async {
+    var userInfo = await UserController().getUserBasicInfo();
+    var emergencyAlert = EmergencyAlert(
+      id: userInfo.uid,
+      requesterName: userInfo.name,
+      requesterPic: userInfo.profilePic,
+      position: LatLng(myPosition.latitude, myPosition.longitude),
+    );
+    return await _excursionService.sendEmergencyAlert(
+        excursionId!, emergencyAlert);
+  }
+
+  Stream<List<EmergencyAlert>> getEmergencyAlert() {
+    return _excursionService.getEmergencyAlert(excursionId!);
+  }
+
+  Future<bool> cancelEmergencyAlert() async {
+    var userInfo = await UserController().getUserBasicInfo();
+
+    return await _excursionService.cancelEmergencyAlert(excursionId!);
   }
 }

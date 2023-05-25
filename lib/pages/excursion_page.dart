@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/model/emergency_alert.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
@@ -14,6 +17,7 @@ import 'package:excursiona/pages/statistics_page.dart';
 import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/add_marker_dialog.dart';
 import 'package:excursiona/widgets/change_map_type_button.dart';
 import 'package:excursiona/widgets/drawer_item.dart';
@@ -22,6 +26,7 @@ import 'package:excursiona/widgets/marker_info_sheet.dart';
 import 'package:excursiona/widgets/user_marker.dart';
 import 'package:excursiona/widgets/user_marker_sheet.dart';
 import 'package:excursiona/widgets/widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
@@ -556,6 +561,31 @@ class _ExcursionPageState extends State<ExcursionPage> {
             ),
           ),
         ),
+        Positioned(
+          top: 0,
+          child: StreamBuilder(
+            stream: _excursionController!.getEmergencyAlert(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                EmergencyAlert emergencyAlert =
+                    snapshot.data![snapshot.data!.length - 1];
+                print("Emergency alert: ${emergencyAlert.id}");
+                print(
+                    "Emergency alert: ${FirebaseAuth.instance.currentUser!.uid}");
+                if (isCurrentUser(emergencyAlert.id)) {
+                  return const SizedBox.shrink();
+                } else {
+                  return EmergencyAlertBox(
+                    emergencyAlert: emergencyAlert,
+                    mapController: _controller,
+                    excursionController: _excursionController!,
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
         if (!_finishedLocation) const Geolocating(),
       ],
     );
@@ -776,7 +806,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
                           context,
                           ChatRoomPage(
                             excursionController: _excursionController!,
-                            users: _participants,
                           ),
                           PageTransitionType.rightToLeft);
                     }),
@@ -870,8 +899,73 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                 },
                                 icon: const Icon(Icons.cancel)),
                             IconButton(
-                              onPressed: () {
-                                //TODO: Send emergency message to participants
+                              onPressed: () async {
+                                var result = await _excursionController!
+                                    .sendEmergencyAlert(
+                                        myPosition: _currentPosition!);
+                                if (result) {
+                                  Navigator.pop(context);
+                                  showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (context) {
+                                        return Dialog(
+                                          backgroundColor:
+                                              Colors.black.withOpacity(0.3),
+                                          child: BackdropFilter(
+                                              filter: ImageFilter.blur(
+                                                  sigmaX: 5, sigmaY: 5),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "ESTADO DE EMERGENCIA",
+                                                    style: GoogleFonts.inter(
+                                                        fontSize: 26,
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w700),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10.0),
+                                                      ),
+                                                      backgroundColor:
+                                                          Constants.redColor,
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 14,
+                                                          vertical: 12),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      _excursionController!
+                                                          .cancelEmergencyAlert();
+                                                    },
+                                                    child: Text(
+                                                      "Cancelar emergencia",
+                                                      style: GoogleFonts.inter(
+                                                          fontSize: 20,
+                                                          color: Colors.white),
+                                                    ),
+                                                  )
+                                                ],
+                                              )),
+                                        );
+                                      });
+                                } else {
+                                  Navigator.pop(context);
+                                  showSnackBar(context, Constants.redColor,
+                                      "No se ha podido enviar el aviso de emergencia. Inténtalo de nuevo.");
+                                }
                               },
                               icon: const Icon(Icons.check),
                             ),
@@ -944,6 +1038,121 @@ class Geolocating extends StatelessWidget {
                 ],
               ),
             )),
+      ),
+    );
+  }
+}
+
+class EmergencyAlertBox extends StatelessWidget {
+  final EmergencyAlert emergencyAlert;
+  final Completer<GoogleMapController> mapController;
+  final ExcursionController excursionController;
+  const EmergencyAlertBox(
+      {super.key,
+      required this.emergencyAlert,
+      required this.mapController,
+      required this.excursionController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(25)),
+        color: Constants.redColor,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      height: MediaQuery.of(context).size.height * 0.35,
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text("¡AVISO DE EMERGENCIA!",
+              style: GoogleFonts.inter(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white)),
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            emergencyAlert.requesterPic.isEmpty
+                ? AccountAvatar(radius: 25, name: emergencyAlert.requesterName)
+                : CircleAvatar(
+                    radius: 25,
+                    backgroundImage:
+                        CachedNetworkImageProvider(emergencyAlert.requesterPic),
+                  ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                  "${getNameAbbreviation(emergencyAlert.requesterName)} dio un aviso de emergencia",
+                  style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white)),
+            ),
+          ]),
+          const SizedBox(height: 15),
+          Text("Por favor, comprobad que está a salvo",
+              style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white)),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              mapController.future.then((controller) {
+                controller.animateCamera(CameraUpdate.newCameraPosition(
+                    CameraPosition(target: emergencyAlert.position, zoom: 19)));
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+              foregroundColor: Colors.black,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.gps_fixed,
+                  size: 28,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  "LOCALIZAR",
+                  style: GoogleFonts.inter(
+                      fontSize: 20, fontWeight: FontWeight.w500),
+                )
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: TextButton(
+                onPressed: () {
+                  nextScreen(
+                      context,
+                      ChatRoomPage(excursionController: excursionController),
+                      PageTransitionType.rightToLeft);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.forum, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text(
+                      "Ir al chat",
+                      style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600),
+                    )
+                  ],
+                )),
+          )
+        ],
       ),
     );
   }

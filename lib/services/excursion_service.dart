@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/model/emergency_alert.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
@@ -287,5 +288,47 @@ class ExcursionService {
     }).catchError((e) {
       return Future.error('Error getting number of markers');
     });
+  }
+
+  Future<bool> sendEmergencyAlert(
+      String excursionId, EmergencyAlert alert) async {
+    try {
+      await excursionCollection
+          .doc(excursionId)
+          .collection('alerts')
+          .doc(alert.id)
+          .set(alert.toMap());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Stream<List<EmergencyAlert>> getEmergencyAlert(String excursionId) {
+    return excursionCollection
+        .doc(excursionId)
+        .collection('alerts')
+        .snapshots()
+        .map((snapshot) {
+      List<EmergencyAlert> alerts = [];
+      for (var doc in snapshot.docs) {
+        alerts.add(EmergencyAlert.fromMap(doc.data()));
+      }
+      return alerts;
+    });
+  }
+
+  Future<bool> cancelEmergencyAlert(String excursionId) async {
+    try {
+      var alertId = currentUserId;
+      await excursionCollection
+          .doc(excursionId)
+          .collection('alerts')
+          .doc(alertId)
+          .delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

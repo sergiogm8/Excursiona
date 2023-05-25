@@ -22,9 +22,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ExcursionController excursionController;
-  final Set<UserModel> users;
-  const ChatRoomPage(
-      {super.key, required this.excursionController, required this.users});
+  const ChatRoomPage({super.key, required this.excursionController});
 
   @override
   State<ChatRoomPage> createState() => _ChatRoomPageState();
