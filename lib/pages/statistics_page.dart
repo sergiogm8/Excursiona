@@ -1,9 +1,13 @@
 import 'package:banner_carousel/banner_carousel.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
+import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/image_model.dart';
+import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/statistic_recap.dart';
+import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/constants.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/gallery_page_widgets.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -14,6 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:screenshot/screenshot.dart';
 
 class StatisticsPage extends StatefulWidget {
@@ -114,10 +119,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
     });
   }
 
-  Stream<List<ImageModel>> _getImagesFromExcursion() {
-    return _excursionController.getImagesFromExcursion();
-  }
-
   _buildBody() {
     Polyline polylineRoute = Polyline(
         polylineId: const PolylineId('route'),
@@ -162,7 +163,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                           CameraUpdate.newLatLngBounds(bounds, 40));
                     },
                   ),
-                  Positioned(
+                  const Positioned(
                     bottom: 10,
                     right: 10,
                     child: Icon(
@@ -186,39 +187,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   height: double.infinity,
                   customizedBanners: [
                     StatisticView(statistics: _excursionData!),
-                    StreamBuilder(
-                      stream: _getImagesFromExcursion(),
-                      builder: (context, snapshot) {
-                        if (snapshot.data == null) {
-                          return const Loader();
-                        }
-                        return snapshot.data!.isNotEmpty
-                            ? GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: snapshot.data!.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: 12,
-                                        mainAxisSpacing: 12,
-                                        childAspectRatio: 0.6),
-                                itemBuilder: (context, index) {
-                                  return SharedImageCard(
-                                    data: snapshot.data![index],
-                                  );
-                                },
-                              )
-                            : const Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "No se han compartido imágenes aún",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ));
-                      },
-                    ),
+                    ImagesView(excursionController: _excursionController),
+                    MarkersView(excursionController: _excursionController)
                   ],
                 ))
       ],
@@ -236,12 +206,139 @@ class _StatisticsPageState extends State<StatisticsPage> {
           IconButton(
             icon: const Icon(Icons.arrow_forward),
             onPressed: () {
-              //TODO: continue to whatever
+              nextScreenReplace(
+                  context, const HomePage(), PageTransitionType.rightToLeft);
             },
           ),
         ],
       ),
-      body: !_isLoading ? _buildBody() : Center(child: const Loader()),
+      body: !_isLoading ? _buildBody() : const Center(child: Loader()),
+    );
+  }
+}
+
+class MarkersView extends StatelessWidget {
+  final ExcursionController excursionController;
+  const MarkersView({super.key, required this.excursionController});
+
+  Stream<List<MarkerModel>> _getMarkers() {
+    return excursionController.getMarkers().map((markerList) =>
+        markerList.where((marker) => _isNotParticipant(marker)).toList());
+  }
+
+  _isNotParticipant(MarkerModel marker) {
+    return marker.markerType != MarkerType.participant;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Marcadores creados",
+                style: GoogleFonts.inter(
+                    fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            StreamBuilder(
+              stream: _getMarkers(),
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return const Loader();
+                }
+                if (snapshot.hasError) {
+                  return const Text("Error al cargar los marcadores");
+                }
+                return snapshot.data != null && snapshot.data!.isNotEmpty
+                    ? Column(children: [
+                        for (var marker in snapshot.data!)
+                          MarkerImageCard(marker: marker)
+                      ])
+                    : const Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "No hay marcadores para mostrar",
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ImagesView extends StatelessWidget {
+  final ExcursionController excursionController;
+  const ImagesView({super.key, required this.excursionController});
+
+  Stream<List<ImageModel>> _getImagesFromExcursion() {
+    return excursionController.getImagesFromExcursion();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Imágenes compartidas",
+                style: GoogleFonts.inter(
+                    fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            StreamBuilder(
+              stream: _getImagesFromExcursion(),
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return const Loader();
+                }
+                if (snapshot.hasError) {
+                  return const Text("Error al cargar las imágenes");
+                }
+                return snapshot.data!.isNotEmpty
+                    ? GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: snapshot.data!.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 0.6),
+                        itemBuilder: (context, index) {
+                          return SharedImageCard(
+                            data: snapshot.data![index],
+                          );
+                        },
+                      )
+                    : const Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "No hay imágenes para mostrar",
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -253,70 +350,74 @@ class StatisticView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Resumen",
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-              StatisticRow(
-                MdiIcons.timerPlay,
-                "Hora de inicio",
-                DateFormat('HH:mm').format(statistics.startTime),
-              ),
-              const Divider(),
-              StatisticRow(
-                MdiIcons.timerPause,
-                "Hora de fin",
-                DateFormat('HH:mm').format(statistics.endTime),
-              ),
-              const Divider(),
-              StatisticRow(MdiIcons.timelapse, "Duración",
-                  '${statistics.duration.inHours.toString()}h ${(statistics.duration.inMinutes % 60).toString()}min'),
-              const Divider(),
-              StatisticRow(
-                MdiIcons.mapMarkerDistance,
-                "Distancia",
-                "${statistics.distance!.toStringAsFixed(2)} km",
-              ),
-              const Divider(),
-              StatisticRow(
-                MdiIcons.runFast,
-                "Velocidad media",
-                "${statistics.avgSpeed!.toStringAsFixed(1)} km/h",
-              ),
-              const Divider(),
-              StatisticRow(
-                MdiIcons.arrowUpDown,
-                "Altitud media",
-                "${statistics.avgAltitude!.toStringAsFixed(0)} m",
-              ),
-              const Divider(),
-              StatisticRow(
-                Icons.group,
-                "Nº participantes",
-                statistics.nParticipants.toString(),
-              ),
-              const Divider(),
-              StatisticRow(
-                Icons.photo_library,
-                "Imágenes subidas",
-                statistics.nPhotos.toString(),
-              ),
-              const Divider(),
-              StatisticRow(
-                MdiIcons.mapMarkerMultiple,
-                "Marcadores creados",
-                statistics.nMarkers.toString(),
-              ),
-              const Divider(),
-            ],
-          )
-        ],
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Resumen",
+              style:
+                  GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 20),
+            Column(
+              children: [
+                StatisticRow(
+                  MdiIcons.timerPlay,
+                  "Hora de inicio",
+                  DateFormat('HH:mm').format(statistics.startTime),
+                ),
+                const Divider(),
+                StatisticRow(
+                  MdiIcons.timerPause,
+                  "Hora de fin",
+                  DateFormat('HH:mm').format(statistics.endTime),
+                ),
+                const Divider(),
+                StatisticRow(MdiIcons.timelapse, "Duración",
+                    '${statistics.duration.inHours.toString()}h ${(statistics.duration.inMinutes % 60).toString()}min'),
+                const Divider(),
+                StatisticRow(
+                  MdiIcons.mapMarkerDistance,
+                  "Distancia",
+                  "${statistics.distance!.toStringAsFixed(2)} km",
+                ),
+                const Divider(),
+                StatisticRow(
+                  MdiIcons.runFast,
+                  "Velocidad media",
+                  "${statistics.avgSpeed!.toStringAsFixed(1)} km/h",
+                ),
+                const Divider(),
+                StatisticRow(
+                  MdiIcons.arrowUpDown,
+                  "Altitud media",
+                  "${statistics.avgAltitude!.toStringAsFixed(0)} m",
+                ),
+                const Divider(),
+                StatisticRow(
+                  Icons.group,
+                  "Nº participantes",
+                  statistics.nParticipants.toString(),
+                ),
+                const Divider(),
+                StatisticRow(
+                  Icons.photo_library,
+                  "Imágenes subidas",
+                  statistics.nPhotos.toString(),
+                ),
+                const Divider(),
+                StatisticRow(
+                  MdiIcons.mapMarkerMultiple,
+                  "Marcadores creados",
+                  statistics.nMarkers.toString(),
+                ),
+                const Divider(),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
