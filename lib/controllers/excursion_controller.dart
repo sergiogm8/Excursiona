@@ -134,6 +134,11 @@ class ExcursionController {
     return _excursionService.getMarkers(excursionId!);
   }
 
+  Future<List<MarkerModel>> getUserMarkers({String? excursionId}) async {
+    excursionId ??= this.excursionId;
+    return await _excursionService.getUserMarkers(excursionId!);
+  }
+
   uploadMarker(
       {required String excursionId,
       required String title,

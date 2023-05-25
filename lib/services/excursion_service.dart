@@ -207,6 +207,22 @@ class ExcursionService {
     });
   }
 
+  Future<List<MarkerModel>> getUserMarkers(String excursionId) async {
+    return await excursionCollection
+        .doc(excursionId)
+        .collection('markers')
+        .get()
+        .then((query) {
+      var data = query.docs;
+      var markers = data.map((e) => MarkerModel.fromMap(e.data())).toList();
+      return markers
+          .where((element) =>
+              element.userId == currentUserId &&
+              element.markerType != MarkerType.participant)
+          .toList();
+    });
+  }
+
   addMarkerToExcursion({
     required MarkerModel marker,
     required String excursionId,
