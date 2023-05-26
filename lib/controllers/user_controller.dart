@@ -1,5 +1,5 @@
 import 'package:excursiona/helper/helper_functions.dart';
-import 'package:excursiona/model/invitation.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/user_service.dart';
 
@@ -17,7 +17,7 @@ class UserController {
     return await _userService.getAllUsersBasicInfo(name);
   }
 
-  Stream<List<Invitation>> getExcursionInvitations() {
+  Stream<List<Excursion>> getExcursionInvitations() {
     return _userService.getExcursionInvitations();
   }
 

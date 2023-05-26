@@ -104,7 +104,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       ownerName: currentUser!.name,
       ownerPic: currentUser!.profilePic,
       id: const Uuid().v4(),
-      nParticipants: _participants.length,
       date: DateTime.now(),
       title: _excursionName,
       description: _description,

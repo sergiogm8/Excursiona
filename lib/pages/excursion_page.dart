@@ -40,11 +40,11 @@ class ExcursionPage extends StatefulWidget {
   const ExcursionPage(
       {super.key,
       required this.excursionId,
-      this.excursion,
+      required this.excursion,
       this.participants});
 
   final String excursionId;
-  final Excursion? excursion;
+  final Excursion excursion;
   final Set<UserModel>? participants;
 
   @override
@@ -758,26 +758,40 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     ],
                   ),
                 ),
-                if (widget.excursion != null)
 
-                  /// Only the excursion owner will have this parameter not null,
-                  /// so only the owner will be able to add new participants
-                  DrawerItem(
-                      title: 'Añadir participantes',
-                      icon: Icons.person_add_outlined,
-                      onTap: () async {
-                        Set<UserModel> newParticipants = await nextScreen(
-                            context,
-                            SearchParticipantsPage(
-                                alreadyParticipants: _participants),
-                            PageTransitionType.rightToLeft);
-                        setState(() {
-                          _participants.addAll(newParticipants);
-                        });
-                        _captureWidgets();
-                        _excursionController!.inviteUsersToExcursion(
-                            widget.excursion!, newParticipants);
-                      }),
+                /// Only the excursion owner will have this parameter not null,
+                /// so only the owner will be able to add new participants
+                DrawerItem(
+                    title: 'Añadir participantes',
+                    icon: Icons.person_add_outlined,
+                    onTap: () async {
+                      Set<UserModel> newParticipants = await nextScreen(
+                          context,
+                          SearchParticipantsPage(
+                              alreadyParticipants: _participants),
+                          PageTransitionType.rightToLeft);
+                      setState(() {
+                        _participants.addAll(newParticipants);
+                      });
+                      _captureWidgets();
+                      _excursionController!.inviteUsersToExcursion(
+                          Excursion(
+                            id: widget.excursionId,
+                            title: widget.excursion.title,
+                            ownerName: _participants
+                                .where((element) => isCurrentUser(element.uid))
+                                .first
+                                .name,
+                            ownerPic: _participants
+                                .where((element) => isCurrentUser(element.uid))
+                                .first
+                                .profilePic,
+                            date: widget.excursion.date,
+                            description: widget.excursion.description,
+                            difficulty: widget.excursion.difficulty,
+                          ),
+                          newParticipants);
+                    }),
                 DrawerItem(
                     title: 'Compartir imágenes',
                     icon: Icons.add_photo_alternate_outlined,

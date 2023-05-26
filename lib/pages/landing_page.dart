@@ -1,5 +1,5 @@
 import 'package:excursiona/controllers/user_controller.dart';
-import 'package:excursiona/model/invitation.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/widgets/excursion_invitation_card.dart';
 import 'package:excursiona/widgets/widgets.dart';
@@ -16,7 +16,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  Stream<List<Invitation>> _getExcursionNotifications() {
+  Stream<List<Excursion>> _getExcursionNotifications() {
     return UserController().getExcursionInvitations();
   }
 
@@ -111,7 +111,7 @@ class _LandingPageState extends State<LandingPage> {
                                             return Column(
                                               children: [
                                                 ExcursionInvitationCard(
-                                                  invitation:
+                                                  excursion:
                                                       snapshot.data![index],
                                                 ),
                                                 const SizedBox(

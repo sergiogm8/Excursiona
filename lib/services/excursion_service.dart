@@ -4,7 +4,6 @@ import 'package:excursiona/model/emergency_alert.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
-import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
@@ -34,16 +33,11 @@ class ExcursionService {
 
   Future inviteUsersToExcursion(
       Excursion excursion, Set<UserModel> participants) async {
-    Invitation invitation = Invitation(
-        excursionTitle: excursion.title,
-        excursionId: excursion.id,
-        ownerName: excursion.ownerName,
-        ownerPic: excursion.ownerPic);
     try {
       for (var participant in participants) {
         if (participant.uid == currentUserId) continue;
         await UserService()
-            .insertExcursionInvitation(invitation, participant.uid);
+            .insertExcursionInvitation(excursion, participant.uid);
         NotificationService()
             .sendExcursionNotificationToUser(excursion, participant.uid);
       }
@@ -54,13 +48,8 @@ class ExcursionService {
   }
 
   Future<bool> inviteUserToExcursion(Excursion excursion, String userId) async {
-    Invitation invitation = Invitation(
-        excursionTitle: excursion.title,
-        excursionId: excursion.id,
-        ownerName: excursion.ownerName,
-        ownerPic: excursion.ownerPic);
     try {
-      UserService().insertExcursionInvitation(invitation, userId);
+      UserService().insertExcursionInvitation(excursion, userId);
       return true;
     } on FirebaseException {
       return false;
