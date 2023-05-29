@@ -33,7 +33,7 @@ class ExcursionParticipant extends UserModel {
       profilePic: map['profilePic'] as String,
       isInExcursion: map['isInExcursion'] as bool,
       joinedAt: DateTime.fromMillisecondsSinceEpoch(map['joinedAt']),
-      leftAt: DateTime.fromMillisecondsSinceEpoch(map['leftAt']),
+      leftAt: DateTime.fromMillisecondsSinceEpoch(map['leftAt'] ?? 0),
     );
   }
 
