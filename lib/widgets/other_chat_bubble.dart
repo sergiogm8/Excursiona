@@ -75,7 +75,8 @@ class _OtherChatBubbleState extends State<OtherChatBubble> {
                   )
                 : AccountAvatar(radius: 15, name: widget.message.senderName),
             const SizedBox(width: 5),
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: Container(
                 margin: const EdgeInsets.only(top: 10),
                 child: Card(
@@ -104,7 +105,7 @@ class _OtherChatBubbleState extends State<OtherChatBubble> {
                             Text(
                               getNameAbbreviation(widget.message.senderName),
                               style: GoogleFonts.inter(
-                                fontSize: 16,
+                                fontSize: 14,
                                 color: Constants.indigoDye,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -114,7 +115,7 @@ class _OtherChatBubbleState extends State<OtherChatBubble> {
                                 ? Text(
                                     widget.message.text,
                                     style: GoogleFonts.inter(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       color: Colors.black,
                                       fontWeight: FontWeight.w400,
                                     ),

@@ -83,7 +83,7 @@ class _MyChatBubbleState extends State<MyChatBubble> {
                         ? Text(
                             widget.message.text,
                             style: GoogleFonts.inter(
-                              fontSize: 16,
+                              fontSize: 14,
                               color: Colors.white,
                               fontWeight: FontWeight.w400,
                             ),
