@@ -587,9 +587,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 EmergencyAlert emergencyAlert =
                     snapshot.data![snapshot.data!.length - 1];
-                print("Emergency alert: ${emergencyAlert.id}");
-                print(
-                    "Emergency alert: ${FirebaseAuth.instance.currentUser!.uid}");
                 if (isCurrentUser(emergencyAlert.id)) {
                   return const SizedBox.shrink();
                 } else {
@@ -942,10 +939,12 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                       builder: (context) {
                                         return Dialog(
                                           backgroundColor:
-                                              Colors.black.withOpacity(0.3),
+                                              Colors.black.withOpacity(0.2),
                                           child: BackdropFilter(
                                               filter: ImageFilter.blur(
-                                                  sigmaX: 5, sigmaY: 5),
+                                                  tileMode: TileMode.clamp,
+                                                  sigmaX: 10,
+                                                  sigmaY: 10),
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
@@ -987,7 +986,40 @@ class _ExcursionPageState extends State<ExcursionPage> {
                                                           fontSize: 20,
                                                           color: Colors.white),
                                                     ),
-                                                  )
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        nextScreen(
+                                                            context,
+                                                            ChatRoomPage(
+                                                                excursionController:
+                                                                    _excursionController!),
+                                                            PageTransitionType
+                                                                .rightToLeft);
+                                                      },
+                                                      child: Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          const Icon(
+                                                              Icons.forum,
+                                                              color:
+                                                                  Colors.white),
+                                                          const SizedBox(
+                                                              width: 5),
+                                                          Text(
+                                                            "Ir al chat",
+                                                            style: GoogleFonts.inter(
+                                                                fontSize: 14,
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          )
+                                                        ],
+                                                      )),
                                                 ],
                                               )),
                                         );
