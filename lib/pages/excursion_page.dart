@@ -159,13 +159,31 @@ class _ExcursionPageState extends State<ExcursionPage> {
     return _excursionController!.getMarkers();
   }
 
+  _captureWidget(UserModel user) {
+    ScreenshotController screenshotController = ScreenshotController();
+
+    screenshotController
+        .captureFromWidget(UserMarker(user: user),
+            delay: const Duration(milliseconds: 200))
+        .then((value) {
+      setState(() {
+        _usersMarkers[user.uid] = value;
+      });
+    });
+  }
+
   Set<Marker> updateMarkers(AsyncSnapshot snapshot) {
     Set<Marker> markers = {};
     if (snapshot.hasData) {
       List<MarkerModel> markersData = snapshot.data;
-      markersData.forEach((MarkerModel markerModel) {
+      markersData.forEach((MarkerModel markerModel) async {
         final markerId = MarkerId(markerModel.id);
         if (markerModel.markerType == MarkerType.participant) {
+          if (!_usersMarkers.containsKey(markerModel.id)) {
+            var newParticipant =
+                await _excursionController!.getParticipantData(markerModel.id);
+            await _captureWidget(newParticipant);
+          }
           Marker marker = Marker(
               markerId: markerId,
               position: LatLng(markerModel.position.latitude,
@@ -694,7 +712,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
   }
 
   _leaveExcursion() {
-    //TODO: This will redirect to the excursion statistics page
     _excursionController!.saveUserRoute();
     _excursionController!.leaveExcursion();
     Navigator.pop(context);

@@ -31,6 +31,11 @@ class ExcursionService {
     }
   }
 
+  Future<Excursion> getExcursion(String excursionId) async {
+    return await excursionCollection.doc(excursionId).get().then(
+        (value) => Excursion.fromMap(value.data()! as Map<String, dynamic>));
+  }
+
   Future inviteUsersToExcursion(
       Excursion excursion, Set<UserModel> participants) async {
     try {
@@ -112,8 +117,6 @@ class ExcursionService {
         .get()
         .then((doc) {
       return ExcursionParticipant.fromMap(doc.data()!);
-    }).catchError((e) {
-      return Future.error('Error getting participant data');
     });
   }
 

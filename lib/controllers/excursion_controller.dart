@@ -50,8 +50,10 @@ class ExcursionController {
     return result;
   }
 
-  Future<bool> leaveExcursion() async {
-    return await _excursionService.leaveExcursion(excursionId!);
+  Future leaveExcursion({String? excursionId}) async {
+    excursionId ??= this.excursionId;
+    await _excursionService.leaveExcursion(excursionId!);
+    await HelperFunctions.deleteExcursionSession();
   }
 
   Future<bool> joinExcursion(String excursionID) async {
@@ -91,6 +93,11 @@ class ExcursionController {
       }
     });
     return participants;
+  }
+
+  Future getParticipantData(String userId) async {
+    return await _excursionService.getParticipantData(excursionId!,
+        userId: userId);
   }
 
   List<Excursion>? getUserExcursions() {
@@ -306,8 +313,16 @@ class ExcursionController {
   }
 
   Future<bool> cancelEmergencyAlert() async {
-    var userInfo = await UserController().getUserBasicInfo();
-
     return await _excursionService.cancelEmergencyAlert(excursionId!);
+  }
+
+  saveExcursionSession(String excursionId) async {
+    await HelperFunctions.saveExcursionSession(excursionId);
+  }
+
+  Future<Excursion?> getActiveExcursion() async {
+    var excursionId = await HelperFunctions.getExcursionSession();
+    if (excursionId == null) return null;
+    return await _excursionService.getExcursion(excursionId);
   }
 }

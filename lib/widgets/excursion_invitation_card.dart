@@ -21,6 +21,7 @@ class ExcursionInvitationCard extends StatelessWidget {
       showSnackBar(
           context, Colors.red, "Hubo un error al aceptar la invitación");
     }
+    await ExcursionController().saveExcursionSession(excursion.id);
     nextScreen(
         context,
         ExcursionPage(excursionId: excursion.id, excursion: excursion),
