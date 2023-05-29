@@ -1,8 +1,7 @@
-import 'package:excursiona/enums/message_enums.dart';
+import 'package:excursiona/enums/message_type.dart';
 import 'package:excursiona/model/chat_contact.dart';
 import 'package:excursiona/model/contact.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/invitation.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
@@ -65,22 +64,23 @@ class UserService {
     return user;
   }
 
-  Future insertExcursionInvitation(Invitation invitation, String userId) async {
+  Future insertExcursionInvitation(Excursion invitation, String userId) async {
     try {
       await userCollection
           .doc(userId)
           .collection('invitations')
-          .doc(invitation.excursionId)
+          .doc(invitation.id)
           .set(invitation.toMap());
     } on FirebaseException {
       rethrow;
     }
   }
 
-  Future deleteExcursionInvitation(String excursionId, String userId) async {
+  Future deleteExcursionInvitation(String excursionId) async {
     try {
+      var currentUserId = authService.firebaseAuth.currentUser!.uid;
       await userCollection
-          .doc(userId)
+          .doc(currentUserId)
           .collection('invitations')
           .doc(excursionId)
           .delete();
@@ -89,136 +89,134 @@ class UserService {
     }
   }
 
-  Stream<List<Invitation>> getExcursionInvitations() {
+  Stream<List<Excursion>> getExcursionInvitations() {
     String userId = authService.firebaseAuth.currentUser!.uid;
     return userCollection
         .doc(userId)
         .collection('invitations')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Invitation.fromMap(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) => Excursion.fromMap(doc.data())).toList();
     });
   }
 
   /// ------------------- CHAT ------------------- ///
-  void _saveMessageToContactsSubcollection(
-      UserModel senderUserData,
-      UserModel recieverUserData,
-      String text,
-      DateTime timeSent,
-      String recieverUserID) async {
-    // SAVE THE MESSAGE TO THE reciever'S CHAT COLLECTION
-    var recieverChatContact = ChatContact(
-        name: senderUserData.name,
-        profilePic: senderUserData.profilePic,
-        contactID: senderUserData.uid,
-        timeSent: timeSent,
-        lastMessage: text);
+  // void _saveMessageToContactsSubcollection(
+  //     UserModel senderUserData,
+  //     UserModel recieverUserData,
+  //     String text,
+  //     DateTime timeSent,
+  //     String recieverUserID) async {
+  //   // SAVE THE MESSAGE TO THE reciever'S CHAT COLLECTION
+  //   var recieverChatContact = ChatContact(
+  //       name: senderUserData.name,
+  //       profilePic: senderUserData.profilePic,
+  //       contactID: senderUserData.uid,
+  //       timeSent: timeSent,
+  //       lastMessage: text);
 
-    await userCollection
-        .doc(recieverUserID)
-        .collection('chats')
-        .doc(authService.firebaseAuth.currentUser!.uid)
-        .set(recieverChatContact.toMap());
+  //   await userCollection
+  //       .doc(recieverUserID)
+  //       .collection('chats')
+  //       .doc(authService.firebaseAuth.currentUser!.uid)
+  //       .set(recieverChatContact.toMap());
 
-    // SAVE THE MESSAGE TO THE SENDER'S CHAT COLLECTION
+  //   // SAVE THE MESSAGE TO THE SENDER'S CHAT COLLECTION
 
-    var senderChatContact = ChatContact(
-        name: recieverUserData.name,
-        profilePic: recieverUserData.profilePic,
-        contactID: recieverUserData.uid,
-        timeSent: timeSent,
-        lastMessage: text);
+  //   var senderChatContact = ChatContact(
+  //       name: recieverUserData.name,
+  //       profilePic: recieverUserData.profilePic,
+  //       contactID: recieverUserData.uid,
+  //       timeSent: timeSent,
+  //       lastMessage: text);
 
-    await userCollection
-        .doc(authService.firebaseAuth.currentUser!.uid)
-        .collection('chats')
-        .doc(recieverUserID)
-        .set(senderChatContact.toMap());
-  }
+  //   await userCollection
+  //       .doc(authService.firebaseAuth.currentUser!.uid)
+  //       .collection('chats')
+  //       .doc(recieverUserID)
+  //       .set(senderChatContact.toMap());
+  // }
 
-  void _saveMessageToMessageSubcollection(
-      String recieverUserID,
-      // String senderUserID,
-      String senderUserName,
-      String reciverUserName,
-      String text,
-      DateTime timeSent,
-      String messageID,
-      MessageEnum messageType) async {
-    var message = Message(
-        senderID: authService.firebaseAuth.currentUser!.uid,
-        recieverID: recieverUserID,
-        text: text,
-        timeSent: timeSent,
-        type: messageType,
-        messageID: messageID,
-        isRead: false);
+  // void _saveMessageToMessageSubcollection(
+  //     String recieverUserID,
+  //     // String senderUserID,
+  //     String senderUserName,
+  //     String reciverUserName,
+  //     String text,
+  //     DateTime timeSent,
+  //     String messageID,
+  //     MessageEnum messageType) async {
+  //   var message = Message(
+  //       senderID: authService.firebaseAuth.currentUser!.uid,
+  //       recieverID: recieverUserID,
+  //       text: text,
+  //       timeSent: timeSent,
+  //       type: messageType,
+  //       messageID: messageID,
+  //       isRead: false);
 
-    //SAVE THE MESSAGE TO THE SENDER'S MESSAGE COLLECTION (OUR MESSAGE)
-    await userCollection
-        .doc(authService.firebaseAuth.currentUser!.uid)
-        .collection('chats')
-        .doc(recieverUserID)
-        .collection('messages')
-        .doc(messageID)
-        .set(message.toMap());
+  //   //SAVE THE MESSAGE TO THE SENDER'S MESSAGE COLLECTION (OUR MESSAGE)
+  //   await userCollection
+  //       .doc(authService.firebaseAuth.currentUser!.uid)
+  //       .collection('chats')
+  //       .doc(recieverUserID)
+  //       .collection('messages')
+  //       .doc(messageID)
+  //       .set(message.toMap());
 
-    //SAVE THE MESSAGE TO THE RECEIVERS'S MESSAGE COLLECTION (OTHER'S MESSAGE)
-    await userCollection
-        .doc(recieverUserID)
-        .collection('chats')
-        .doc(authService.firebaseAuth.currentUser!.uid)
-        .collection('messages')
-        .doc(messageID)
-        .set(message.toMap());
-  }
+  //   //SAVE THE MESSAGE TO THE RECEIVERS'S MESSAGE COLLECTION (OTHER'S MESSAGE)
+  //   await userCollection
+  //       .doc(recieverUserID)
+  //       .collection('chats')
+  //       .doc(authService.firebaseAuth.currentUser!.uid)
+  //       .collection('messages')
+  //       .doc(messageID)
+  //       .set(message.toMap());
+  // }
 
-  void sendTextMessage(
-      {required BuildContext context,
-      required String text,
-      required String recieverUserID}) async {
-    try {
-      var timeSent = DateTime.now();
-      UserModel recieverUserData;
-      // User recieverUserData = getUserDataByID(recieverUserID) as User;
+  // void sendTextMessage(
+  //     {required BuildContext context,
+  //     required String text,
+  //     required String recieverUserID}) async {
+  //   try {
+  //     var timeSent = DateTime.now();
+  //     UserModel recieverUserData;
+  //     // User recieverUserData = getUserDataByID(recieverUserID) as User;
 
-      var recieverUserDataMap = await userCollection.doc(recieverUserID).get();
-      recieverUserData = UserModel.fromMap(
-          recieverUserDataMap.data()! as Map<String, dynamic>);
+  //     var recieverUserDataMap = await userCollection.doc(recieverUserID).get();
+  //     recieverUserData = UserModel.fromMap(
+  //         recieverUserDataMap.data()! as Map<String, dynamic>);
 
-      var messageID = const Uuid().v1();
+  //     var messageID = const Uuid().v1();
 
-      UserModel senderUserData = await getCurrentUserData() as UserModel;
+  //     UserModel senderUserData = await getCurrentUserData() as UserModel;
 
-      _saveMessageToContactsSubcollection(
-          senderUserData, recieverUserData, text, timeSent, recieverUserID);
+  //     _saveMessageToContactsSubcollection(
+  //         senderUserData, recieverUserData, text, timeSent, recieverUserID);
 
-      _saveMessageToMessageSubcollection(recieverUserID, senderUserData.name,
-          recieverUserData.name, text, timeSent, messageID, MessageEnum.text);
-    } catch (e) {
-      showSnackBar(context, Theme.of(context).primaryColor, e.toString());
-    }
-  }
+  //     _saveMessageToMessageSubcollection(recieverUserID, senderUserData.name,
+  //         recieverUserData.name, text, timeSent, messageID, MessageEnum.text);
+  //   } catch (e) {
+  //     showSnackBar(context, Theme.of(context).primaryColor, e.toString());
+  //   }
+  // }
 
-  Stream<List<Message>> getUserMessages(String receiverUserId) {
-    return userCollection
-        .doc(authService.firebaseAuth.currentUser!.uid)
-        .collection('chats')
-        .doc(receiverUserId)
-        .collection('messages')
-        .orderBy('timeSent')
-        .snapshots()
-        .map((event) {
-      List<Message> messages = [];
-      for (var doc in event.docs) {
-        messages.add(Message.fromMap(doc.data()));
-      }
-      return messages;
-    });
-  }
+  // Stream<List<Message>> getUserMessages(String receiverUserId) {
+  //   return userCollection
+  //       .doc(authService.firebaseAuth.currentUser!.uid)
+  //       .collection('chats')
+  //       .doc(receiverUserId)
+  //       .collection('messages')
+  //       .orderBy('timeSent')
+  //       .snapshots()
+  //       .map((event) {
+  //     List<Message> messages = [];
+  //     for (var doc in event.docs) {
+  //       messages.add(Message.fromMap(doc.data()));
+  //     }
+  //     return messages;
+  //   });
+  // }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
     //if a name is given filter by name

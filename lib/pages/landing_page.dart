@@ -1,11 +1,12 @@
 import 'package:excursiona/controllers/user_controller.dart';
-import 'package:excursiona/model/invitation.dart';
+import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/widgets/excursion_invitation_card.dart';
 import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -15,7 +16,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  Stream<List<Invitation>> _getExcursionNotifications() {
+  Stream<List<Excursion>> _getExcursionNotifications() {
     return UserController().getExcursionInvitations();
   }
 
@@ -89,10 +90,10 @@ class _LandingPageState extends State<LandingPage> {
                               Text(
                                 "Notificaciones",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(
+                                style: GoogleFonts.inter(
                                     color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600),
                               ),
                               StreamBuilder(
                                 stream: _getExcursionNotifications(),
@@ -107,8 +108,16 @@ class _LandingPageState extends State<LandingPage> {
                                               const NeverScrollableScrollPhysics(),
                                           itemCount: snapshot.data!.length,
                                           itemBuilder: (context, index) {
-                                            return ExcursionInvitationCard(
-                                              invitation: snapshot.data![index],
+                                            return Column(
+                                              children: [
+                                                ExcursionInvitationCard(
+                                                  excursion:
+                                                      snapshot.data![index],
+                                                ),
+                                                const SizedBox(
+                                                  height: 15,
+                                                )
+                                              ],
                                             );
                                           },
                                         )

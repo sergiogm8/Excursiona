@@ -19,6 +19,7 @@ class SearchParticipantsPage extends StatefulWidget {
 
 class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   bool _isLoading = false;
+  Set<UserModel> get _alreadyParticipants => widget.alreadyParticipants;
   final Set<UserModel> _participants = {};
   List<UserModel> _searchResults = [];
   final TextEditingController _textController = TextEditingController();
@@ -29,9 +30,6 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   void initState() {
     super.initState();
     _isLoading = true;
-    setState(() {
-      _participants.addAll(widget.alreadyParticipants);
-    });
     _fetchUsers();
   }
 
@@ -39,7 +37,7 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
     var results = await _userController
         .getAllUsersBasicInfo(_textController.text.toLowerCase());
     results = results
-        .where((element) => !_participants
+        .where((element) => !_alreadyParticipants
             .where(
                 (alreadyParticipant) => alreadyParticipant.uid == element.uid)
             .isNotEmpty)

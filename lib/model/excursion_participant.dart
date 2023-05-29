@@ -1,29 +1,28 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:excursiona/model/user_model.dart';
 
-class ExcursionParticipant {
-  final String uid;
-  final String name;
-  final String profilePic;
-  final LatLng currentLocation;
+class ExcursionParticipant extends UserModel {
   final bool isInExcursion;
+  final DateTime? joinedAt;
+  final DateTime? leftAt;
 
   ExcursionParticipant({
-    required this.uid,
-    required this.name,
-    required this.profilePic,
-    required this.currentLocation,
+    required super.uid,
+    required super.name,
+    required super.profilePic,
     required this.isInExcursion,
+    this.joinedAt,
+    this.leftAt,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'uid': uid,
       'name': name,
       'profilePic': profilePic,
-      'currentLocation':
-          GeoPoint(currentLocation.latitude, currentLocation.longitude),
       'isInExcursion': isInExcursion,
+      'joinedAt': joinedAt?.millisecondsSinceEpoch,
+      'leftAt': leftAt?.millisecondsSinceEpoch,
     };
   }
 
@@ -32,9 +31,19 @@ class ExcursionParticipant {
       uid: map['uid'] as String,
       name: map['name'] as String,
       profilePic: map['profilePic'] as String,
-      currentLocation: LatLng(
-          map['currentLocation'].latitude, map['currentLocation'].longitude),
       isInExcursion: map['isInExcursion'] as bool,
+      joinedAt: DateTime.fromMillisecondsSinceEpoch(map['joinedAt']),
+      leftAt: DateTime.fromMillisecondsSinceEpoch(map['leftAt'] ?? 0),
+    );
+  }
+
+  factory ExcursionParticipant.fromUserModel(UserModel user) {
+    return ExcursionParticipant(
+      uid: user.uid,
+      name: user.name,
+      profilePic: user.profilePic,
+      isInExcursion: true,
+      joinedAt: DateTime.now(),
     );
   }
 }

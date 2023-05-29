@@ -27,191 +27,191 @@ final textInputDecoration = InputDecoration(
   ),
 );
 
-class ChatList extends StatefulWidget {
-  final String receiverUserId;
+// class ChatList extends StatefulWidget {
+//   final String receiverUserId;
 
-  const ChatList({super.key, required this.receiverUserId});
+//   const ChatList({super.key, required this.receiverUserId});
 
-  @override
-  State<ChatList> createState() => _ChatListState();
-}
+//   @override
+//   State<ChatList> createState() => _ChatListState();
+// }
 
-class _ChatListState extends State<ChatList> {
-  final ScrollController messageController = ScrollController();
+// class _ChatListState extends State<ChatList> {
+//   final ScrollController messageController = ScrollController();
 
-  @override
-  void dispose() {
-    super.dispose();
-    messageController.dispose();
-  }
+//   @override
+//   void dispose() {
+//     super.dispose();
+//     messageController.dispose();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Message>>(
-      stream: UserService().getUserMessages(widget.receiverUserId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Loader();
-        }
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          messageController.jumpTo(messageController.position.maxScrollExtent);
-        });
-        return ListView.builder(
-          controller: messageController,
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-            final message = snapshot.data![index];
-            var timeSent = DateFormat.Hm().format(message.timeSent);
-            return Align(
-                alignment: message.recieverID ==
-                        AuthService().firebaseAuth.currentUser!.uid
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
-                child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      minWidth: MediaQuery.of(context).size.width * 0.3,
-                    ),
-                    child: Card(
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      color: message.recieverID ==
-                              AuthService().firebaseAuth.currentUser!.uid
-                          ? Constants.lightChatColor
-                          : Constants.indigoDye,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 5),
-                      child: Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                              right: 50,
-                              top: 5,
-                              bottom: 15,
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  message.text,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: message.recieverID ==
-                                            AuthService()
-                                                .firebaseAuth
-                                                .currentUser!
-                                                .uid
-                                        ? Colors.black
-                                        : Colors.white,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 2,
-                            right: 4,
-                            child: Row(
-                              children: [
-                                Text(
-                                  timeSent,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: message.recieverID ==
-                                            AuthService()
-                                                .firebaseAuth
-                                                .currentUser!
-                                                .uid
-                                        ? Constants.darkGrey
-                                        : Constants.lightGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )));
-          },
-        );
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<List<Message>>(
+//       stream: UserService().getUserMessages(widget.receiverUserId),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Loader();
+//         }
+//         SchedulerBinding.instance.addPostFrameCallback((_) {
+//           messageController.jumpTo(messageController.position.maxScrollExtent);
+//         });
+//         return ListView.builder(
+//           controller: messageController,
+//           itemCount: snapshot.data!.length,
+//           itemBuilder: (context, index) {
+//             final message = snapshot.data![index];
+//             var timeSent = DateFormat.Hm().format(message.timeSent);
+//             return Align(
+//                 alignment: message.recieverID ==
+//                         AuthService().firebaseAuth.currentUser!.uid
+//                     ? Alignment.centerLeft
+//                     : Alignment.centerRight,
+//                 child: ConstrainedBox(
+//                     constraints: BoxConstraints(
+//                       maxWidth: MediaQuery.of(context).size.width * 0.8,
+//                       minWidth: MediaQuery.of(context).size.width * 0.3,
+//                     ),
+//                     child: Card(
+//                       elevation: 1,
+//                       shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(8)),
+//                       color: message.recieverID ==
+//                               AuthService().firebaseAuth.currentUser!.uid
+//                           ? Constants.lightChatColor
+//                           : Constants.indigoDye,
+//                       margin: const EdgeInsets.symmetric(
+//                           horizontal: 15, vertical: 5),
+//                       child: Stack(
+//                         children: [
+//                           Padding(
+//                             padding: const EdgeInsets.only(
+//                               left: 10,
+//                               right: 50,
+//                               top: 5,
+//                               bottom: 15,
+//                             ),
+//                             child: Column(
+//                               children: [
+//                                 Text(
+//                                   message.text,
+//                                   style: TextStyle(
+//                                     fontSize: 16,
+//                                     color: message.recieverID ==
+//                                             AuthService()
+//                                                 .firebaseAuth
+//                                                 .currentUser!
+//                                                 .uid
+//                                         ? Colors.black
+//                                         : Colors.white,
+//                                   ),
+//                                 )
+//                               ],
+//                             ),
+//                           ),
+//                           Positioned(
+//                             bottom: 2,
+//                             right: 4,
+//                             child: Row(
+//                               children: [
+//                                 Text(
+//                                   timeSent,
+//                                   style: TextStyle(
+//                                     fontSize: 13,
+//                                     color: message.recieverID ==
+//                                             AuthService()
+//                                                 .firebaseAuth
+//                                                 .currentUser!
+//                                                 .uid
+//                                         ? Constants.darkGrey
+//                                         : Constants.lightGrey,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     )));
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
 
-class BottomChatField extends StatefulWidget {
-  final String receiverUserId;
-  const BottomChatField({super.key, required this.receiverUserId});
+// class BottomChatField extends StatefulWidget {
+//   final String receiverUserId;
+//   const BottomChatField({super.key, required this.receiverUserId});
 
-  @override
-  State<BottomChatField> createState() => _BottomChatField();
-}
+//   @override
+//   State<BottomChatField> createState() => _BottomChatField();
+// }
 
-class _BottomChatField extends State<BottomChatField> {
-  final TextEditingController messageController = TextEditingController();
-  bool enableSend = false;
+// class _BottomChatField extends State<BottomChatField> {
+//   final TextEditingController messageController = TextEditingController();
+//   bool enableSend = false;
 
-  void sendTextMessage() async {
-    if (enableSend) {
-      UserService().sendTextMessage(
-          context: context,
-          text: messageController.text.trimLeft(),
-          recieverUserID: widget.receiverUserId);
-      setState(() {
-        messageController.clear();
-      });
-    }
-  }
+//   void sendTextMessage() async {
+//     if (enableSend) {
+//       UserService().sendTextMessage(
+//           context: context,
+//           text: messageController.text.trimLeft(),
+//           recieverUserID: widget.receiverUserId);
+//       setState(() {
+//         messageController.clear();
+//       });
+//     }
+//   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    messageController.dispose();
-  }
+//   @override
+//   void dispose() {
+//     super.dispose();
+//     messageController.dispose();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: messageController,
-                maxLines: null,
-                onChanged: ((value) {
-                  if (value.trimLeft().isNotEmpty) {
-                    setState(() {
-                      enableSend = true;
-                    });
-                  } else {
-                    setState(() {
-                      enableSend = false;
-                    });
-                  }
-                }),
-                decoration: textInputDecoration.copyWith(
-                  hintText: 'Type a message',
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  fillColor: const Color.fromARGB(255, 255, 255, 255),
-                  filled: true,
-                ),
-                textAlignVertical: TextAlignVertical.center,
-              ),
-            ),
-            const SizedBox(width: 10),
-            CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor,
-                radius: 25,
-                child: GestureDetector(
-                    onTap: sendTextMessage,
-                    child: const Icon(Icons.send, color: Colors.white)))
-          ],
-        ));
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+//         child: Row(
+//           children: [
+//             Expanded(
+//               child: TextField(
+//                 controller: messageController,
+//                 maxLines: null,
+//                 onChanged: ((value) {
+//                   if (value.trimLeft().isNotEmpty) {
+//                     setState(() {
+//                       enableSend = true;
+//                     });
+//                   } else {
+//                     setState(() {
+//                       enableSend = false;
+//                     });
+//                   }
+//                 }),
+//                 decoration: textInputDecoration.copyWith(
+//                   hintText: 'Type a message',
+//                   contentPadding:
+//                       const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+//                   fillColor: const Color.fromARGB(255, 255, 255, 255),
+//                   filled: true,
+//                 ),
+//                 textAlignVertical: TextAlignVertical.center,
+//               ),
+//             ),
+//             const SizedBox(width: 10),
+//             CircleAvatar(
+//                 backgroundColor: Theme.of(context).primaryColor,
+//                 radius: 25,
+//                 child: GestureDetector(
+//                     onTap: sendTextMessage,
+//                     child: const Icon(Icons.send, color: Colors.white)))
+//           ],
+//         ));
+//   }
+// }
 
 class Loader extends StatelessWidget {
   const Loader({super.key});

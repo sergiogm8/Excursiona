@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/pages/forgot_password.dart';
@@ -104,7 +104,8 @@ class _LandingPageState extends State<AuthPage>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
                         height:
                             MediaQuery.of(context).size.height * topBoxFactor),
                     Padding(

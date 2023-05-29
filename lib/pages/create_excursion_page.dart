@@ -1,4 +1,4 @@
-import 'package:excursiona/constants/assets.dart';
+import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion.dart';
@@ -66,9 +66,9 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
 
   _showLoadingDialog() {
     showDialog(
-        barrierColor: const Color(0xFFFAFAFA).withOpacity(0.8),
-        context: context,
+        barrierColor: Constants.darkWhite.withOpacity(0.8),
         barrierDismissible: false,
+        context: context,
         builder: (context) {
           return Scaffold(
               backgroundColor: Colors.transparent,
@@ -104,7 +104,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       ownerName: currentUser!.name,
       ownerPic: currentUser!.profilePic,
       id: const Uuid().v4(),
-      nParticipants: _participants.length,
       date: DateTime.now(),
       title: _excursionName,
       description: _description,
@@ -119,11 +118,13 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       showSnackBar(context, Colors.red, "Hubo un error al crear la excursión");
     } else {
       Navigator.of(context).pop();
+      Navigator.of(context).pop();
       showSnackBar(context, Colors.green, "Excursión creada con éxito");
-      nextScreen(
+      nextScreenReplace(
           context,
           ExcursionPage(
             excursionId: excursion.id,
+            excursion: excursion,
             participants: _participants,
           ),
           PageTransitionType.fade);
@@ -134,8 +135,9 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Crear excursión",
-            style: TextStyle(color: Colors.black)),
+        title: Text("Crear excursión",
+            style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        foregroundColor: Colors.black,
         backgroundColor: const Color(0xFFFAFAFA),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -183,11 +185,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Participantes",
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 15),

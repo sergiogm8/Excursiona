@@ -1,3 +1,4 @@
+import 'package:excursiona/model/excursion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HelperFunctions {
@@ -6,6 +7,7 @@ class HelperFunctions {
   static String userEmailKey = "USEREMAILKEY";
   static String profilePicKey = "USERPROFILEPICKEY";
   static String userUIDKey = "USERUIDKEY";
+  static String excursionIdKey = "EXCURSIONIDKEY";
 
   static Future<bool> saveUserLoggedInStatus(bool isUserLoggedIn) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -30,6 +32,21 @@ class HelperFunctions {
   static Future<bool> saveUserProfilePic(String profilePic) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.setString(profilePicKey, profilePic);
+  }
+
+  static Future<bool> saveExcursionSession(String excursionId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setString(excursionIdKey, excursionId);
+  }
+
+  static Future<String?> getExcursionSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(excursionIdKey);
+  }
+
+  static Future<bool> deleteExcursionSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.remove(excursionIdKey);
   }
 
   static Future<bool?> getUserLoggedInStatus() async {
