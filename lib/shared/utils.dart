@@ -53,6 +53,18 @@ final blueTextInputDecoration = InputDecoration(
       borderRadius: BorderRadius.circular(15)),
 );
 
+final textInputDecoration = InputDecoration(
+  hintStyle: GoogleFonts.inter(
+      color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w300),
+  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+  enabledBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Colors.black, width: 1.5),
+  ),
+  focusedBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Constants.lapisLazuli, width: 2.0),
+  ),
+);
+
 getIconByMarkerType(MarkerType markerType) {
   switch (markerType) {
     case MarkerType.info:

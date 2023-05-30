@@ -4,7 +4,7 @@ import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -141,7 +141,7 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
                     const Loader(),
                     const SizedBox(height: 20),
                     Text(
-                      "Compartiendo ${_title}... ",
+                      "Compartiendo $_title... ",
                       style: GoogleFonts.inter(fontSize: 20),
                       textAlign: TextAlign.center,
                     )

@@ -2,7 +2,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/form_button.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 

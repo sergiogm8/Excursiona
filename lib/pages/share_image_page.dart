@@ -4,10 +4,8 @@ import 'package:banner_carousel/banner_carousel.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 

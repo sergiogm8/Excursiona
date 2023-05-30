@@ -4,11 +4,10 @@ import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
-import 'widgets.dart';
 
 class SharedImageCard extends StatelessWidget {
   final ImageModel data;
@@ -31,8 +30,7 @@ class SharedImageCard extends StatelessWidget {
         ],
       ),
       child: GestureDetector(
-        onTap: () => showFullscreenImage(
-            context, data.imageUrl), //TODO: Implementar vista de imagen
+        onTap: () => showFullscreenImage(context, data.imageUrl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -6,7 +6,6 @@ import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +16,9 @@ class UserService {
   AuthService authService = AuthService();
 
   final String? uid;
-  // collection reference
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
-  ///
-  /// FUNCIONALIDAD DE USUARIOS
-  ///
   Future saveUserData(String name, String email, [String photoUrl = '']) async {
     return await userCollection.doc(uid).set({
       'uid': uid,
@@ -100,123 +95,25 @@ class UserService {
     });
   }
 
-  /// ------------------- CHAT ------------------- ///
-  // void _saveMessageToContactsSubcollection(
-  //     UserModel senderUserData,
-  //     UserModel recieverUserData,
-  //     String text,
-  //     DateTime timeSent,
-  //     String recieverUserID) async {
-  //   // SAVE THE MESSAGE TO THE reciever'S CHAT COLLECTION
-  //   var recieverChatContact = ChatContact(
-  //       name: senderUserData.name,
-  //       profilePic: senderUserData.profilePic,
-  //       contactID: senderUserData.uid,
-  //       timeSent: timeSent,
-  //       lastMessage: text);
+  void updateKilometers(String userId, double additionalKilometers) {
+    final DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(userId);
 
-  //   await userCollection
-  //       .doc(recieverUserID)
-  //       .collection('chats')
-  //       .doc(authService.firebaseAuth.currentUser!.uid)
-  //       .set(recieverChatContact.toMap());
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      final DocumentSnapshot snapshot = await transaction.get(userRef);
 
-  //   // SAVE THE MESSAGE TO THE SENDER'S CHAT COLLECTION
-
-  //   var senderChatContact = ChatContact(
-  //       name: recieverUserData.name,
-  //       profilePic: recieverUserData.profilePic,
-  //       contactID: recieverUserData.uid,
-  //       timeSent: timeSent,
-  //       lastMessage: text);
-
-  //   await userCollection
-  //       .doc(authService.firebaseAuth.currentUser!.uid)
-  //       .collection('chats')
-  //       .doc(recieverUserID)
-  //       .set(senderChatContact.toMap());
-  // }
-
-  // void _saveMessageToMessageSubcollection(
-  //     String recieverUserID,
-  //     // String senderUserID,
-  //     String senderUserName,
-  //     String reciverUserName,
-  //     String text,
-  //     DateTime timeSent,
-  //     String messageID,
-  //     MessageEnum messageType) async {
-  //   var message = Message(
-  //       senderID: authService.firebaseAuth.currentUser!.uid,
-  //       recieverID: recieverUserID,
-  //       text: text,
-  //       timeSent: timeSent,
-  //       type: messageType,
-  //       messageID: messageID,
-  //       isRead: false);
-
-  //   //SAVE THE MESSAGE TO THE SENDER'S MESSAGE COLLECTION (OUR MESSAGE)
-  //   await userCollection
-  //       .doc(authService.firebaseAuth.currentUser!.uid)
-  //       .collection('chats')
-  //       .doc(recieverUserID)
-  //       .collection('messages')
-  //       .doc(messageID)
-  //       .set(message.toMap());
-
-  //   //SAVE THE MESSAGE TO THE RECEIVERS'S MESSAGE COLLECTION (OTHER'S MESSAGE)
-  //   await userCollection
-  //       .doc(recieverUserID)
-  //       .collection('chats')
-  //       .doc(authService.firebaseAuth.currentUser!.uid)
-  //       .collection('messages')
-  //       .doc(messageID)
-  //       .set(message.toMap());
-  // }
-
-  // void sendTextMessage(
-  //     {required BuildContext context,
-  //     required String text,
-  //     required String recieverUserID}) async {
-  //   try {
-  //     var timeSent = DateTime.now();
-  //     UserModel recieverUserData;
-  //     // User recieverUserData = getUserDataByID(recieverUserID) as User;
-
-  //     var recieverUserDataMap = await userCollection.doc(recieverUserID).get();
-  //     recieverUserData = UserModel.fromMap(
-  //         recieverUserDataMap.data()! as Map<String, dynamic>);
-
-  //     var messageID = const Uuid().v1();
-
-  //     UserModel senderUserData = await getCurrentUserData() as UserModel;
-
-  //     _saveMessageToContactsSubcollection(
-  //         senderUserData, recieverUserData, text, timeSent, recieverUserID);
-
-  //     _saveMessageToMessageSubcollection(recieverUserID, senderUserData.name,
-  //         recieverUserData.name, text, timeSent, messageID, MessageEnum.text);
-  //   } catch (e) {
-  //     showSnackBar(context, Theme.of(context).primaryColor, e.toString());
-  //   }
-  // }
-
-  // Stream<List<Message>> getUserMessages(String receiverUserId) {
-  //   return userCollection
-  //       .doc(authService.firebaseAuth.currentUser!.uid)
-  //       .collection('chats')
-  //       .doc(receiverUserId)
-  //       .collection('messages')
-  //       .orderBy('timeSent')
-  //       .snapshots()
-  //       .map((event) {
-  //     List<Message> messages = [];
-  //     for (var doc in event.docs) {
-  //       messages.add(Message.fromMap(doc.data()));
-  //     }
-  //     return messages;
-  //   });
-  // }
+      if (snapshot.exists) {
+        var data = snapshot.data()! as Map<String, dynamic>;
+        final currentKilometers = data['kilometers'] ?? 0.0;
+        final newKilometers = currentKilometers + additionalKilometers;
+        transaction.update(userRef, {'kilometers': newKilometers});
+      }
+    }).then((value) {
+      print('Kilometers updated successfully.');
+    }).catchError((error) {
+      print('Failed to update kilometers: $error');
+    });
+  }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
     //if a name is given filter by name

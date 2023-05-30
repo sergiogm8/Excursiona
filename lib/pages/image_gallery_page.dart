@@ -4,7 +4,7 @@ import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/widgets/gallery_page_widgets.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';

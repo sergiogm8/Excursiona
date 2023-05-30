@@ -9,13 +9,9 @@ import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/gallery_page_widgets.dart';
-import 'package:excursiona/widgets/icon_marker.dart';
-import 'package:excursiona/widgets/marker_info_sheet.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -36,11 +32,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
   late ExcursionController _excursionController;
   RouteModel? _userRoute;
   StatisticRecap? _excursionData;
-  Uint8List? _mapImage;
   bool _isLoading = true;
-  GoogleMapController? _mapController;
   ScreenshotController _screenshotController = ScreenshotController();
-  // var _startPointMarker;
   Set<Marker> _markers = {};
 
   @override

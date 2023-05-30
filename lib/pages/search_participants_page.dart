@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/user_controller.dart';
-import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -130,11 +129,11 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
                           : CircleAvatar(
                               radius: 30,
                               backgroundColor: Colors.transparent,
-                              // backgroundImage: CachedNetworkImageProvider(
-                              //     _searchResults[index].profilePic),
                               child: CachedNetworkImage(
                                 imageUrl: _searchResults[index].profilePic,
                                 placeholder: (context, url) => const Loader(),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
                                 placeholderFadeInDuration:
                                     const Duration(milliseconds: 300),
                                 imageBuilder: (context, imageProvider) =>
