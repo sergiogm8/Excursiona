@@ -104,8 +104,11 @@ class _HomePageState extends State<HomePage> {
           selectedItemColor: Constants.indigoDye,
           onTap: _onItemTapped,
           unselectedItemColor: Colors.grey[500],
-          showUnselectedLabels: false,
-          iconSize: 35,
+          // showUnselectedLabels: false,
+          // showSelectedLabels: false,
+          unselectedFontSize: 12,
+          selectedFontSize: 12,
+          iconSize: 24,
           items: [
             const BottomNavigationBarItem(
                 icon: Icon(
@@ -124,7 +127,10 @@ class _HomePageState extends State<HomePage> {
                   onPressed: _createExcursion,
                   foregroundColor: Colors.white,
                   backgroundColor: Constants.indigoDye,
-                  child: Icon(Icons.landscape_rounded, size: 40),
+                  child: Icon(
+                    Icons.landscape_rounded,
+                    size: 40,
+                  ),
                 ),
                 label: ""),
             const BottomNavigationBarItem(
