@@ -27,33 +27,33 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initializeFirebaseMessaging();
+    // initializeFirebaseMessaging();
     getIsUserLoggedIn();
   }
 
-  initializeFirebaseMessaging() async {
-    await FirebaseMessaging.instance.setAutoInitEnabled(true);
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
+  // initializeFirebaseMessaging() async {
+  //   await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  //   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+  //   NotificationSettings settings = await messaging.requestPermission(
+  //     alert: true,
+  //     announcement: false,
+  //     badge: true,
+  //     carPlay: false,
+  //     criticalAlert: false,
+  //     provisional: false,
+  //     sound: true,
+  //   );
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print('Got a message whilst in the foreground!');
+  //     print('Message data: ${message.data}');
 
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
-  }
+  //     if (message.notification != null) {
+  //       print('Message also contained a notification: ${message.notification}');
+  //     }
+  //   });
+  // }
 
   void getIsUserLoggedIn() async {
     await HelperFunctions.getUserLoggedInStatus().then((value) {
