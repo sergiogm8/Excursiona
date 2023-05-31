@@ -8,6 +8,8 @@ class ExcursionRecap {
   final double distance;
   final double avgSpeed;
   final int nParticipants;
+  final String userId;
+  final String userPic;
   String? mapSnapshotUrl;
 
   ExcursionRecap({
@@ -20,6 +22,8 @@ class ExcursionRecap {
     required this.distance,
     required this.avgSpeed,
     required this.nParticipants,
+    required this.userId,
+    required this.userPic,
     this.mapSnapshotUrl,
   });
 
@@ -34,6 +38,8 @@ class ExcursionRecap {
       distance: map['distance'] ?? 0.0,
       avgSpeed: map['avgSpeed'] ?? 0.0,
       nParticipants: map['nParticipants'] ?? 0,
+      userId: map['userId'] ?? '',
+      userPic: map['userPic'] ?? '',
       mapSnapshotUrl: map['mapSnapshotUrl'] ?? '',
     );
   }
@@ -49,6 +55,8 @@ class ExcursionRecap {
       'distance': distance,
       'avgSpeed': avgSpeed,
       'nParticipants': nParticipants,
+      'userId': userId,
+      'userPic': userPic,
       'mapSnapshotUrl': mapSnapshotUrl,
     };
   }

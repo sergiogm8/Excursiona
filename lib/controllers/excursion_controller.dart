@@ -100,20 +100,6 @@ class ExcursionController {
         userId: userId);
   }
 
-  List<Excursion>? getUserExcursions() {
-    //TODO: Review later with the method of the service
-    List<Excursion>? excursions = [];
-    _excursionService.getUserExcursions().then((excursionsQuery) {
-      for (var excursion in excursionsQuery) {
-        excursions
-            ?.add(Excursion.fromMap(excursion.data() as Map<String, dynamic>));
-      }
-    }).catchError((error) {
-      excursions = null;
-    });
-    return excursions;
-  }
-
   shareCurrentLocation(Position coords, double speed, double distance) async {
     var userId = await HelperFunctions.getUserUID();
     var userPic = await HelperFunctions.getUserProfilePic();

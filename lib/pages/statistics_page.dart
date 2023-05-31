@@ -198,6 +198,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       final tempDir = await getTemporaryDirectory();
       final snapshotFile = File('${tempDir.path}/map.png');
       await snapshotFile.writeAsBytes(mapSnapshot!);
+      var currentUser = await UserController().getUserBasicInfo();
       ExcursionRecap excursionRecap = ExcursionRecap(
         id: _excursionId,
         date: _excursion.date,
@@ -208,6 +209,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
         title: _excursion.title,
         description: _excursion.description,
         difficulty: _excursion.difficulty,
+        userId: currentUser.uid,
+        userPic: currentUser.profilePic,
       );
       UserController().saveExcursionToUser(
         excursionRecap,

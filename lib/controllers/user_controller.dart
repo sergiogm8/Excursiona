@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_recap.dart';
@@ -8,6 +9,9 @@ import 'package:excursiona/services/user_service.dart';
 
 class UserController {
   final UserService _userService = UserService();
+
+  var _lastDocumentFetched = null;
+  static const int _DOCS_PER_PAGE = 10;
 
   Future<UserModel> getUserBasicInfo() async {
     var name = await HelperFunctions.getUserName();
@@ -30,5 +34,21 @@ class UserController {
 
   saveExcursionToUser(ExcursionRecap excursion, File mapSnapshot) async {
     await _userService.saveExcursionToUser(excursion, mapSnapshot);
+  }
+
+  Future<List<ExcursionRecap>> getUserExcursions() async {
+    List<ExcursionRecap> excursions = [];
+    try {
+      var docs = await _userService.getUserExcursions(
+          _DOCS_PER_PAGE, _lastDocumentFetched);
+      docs.forEach((e) {
+        excursions
+            .add(ExcursionRecap.fromMap(e.data() as Map<String, dynamic>));
+      });
+      _lastDocumentFetched = docs.last;
+      return excursions;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

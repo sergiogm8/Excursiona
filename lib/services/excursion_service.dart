@@ -120,15 +120,6 @@ class ExcursionService {
     });
   }
 
-  Future<List<QueryDocumentSnapshot>> getUserExcursions() async {
-    //TODO: Modify this, it won't work
-    String participantsSubcollection = 'participants';
-    QuerySnapshot querySnapshot = await excursionCollection
-        .where('$participantsSubcollection.$currentUserId', isEqualTo: true)
-        .get();
-    return querySnapshot.docs;
-  }
-
   Future<bool> leaveExcursion(String excursionID) async {
     try {
       await excursionCollection

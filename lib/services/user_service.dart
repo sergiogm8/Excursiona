@@ -146,4 +146,29 @@ class UserService {
           .set(excursion.toMap());
     }
   }
+
+  Future<List<QueryDocumentSnapshot>> getUserExcursions(
+      int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
+    var userId = authService.firebaseAuth.currentUser!.uid;
+    try {
+      var data = lastDoc == null
+          ? await userCollection
+              .doc(userId)
+              .collection('excursions')
+              .orderBy('date', descending: true)
+              .limit(docsPerPage)
+              .get()
+          : await userCollection
+              .doc(userId)
+              .collection('excursions')
+              .orderBy('date', descending: true)
+              .startAfterDocument(lastDoc)
+              .limit(docsPerPage)
+              .startAfterDocument(lastDoc)
+              .get();
+      return data.docs;
+    } catch (e) {
+      return Future.error('Hubo un error al recuperar las excursiones');
+    }
+  }
 }
