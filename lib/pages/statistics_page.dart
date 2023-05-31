@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:banner_carousel/banner_carousel.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
+import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
+import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/route.dart';
@@ -17,24 +22,27 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 
 class StatisticsPage extends StatefulWidget {
-  final String excursionId;
-  const StatisticsPage({super.key, required this.excursionId});
+  final Excursion excursion;
+  const StatisticsPage({super.key, required this.excursion});
 
   @override
   State<StatisticsPage> createState() => _StatisticsPageState();
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
-  String get _excursionId => widget.excursionId;
+  Excursion get _excursion => widget.excursion;
+  String get _excursionId => widget.excursion.id;
   late ExcursionController _excursionController;
   RouteModel? _userRoute;
   StatisticRecap? _excursionData;
   bool _isLoading = true;
   ScreenshotController _screenshotController = ScreenshotController();
   Set<Marker> _markers = {};
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -134,29 +142,30 @@ class _StatisticsPageState extends State<StatisticsPage> {
           flex: 3,
           child: GoogleMap(
             zoomControlsEnabled: false,
-            zoomGesturesEnabled: true,
+            zoomGesturesEnabled: false,
             myLocationButtonEnabled: false,
             myLocationEnabled: false,
             compassEnabled: false,
-            scrollGesturesEnabled: true,
+            scrollGesturesEnabled: false,
             tiltGesturesEnabled: false,
             rotateGesturesEnabled: false,
             mapToolbarEnabled: false,
-            // onTap: (argument) => nextScreen(
-            //   context,
-            //   MapViewRecap(
-            //       route: polylineRoute,
-            //       initialCamera: cameraPosition,
-            //       bounds: bounds,
-            //       routeDelimiters: _markers,
-            //       excursionController: _excursionController),
-            //   PageTransitionType.rightToLeft,
-            // ),
+            onTap: (argument) => nextScreen(
+              context,
+              MapViewRecap(
+                  route: polylineRoute,
+                  initialCamera: cameraPosition,
+                  bounds: bounds,
+                  routeDelimiters: _markers,
+                  excursionController: _excursionController),
+              PageTransitionType.rightToLeft,
+            ),
             markers: _markers,
             mapType: MapType.satellite,
             initialCameraPosition: cameraPosition,
             polylines: {polylineRoute},
             onMapCreated: (controller) async {
+              _mapController = controller;
               await _generateMarkers();
               Future.delayed(const Duration(microseconds: 100));
               controller
@@ -184,6 +193,29 @@ class _StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
+  _saveExcursionToUser() {
+    _mapController!.takeSnapshot().then((mapSnapshot) async {
+      final tempDir = await getTemporaryDirectory();
+      final snapshotFile = File('${tempDir.path}/map.png');
+      await snapshotFile.writeAsBytes(mapSnapshot!);
+      ExcursionRecap excursionRecap = ExcursionRecap(
+        id: _excursionId,
+        date: _excursion.date,
+        duration: _excursionData!.duration,
+        distance: _excursionData!.distance!,
+        avgSpeed: _excursionData!.avgSpeed!,
+        nParticipants: _excursionData!.nParticipants,
+        title: _excursion.title,
+        description: _excursion.description,
+        difficulty: _excursion.difficulty,
+      );
+      UserController().saveExcursionToUser(
+        excursionRecap,
+        snapshotFile,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,7 +226,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: () {
+            onPressed: () async {
+              await _saveExcursionToUser();
               nextScreenReplace(
                   context, const HomePage(), PageTransitionType.rightToLeft);
             },
@@ -444,159 +477,62 @@ class StatisticRow extends StatelessWidget {
   }
 }
 
-// class MapViewRecap extends StatefulWidget {
-//   final Polyline route;
-//   final CameraPosition initialCamera;
-//   final LatLngBounds bounds;º
-//   final Set<Marker> routeDelimiters;
-//   final ExcursionController excursionController;
-//   const MapViewRecap(
-//       {super.key,
-//       required this.route,
-//       required this.initialCamera,
-//       required this.bounds,
-//       required this.routeDelimiters,
-//       required this.excursionController});
+class MapViewRecap extends StatefulWidget {
+  final Polyline route;
+  final CameraPosition initialCamera;
+  final LatLngBounds bounds;
+  final Set<Marker> routeDelimiters;
+  final ExcursionController excursionController;
+  const MapViewRecap(
+      {super.key,
+      required this.route,
+      required this.initialCamera,
+      required this.bounds,
+      required this.routeDelimiters,
+      required this.excursionController});
 
-//   @override
-//   State<MapViewRecap> createState() => _MapViewRecapState();
-// }
+  @override
+  State<MapViewRecap> createState() => _MapViewRecapState();
+}
 
-// class _MapViewRecapState extends State<MapViewRecap> {
-//   Polyline get _route => widget.route;
-//   CameraPosition get _initialCamera => widget.initialCamera;
-//   LatLngBounds get _bounds => widget.bounds;
-//   Set<Marker> _markers = {};
-//   ExcursionController get _excursionController => widget.excursionController;
+class _MapViewRecapState extends State<MapViewRecap> {
+  Polyline get _route => widget.route;
+  CameraPosition get _initialCamera => widget.initialCamera;
+  LatLngBounds get _bounds => widget.bounds;
 
-//   BitmapDescriptor _warningMarkerIcon = BitmapDescriptor.defaultMarker;
-//   BitmapDescriptor _restMarkerIcon = BitmapDescriptor.defaultMarker;
-//   BitmapDescriptor _customMarkerIcon = BitmapDescriptor.defaultMarker;
-//   BitmapDescriptor _interestMarkerIcon = BitmapDescriptor.defaultMarker;
+  @override
+  void initState() {
+    super.initState();
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     var aux = widget.routeDelimiters;
-//     setState(() {
-//       _markers = aux;
-//     });
-//   }
-
-//   _captureWidgets() {
-//     ScreenshotController screenshotController = ScreenshotController();
-
-//     screenshotController
-//         .captureFromWidget(const IconMarker(
-//             icon: Constants.warningMarkerIcon,
-//             color: Constants.warningMarkerColor))
-//         .then((image) => setState(() {
-//               _warningMarkerIcon = BitmapDescriptor.fromBytes(image);
-//             })); // Warning marker
-//     screenshotController
-//         .captureFromWidget(const IconMarker(
-//             icon: Constants.restMarkerIcon, color: Constants.restMarkerColor))
-//         .then((image) => setState(() {
-//               _restMarkerIcon = BitmapDescriptor.fromBytes(image);
-//             })); // Rest marker
-//     screenshotController
-//         .captureFromWidget(const IconMarker(
-//             icon: Constants.interestMarkerIcon,
-//             color: Constants.interestMarkerColor))
-//         .then((image) => setState(() {
-//               _interestMarkerIcon = BitmapDescriptor.fromBytes(image);
-//             })); // Interest marker
-//     screenshotController
-//         .captureFromWidget(const IconMarker(
-//             icon: Constants.customMarkerIcon,
-//             color: Constants.customMarkerColor))
-//         .then((image) => setState(() {
-//               _customMarkerIcon = BitmapDescriptor.fromBytes(image);
-//             })); // Custom marker
-//   }
-
-//   _getBitmapByMarkerType(MarkerType markerType) {
-//     switch (markerType) {
-//       case MarkerType.info:
-//         return _interestMarkerIcon;
-//       case MarkerType.rest:
-//         return _restMarkerIcon;
-//       case MarkerType.warning:
-//         return _warningMarkerIcon;
-//       case MarkerType.custom:
-//         return _customMarkerIcon;
-//       default:
-//         return _interestMarkerIcon;
-//     }
-//   }
-
-//   _showMarkerInfo(MarkerModel markerModel) {
-//     showModalBottomSheet(
-//         barrierColor: Colors.black.withOpacity(0.2),
-//         constraints: BoxConstraints(
-//           maxHeight: markerModel.markerType == MarkerType.participant
-//               ? MediaQuery.of(context).size.height * 0.3
-//               : MediaQuery.of(context).size.height * 0.35,
-//         ),
-//         shape: const RoundedRectangleBorder(
-//           borderRadius: BorderRadius.vertical(
-//             top: Radius.circular(15),
-//           ),
-//         ),
-//         elevation: 1,
-//         context: context,
-//         builder: (context) {
-//           return MarkerInfoSheet(markerModel: markerModel);
-//         });
-//   }
-
-//   _retrieveUserMarkers() {
-//     Set<Marker> markers = {};
-//     _excursionController.getUserMarkers().then((markerList) {
-//       for (var marker in markerList) {
-//         markers.add(Marker(
-//           markerId: MarkerId(marker.id),
-//           position: marker.position,
-//           icon: _getBitmapByMarkerType(marker.markerType),
-//           onTap: () => _showMarkerInfo(marker),
-//         ));
-//       }
-//       setState(() {
-//         _markers.addAll(markers.toSet());
-//       });
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-//       floatingActionButton: FloatingActionButton(
-//           child: const Icon(Icons.arrow_back),
-//           backgroundColor: Colors.white,
-//           foregroundColor: Colors.black,
-//           onPressed: () => Navigator.pop(context)),
-//       body: GoogleMap(
-//         initialCameraPosition: _initialCamera,
-//         zoomControlsEnabled: false,
-//         zoomGesturesEnabled: true,
-//         myLocationButtonEnabled: false,
-//         myLocationEnabled: false,
-//         compassEnabled: true,
-//         scrollGesturesEnabled: true,
-//         tiltGesturesEnabled: true,
-//         rotateGesturesEnabled: true,
-//         mapToolbarEnabled: false,
-//         polylines: {_route},
-//         markers: _markers,
-//         mapType: MapType.satellite,
-//         onMapCreated: (controller) async {
-//           Future.delayed(const Duration(microseconds: 300));
-//           controller.animateCamera(CameraUpdate.newLatLngBounds(_bounds, 40));
-//           _captureWidgets();
-//           _retrieveUserMarkers();
-//         },
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.arrow_back),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          onPressed: () => Navigator.pop(context)),
+      body: GoogleMap(
+        initialCameraPosition: _initialCamera,
+        zoomControlsEnabled: false,
+        zoomGesturesEnabled: true,
+        myLocationButtonEnabled: false,
+        myLocationEnabled: false,
+        compassEnabled: true,
+        scrollGesturesEnabled: true,
+        tiltGesturesEnabled: true,
+        rotateGesturesEnabled: true,
+        mapToolbarEnabled: false,
+        polylines: {_route},
+        markers: widget.routeDelimiters,
+        mapType: MapType.satellite,
+        onMapCreated: (controller) async {
+          Future.delayed(const Duration(microseconds: 300));
+          controller.animateCamera(CameraUpdate.newLatLngBounds(_bounds, 40));
+        },
+      ),
+    );
+  }
+}

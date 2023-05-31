@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:excursiona/enums/message_type.dart';
 import 'package:excursiona/model/chat_contact.dart';
 import 'package:excursiona/model/contact.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/model/message.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/services/storage_service.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -79,8 +83,9 @@ class UserService {
           .collection('invitations')
           .doc(excursionId)
           .delete();
-    } on FirebaseException {
-      rethrow;
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -127,5 +132,18 @@ class UserService {
       }
     }
     return users;
+  }
+
+  saveExcursionToUser(ExcursionRecap excursion, File mapSnapshot) async {
+    String mapUrl = await StorageService().uploadMapSnapshot(
+        excursion.id, mapSnapshot, authService.firebaseAuth.currentUser!.uid);
+    if (mapUrl.isNotEmpty) {
+      excursion.mapSnapshotUrl = mapUrl;
+      await userCollection
+          .doc(authService.firebaseAuth.currentUser!.uid)
+          .collection('excursions')
+          .doc(excursion.id)
+          .set(excursion.toMap());
+    }
   }
 }

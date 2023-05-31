@@ -711,7 +711,11 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _excursionController!.saveUserRoute();
     _excursionController!.leaveExcursion();
     Navigator.pop(context);
-    nextScreenReplace(context, StatisticsPage(excursionId: widget.excursionId),
+    nextScreenReplace(
+        context,
+        StatisticsPage(
+          excursion: widget.excursion,
+        ),
         PageTransitionType.fade);
   }
 

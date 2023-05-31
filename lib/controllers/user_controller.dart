@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/user_service.dart';
 
@@ -23,5 +26,9 @@ class UserController {
 
   deleteExcursionInvitation(String invitationId) {
     _userService.deleteExcursionInvitation(invitationId);
+  }
+
+  saveExcursionToUser(ExcursionRecap excursion, File mapSnapshot) async {
+    await _userService.saveExcursionToUser(excursion, mapSnapshot);
   }
 }
