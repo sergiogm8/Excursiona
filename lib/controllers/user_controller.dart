@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/excursion_recap.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/user_service.dart';
@@ -54,7 +54,7 @@ class UserController {
       _lastDocumentFetched = docs.last;
       return excursions;
     } catch (e) {
-      rethrow;
+      throw Exception("Hubo un error al obtener las excursiones: $e");
     }
   }
 }

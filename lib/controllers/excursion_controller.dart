@@ -13,7 +13,7 @@ import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/message.dart';
-import 'package:excursiona/model/statistic_recap.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';

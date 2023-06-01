@@ -1,3 +1,30 @@
+class StatisticRecap {
+  final DateTime startTime;
+  final DateTime endTime;
+  final int nParticipants;
+  final int nPhotos;
+  final int nMarkers;
+  double? distance;
+  double? avgSpeed;
+  double? avgAltitude;
+
+  StatisticRecap(
+      {required this.startTime,
+      required this.endTime,
+      required this.nParticipants,
+      required this.nPhotos,
+      required this.nMarkers,
+      this.distance,
+      this.avgSpeed,
+      this.avgAltitude});
+
+  setAvgSpeed(double speed) => avgSpeed = speed;
+  setAvgAltitude(double altitude) => avgAltitude = altitude;
+  setDistance(double distance) => distance = distance;
+
+  Duration get duration => endTime.difference(startTime);
+}
+
 class ExcursionRecap {
   final String id;
   final String title;
@@ -10,6 +37,7 @@ class ExcursionRecap {
   final int nParticipants;
   final String userId;
   final String userPic;
+  final String userName;
   String? mapSnapshotUrl;
 
   ExcursionRecap({
@@ -24,6 +52,7 @@ class ExcursionRecap {
     required this.nParticipants,
     required this.userId,
     required this.userPic,
+    required this.userName,
     this.mapSnapshotUrl,
   });
 
@@ -40,6 +69,7 @@ class ExcursionRecap {
       nParticipants: map['nParticipants'] ?? 0,
       userId: map['userId'] ?? '',
       userPic: map['userPic'] ?? '',
+      userName: map['userName'] ?? '',
       mapSnapshotUrl: map['mapSnapshotUrl'] ?? '',
     );
   }
@@ -57,6 +87,7 @@ class ExcursionRecap {
       'nParticipants': nParticipants,
       'userId': userId,
       'userPic': userPic,
+      'userName': userName,
       'mapSnapshotUrl': mapSnapshotUrl,
     };
   }

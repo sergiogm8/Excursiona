@@ -5,11 +5,10 @@ import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/route.dart';
-import 'package:excursiona/model/statistic_recap.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
@@ -220,6 +219,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         difficulty: _excursion.difficulty,
         userId: currentUser.uid,
         userPic: currentUser.profilePic,
+        userName: currentUser.name,
       );
 
       try {
