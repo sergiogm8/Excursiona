@@ -27,7 +27,10 @@ import 'package:screenshot/screenshot.dart';
 
 class StatisticsPage extends StatefulWidget {
   final Excursion excursion;
-  const StatisticsPage({super.key, required this.excursion});
+  final String? userId;
+  final bool isNew;
+  const StatisticsPage(
+      {super.key, required this.excursion, this.userId, this.isNew = true});
 
   @override
   State<StatisticsPage> createState() => _StatisticsPageState();
@@ -36,11 +39,12 @@ class StatisticsPage extends StatefulWidget {
 class _StatisticsPageState extends State<StatisticsPage> {
   Excursion get _excursion => widget.excursion;
   String get _excursionId => widget.excursion.id;
+  String? get _userId => widget.userId;
   late ExcursionController _excursionController;
   RouteModel? _userRoute;
   StatisticRecap? _excursionData;
   bool _isLoading = true;
-  ScreenshotController _screenshotController = ScreenshotController();
+  final ScreenshotController _screenshotController = ScreenshotController();
   Set<Marker> _markers = {};
   GoogleMapController? _mapController;
 
@@ -52,11 +56,15 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   _getExcursionData() async {
-    var userRoute = await _excursionController.getUserRoute();
-    var excursionData = await _excursionController.getExcursionData();
+    try {
+      var userRoute = await _excursionController.getUserRoute(_userId);
+      var excursionData = await _excursionController.getExcursionData(_userId);
 
-    _userRoute = userRoute;
-    _excursionData = excursionData;
+      _userRoute = userRoute;
+      _excursionData = excursionData;
+    } on Exception catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
+    }
     setState(() {
       _isLoading = false;
     });
@@ -193,12 +201,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  _saveExcursionToUser() {
+  _saveExcursion() {
     _mapController!.takeSnapshot().then((mapSnapshot) async {
       final tempDir = await getTemporaryDirectory();
       final snapshotFile = File('${tempDir.path}/map.png');
       await snapshotFile.writeAsBytes(mapSnapshot!);
-      var currentUser = await UserController().getUserBasicInfo();
+      var userController = UserController();
+      var currentUser = await userController.getUserBasicInfo();
       ExcursionRecap excursionRecap = ExcursionRecap(
         id: _excursionId,
         date: _excursion.date,
@@ -212,10 +221,15 @@ class _StatisticsPageState extends State<StatisticsPage> {
         userId: currentUser.uid,
         userPic: currentUser.profilePic,
       );
-      UserController().saveExcursionToUser(
-        excursionRecap,
-        snapshotFile,
-      );
+
+      try {
+        userController.saveExcursion(
+          excursionRecap,
+          snapshotFile,
+        );
+      } catch (e) {
+        showSnackBar(context, Colors.red, e.toString());
+      }
     });
   }
 
@@ -230,7 +244,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
           IconButton(
             icon: const Icon(Icons.arrow_forward),
             onPressed: () async {
-              await _saveExcursionToUser();
+              if (widget.isNew) {
+                await _saveExcursion();
+              }
               nextScreenReplace(
                   context, const HomePage(), PageTransitionType.rightToLeft);
             },

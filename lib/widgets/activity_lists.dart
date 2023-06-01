@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/pages/statistics_page.dart';
@@ -232,11 +233,20 @@ class ActivityItem extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color: Constants.indigoDye)),
                 TextButton(
-                    onPressed: () {
-                      /// RECUPERAR EXCURSION DE LA BBDD
-                      ///
-                      // nextScreen(context, StatisticsPage(excursion: excursion),
-                      //     PageTransitionType.rightToLeft);
+                    onPressed: () async {
+                      try {
+                        await ExcursionController()
+                            .getExcursionById(item.id)
+                            .then((value) {
+                          nextScreen(
+                            context,
+                            StatisticsPage(excursion: value, isNew: false),
+                            PageTransitionType.rightToLeft,
+                          );
+                        });
+                      } catch (e) {
+                        showSnackBar(context, Colors.red, e.toString());
+                      }
                     },
                     style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0)),
