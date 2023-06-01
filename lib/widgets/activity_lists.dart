@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
-import 'package:excursiona/model/excursion_recap.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/pages/statistics_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/account_avatar.dart';
 import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,6 +126,27 @@ class ActivityItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (!isCurrentUser(item.userId))
+                  Row(
+                    children: [
+                      item.userPic.isEmpty
+                          ? AccountAvatar(radius: 20, name: item.userName)
+                          : CircleAvatar(
+                              radius: 20,
+                              backgroundImage:
+                                  CachedNetworkImageProvider(item.userPic),
+                            ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        item.userName,
+                        style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Constants.indigoDye),
+                      ),
+                    ],
+                  ),
+                if (!isCurrentUser(item.userId)) const SizedBox(height: 12.0),
                 Text(
                   item.title,
                   style: GoogleFonts.inter(
