@@ -256,30 +256,38 @@ class ExcursionController {
   //   return await _excursionService.getUserRoute(excursionId!);
   // }
 
-  Future<RouteModel> getUserRoute() async {
-    var route = await _excursionService.getUserRoute(excursionId!);
+  Future<RouteModel> getUserRoute(String? userId) async {
+    var route =
+        await _excursionService.getUserRoute(excursionId!, userId: userId);
     _route = route;
     return route;
   }
 
-  Future<StatisticRecap> getExcursionData({String? excursionId}) async {
+  Future<StatisticRecap> getExcursionData(String? userId,
+      {String? excursionId}) async {
     excursionId ??= this.excursionId;
-    var participant = await _excursionService.getParticipantData(excursionId!);
-    var participants = await getParticipantsData();
-    var nParticipants = participants.length;
-    var nPhotos = await StorageService().getNumberOfImages(excursionId);
-    var nMarkers = await _excursionService.getNumberOfMarkers(excursionId);
-    var statistics = StatisticRecap(
-        startTime: participant.joinedAt!,
-        endTime: participant.leftAt!,
-        nParticipants: nParticipants,
-        nPhotos: nPhotos,
-        nMarkers: nMarkers,
-        avgAltitude: _route.avgAltitude,
-        avgSpeed: _route.avgSpeed,
-        distance: _route.distance);
+    try {
+      var participant = await _excursionService.getParticipantData(excursionId!,
+          userId: userId);
+      var participants = await getParticipantsData();
+      var nParticipants = participants.length;
+      var nPhotos = await StorageService().getNumberOfImages(excursionId);
+      var nMarkers = await _excursionService.getNumberOfMarkers(excursionId);
+      var statistics = StatisticRecap(
+          startTime: participant.joinedAt!,
+          endTime: participant.leftAt!,
+          nParticipants: nParticipants,
+          nPhotos: nPhotos,
+          nMarkers: nMarkers,
+          avgAltitude: _route.avgAltitude,
+          avgSpeed: _route.avgSpeed,
+          distance: _route.distance);
 
-    return statistics;
+      return statistics;
+    } catch (e) {
+      throw Exception(
+          "Hubo algún error al obtener los datos de la excursión: $e");
+    }
   }
 
   sendEmergencyAlert({required Position myPosition}) async {
@@ -310,5 +318,14 @@ class ExcursionController {
     var excursionId = await HelperFunctions.getExcursionSession();
     if (excursionId == null) return null;
     return await _excursionService.getExcursion(excursionId);
+  }
+
+  Future<Excursion> getExcursionById(String excursionId) async {
+    try {
+      var excursion = await _excursionService.getExcursion(excursionId);
+      return excursion;
+    } catch (e) {
+      throw Exception("Hubo un error al obtener la excursión: $e");
+    }
   }
 }

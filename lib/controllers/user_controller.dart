@@ -5,6 +5,7 @@ import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_recap.dart';
 import 'package:excursiona/model/user_model.dart';
+import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/user_service.dart';
 
 class UserController {
@@ -32,8 +33,13 @@ class UserController {
     _userService.deleteExcursionInvitation(invitationId);
   }
 
-  saveExcursionToUser(ExcursionRecap excursion, File mapSnapshot) async {
-    await _userService.saveExcursionToUser(excursion, mapSnapshot);
+  saveExcursion(ExcursionRecap excursion, File mapSnapshot) async {
+    try {
+      await _userService.saveExcursion(excursion, mapSnapshot);
+    } catch (e) {
+      throw Exception(
+          "Hubo un error al guardar la excursión en el sistema: $e");
+    }
   }
 
   Future<List<ExcursionRecap>> getUserExcursions() async {
