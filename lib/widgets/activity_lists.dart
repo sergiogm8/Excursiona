@@ -24,9 +24,9 @@ class _MyActivityState extends State<MyActivity> {
   bool _isLoading = true;
   bool _hasMore = true;
   List<ExcursionRecap> _items = [];
-
-  ScrollController _scrollController = ScrollController();
-  UserController _userController = UserController();
+  static const int _docsLimit = 10;
+  final ScrollController _scrollController = ScrollController();
+  final UserController _userController = UserController();
 
   @override
   void initState() {
@@ -51,14 +51,112 @@ class _MyActivityState extends State<MyActivity> {
 
   _fetchData() async {
     try {
-      var newExcursions = await _userController.getUserExcursions();
+      var newExcursions = await _userController.getUserExcursions(_docsLimit);
       setState(() {
-        if (newExcursions.isNotEmpty) {
+        if (newExcursions.length < _docsLimit) {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
+        // } else {
+        //   _hasMore = false;
+        // }
       });
-    } catch (e) {}
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _isLoading
+        ? const Center(child: Text("Cargando..."))
+        : Container(
+            decoration: const BoxDecoration(
+              color: Constants.darkWhite,
+            ),
+            child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                controller: _scrollController,
+                itemCount: _items.length + 1,
+                padding: const EdgeInsets.all(8.0),
+                itemBuilder: (context, index) {
+                  if (_items.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child:
+                          Center(child: Text("No hay excursiones que mostrar")),
+                    );
+                  }
+                  if (index < _items.length) {
+                    final item = _items[index];
+                    return ActivityItem(item: item);
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                          child: _hasMore
+                              ? const Loader()
+                              : const Text("No hay más datos que mostrar")),
+                    );
+                  }
+                }),
+          );
+  }
+}
+
+class CommunityActivity extends StatefulWidget {
+  const CommunityActivity({super.key});
+
+  @override
+  State<CommunityActivity> createState() => _CommunityActivityState();
+}
+
+class _CommunityActivityState extends State<CommunityActivity> {
+  bool _isLoading = true;
+  bool _hasMore = true;
+  List<ExcursionRecap> _items = [];
+
+  static const int _docsLimit = 10;
+  final ScrollController _scrollController = ScrollController();
+  final ExcursionController _excursionController = ExcursionController();
+
+  @override
+  void initState() {
+    _fetchData();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.offset) {
+        _fetchData();
+      }
+    });
+    setState(() {
+      _isLoading = false;
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  _fetchData() async {
+    try {
+      var newExcursions =
+          await _excursionController.getTLExcursions(_docsLimit);
+      setState(() {
+        if (newExcursions.length < _docsLimit) {
+          _hasMore = false;
+        }
+        _items.addAll(newExcursions);
+        // } else {
+        //   _hasMore = false;
+        // }
+      });
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
+    }
   }
 
   @override
@@ -262,7 +360,10 @@ class ActivityItem extends StatelessWidget {
                             .then((value) {
                           nextScreen(
                             context,
-                            StatisticsPage(excursion: value, isNew: false),
+                            StatisticsPage(
+                                excursion: value,
+                                userId: item.userId,
+                                isNew: false),
                             PageTransitionType.rightToLeft,
                           );
                         });

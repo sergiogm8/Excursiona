@@ -12,7 +12,6 @@ class UserController {
   final UserService _userService = UserService();
 
   var _lastDocumentFetched = null;
-  static const int _DOCS_PER_PAGE = 10;
 
   Future<UserModel> getUserBasicInfo() async {
     var name = await HelperFunctions.getUserName();
@@ -42,11 +41,11 @@ class UserController {
     }
   }
 
-  Future<List<ExcursionRecap>> getUserExcursions() async {
+  Future<List<ExcursionRecap>> getUserExcursions(int docsLimit) async {
     List<ExcursionRecap> excursions = [];
     try {
-      var docs = await _userService.getUserExcursions(
-          _DOCS_PER_PAGE, _lastDocumentFetched);
+      var docs =
+          await _userService.getUserExcursions(docsLimit, _lastDocumentFetched);
       docs.forEach((e) {
         excursions
             .add(ExcursionRecap.fromMap(e.data() as Map<String, dynamic>));
@@ -54,6 +53,9 @@ class UserController {
       _lastDocumentFetched = docs.last;
       return excursions;
     } catch (e) {
+      if (e.toString().contains("Bad state: No element")) {
+        return [];
+      }
       throw Exception("Hubo un error al obtener las excursiones: $e");
     }
   }

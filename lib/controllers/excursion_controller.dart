@@ -18,6 +18,7 @@ import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,6 +35,8 @@ class ExcursionController {
   Timer? batteryTimer;
   Battery battery = Battery();
   RouteModel _route = RouteModel();
+
+  var _lastDocumentFetched = null;
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
@@ -326,6 +329,26 @@ class ExcursionController {
       return excursion;
     } catch (e) {
       throw Exception("Hubo un error al obtener la excursión: $e");
+    }
+  }
+
+  Future<List<ExcursionRecap>> getTLExcursions(int docsLimit) async {
+    try {
+      var docs = await _excursionService.getTLExcursions(
+          docsLimit, _lastDocumentFetched);
+      List<ExcursionRecap> excursions = [];
+      docs.forEach((doc) {
+        excursions
+            .add(ExcursionRecap.fromMap(doc.data()! as Map<String, dynamic>));
+      });
+      _lastDocumentFetched = docs.last;
+      excursions.removeWhere((element) => isCurrentUser(element.userId));
+      return excursions;
+    } catch (e) {
+      if (e.toString().contains("Bad state: No element")) {
+        return [];
+      }
+      throw Exception("Hubo un error al obtener las excursiones: $e");
     }
   }
 }

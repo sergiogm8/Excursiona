@@ -45,14 +45,12 @@ class _ActivityPageState extends State<ActivityPage> {
                   ],
                 ),
               ),
-              Expanded(
+              const Expanded(
                 child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   children: [
                     MyActivity(),
-                    Container(
-                      color: Colors.green,
-                    ),
+                    CommunityActivity(),
                   ],
                 ),
               ),

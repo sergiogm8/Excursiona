@@ -1,19 +1,13 @@
 import 'dart:io';
 
-import 'package:excursiona/enums/message_type.dart';
-import 'package:excursiona/model/chat_contact.dart';
-import 'package:excursiona/model/contact.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/excursion.dart';
-import 'package:excursiona/model/excursion_recap.dart';
-import 'package:excursiona/model/message.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
+import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
-import 'package:excursiona/shared/utils.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 class UserService {
   UserService({this.uid});
@@ -134,16 +128,22 @@ class UserService {
     return users;
   }
 
-  saveExcursionToUser(ExcursionRecap excursion, File mapSnapshot) async {
+  saveExcursion(ExcursionRecap excursion, File mapSnapshot) async {
     String mapUrl = await StorageService().uploadMapSnapshot(
         excursion.id, mapSnapshot, authService.firebaseAuth.currentUser!.uid);
     if (mapUrl.isNotEmpty) {
       excursion.mapSnapshotUrl = mapUrl;
-      await userCollection
-          .doc(authService.firebaseAuth.currentUser!.uid)
-          .collection('excursions')
-          .doc(excursion.id)
-          .set(excursion.toMap());
+      try {
+        await userCollection
+            .doc(authService.firebaseAuth.currentUser!.uid)
+            .collection('excursions')
+            .doc(excursion.id)
+            .set(excursion.toMap());
+
+        await ExcursionService().saveExcursionToTL(excursion);
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 
@@ -164,11 +164,10 @@ class UserService {
               .orderBy('date', descending: true)
               .startAfterDocument(lastDoc)
               .limit(docsPerPage)
-              .startAfterDocument(lastDoc)
               .get();
       return data.docs;
     } catch (e) {
-      return Future.error('Hubo un error al recuperar las excursiones');
+      rethrow;
     }
   }
 }

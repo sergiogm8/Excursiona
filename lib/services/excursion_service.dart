@@ -4,15 +4,14 @@ import 'package:excursiona/model/emergency_alert.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/excursion_participant.dart';
 import 'package:excursiona/model/image_model.dart';
-import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
+import 'package:excursiona/model/recap_models.dart';
+import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/notification_service.dart';
 import 'package:excursiona/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:uuid/uuid.dart';
 
 class ExcursionService {
   final CollectionReference excursionCollection =
@@ -32,8 +31,13 @@ class ExcursionService {
   }
 
   Future<Excursion> getExcursion(String excursionId) async {
-    return await excursionCollection.doc(excursionId).get().then(
-        (value) => Excursion.fromMap(value.data()! as Map<String, dynamic>));
+    try {
+      var excursion = await excursionCollection.doc(excursionId).get().then(
+          (value) => Excursion.fromMap(value.data()! as Map<String, dynamic>));
+      return excursion;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future inviteUsersToExcursion(
@@ -167,7 +171,7 @@ class ExcursionService {
 
   Future<RouteModel> getUserRoute(String excursionId, {String? userId}) async {
     userId ??= currentUserId;
-    return excursionCollection
+    return await excursionCollection
         .doc(excursionId)
         .collection('routes')
         .doc(userId)
@@ -263,13 +267,12 @@ class ExcursionService {
         .then((query) {
       var data = query.docs;
       var markers = data.map((e) => MarkerModel.fromMap(e.data())).toList();
-      // filter markers which markerType is not participant
       markers = markers
           .where((element) => element.markerType != MarkerType.participant)
           .toList();
       return markers.length;
     }).catchError((e) {
-      return Future.error('Error getting number of markers');
+      throw e;
     });
   }
 
@@ -312,6 +315,35 @@ class ExcursionService {
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  saveExcursionToTL(ExcursionRecap excursion) async {
+    try {
+      final CollectionReference TLCollection =
+          FirebaseFirestore.instance.collection('timeline');
+      await TLCollection.doc(excursion.id).set(excursion.toMap());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<QueryDocumentSnapshot>> getTLExcursions(
+      int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
+    try {
+      final CollectionReference TLCollection =
+          FirebaseFirestore.instance.collection('timeline');
+      var snapshot = lastDoc == null
+          ? await TLCollection.orderBy('date', descending: true)
+              .limit(docsPerPage)
+              .get()
+          : await TLCollection.orderBy('date', descending: true)
+              .startAfterDocument(lastDoc)
+              .limit(docsPerPage)
+              .get();
+      return snapshot.docs;
+    } catch (e) {
+      rethrow;
     }
   }
 }
