@@ -22,7 +22,7 @@ class StorageService {
     try {
       await referenceUploadImage.putFile(image);
       return await referenceUploadImage.getDownloadURL();
-    } on FirebaseException {
+    } catch (e) {
       return '';
     }
   }
@@ -37,7 +37,7 @@ class StorageService {
     try {
       await referenceUploadImage.putFile(image);
       return await referenceUploadImage.getDownloadURL();
-    } on FirebaseException {
+    } catch (e) {
       return '';
     }
   }
@@ -52,7 +52,7 @@ class StorageService {
       await referenceUploadAudio.putFile(audio);
       var path = await referenceUploadAudio.getDownloadURL();
       return path;
-    } on FirebaseException {
+    } catch (e) {
       return '';
     }
   }
@@ -63,7 +63,7 @@ class StorageService {
     try {
       var list = await referenceDirExcursion.listAll();
       return list.items.length;
-    } on FirebaseException {
+    } catch (e) {
       return 0;
     }
   }
@@ -76,8 +76,21 @@ class StorageService {
     try {
       await referenceUploadImage.putFile(mapSnapshot);
       return await referenceUploadImage.getDownloadURL();
-    } on FirebaseException {
+    } catch (e) {
       return '';
+    }
+  }
+
+  uploadProfilePic(File profilePic, String userId) async {
+    Reference referenceDirUserPics =
+        referenceDirImages.child(profilePicsFolder);
+    final fileName = userId;
+    Reference referenceUploadImage = referenceDirUserPics.child(fileName);
+    try {
+      await referenceUploadImage.putFile(profilePic);
+      return await referenceUploadImage.getDownloadURL();
+    } catch (e) {
+      rethrow;
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
+import 'package:excursiona/services/storage_service.dart';
 import 'package:excursiona/services/user_service.dart';
 
 class UserController {
@@ -17,7 +18,9 @@ class UserController {
     var name = await HelperFunctions.getUserName();
     var profilePic = await HelperFunctions.getUserProfilePic();
     var uid = await HelperFunctions.getUserUID();
-    return UserModel(name: name!, profilePic: profilePic!, uid: uid!);
+    var email = await HelperFunctions.getUserEmail();
+    return UserModel(
+        name: name!, profilePic: profilePic!, uid: uid!, email: email!);
   }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
@@ -57,6 +60,19 @@ class UserController {
         return [];
       }
       throw Exception("Hubo un error al obtener las excursiones: $e");
+    }
+  }
+
+  updateProfilePic(String filePath) async {
+    try {
+      var userId = await HelperFunctions.getUserUID();
+      var file = File(filePath);
+      var url = await StorageService().uploadProfilePic(file, userId!);
+      await _userService.updateProfilePic(url);
+      await HelperFunctions.saveUserProfilePic(url);
+      return url;
+    } catch (e) {
+      throw Exception("Hubo un error al actualizar la foto de perfil: $e");
     }
   }
 }

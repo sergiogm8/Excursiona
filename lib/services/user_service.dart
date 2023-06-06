@@ -170,4 +170,14 @@ class UserService {
       rethrow;
     }
   }
+
+  updateProfilePic(String url) async {
+    try {
+      await userCollection
+          .doc(authService.firebaseAuth.currentUser!.uid)
+          .update({'profilePic': url});
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
