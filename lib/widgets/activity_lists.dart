@@ -37,9 +37,7 @@ class _MyActivityState extends State<MyActivity> {
         _fetchData();
       }
     });
-    setState(() {
-      _isLoading = false;
-    });
+
     super.initState();
   }
 
@@ -57,9 +55,9 @@ class _MyActivityState extends State<MyActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        // } else {
-        //   _hasMore = false;
-        // }
+        setState(() {
+          _isLoading = false;
+        });
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
@@ -69,7 +67,7 @@ class _MyActivityState extends State<MyActivity> {
   @override
   Widget build(BuildContext context) {
     return _isLoading
-        ? const Center(child: Text("Cargando..."))
+        ? const Center(child: Loader())
         : Container(
             decoration: const BoxDecoration(
               color: Constants.darkWhite,
@@ -129,9 +127,6 @@ class _CommunityActivityState extends State<CommunityActivity> {
         _fetchData();
       }
     });
-    setState(() {
-      _isLoading = false;
-    });
     super.initState();
   }
 
@@ -150,9 +145,9 @@ class _CommunityActivityState extends State<CommunityActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        // } else {
-        //   _hasMore = false;
-        // }
+        setState(() {
+          _isLoading = false;
+        });
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
