@@ -17,14 +17,8 @@ class UserService {
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
-  Future saveUserData(String name, String email, [String photoUrl = '']) async {
-    return await userCollection.doc(uid).set({
-      'uid': uid,
-      'name': name,
-      'email': email,
-      'profilePic': photoUrl,
-      'contacts': [],
-    });
+  Future saveUserData(UserModel user) async {
+    return await userCollection.doc(uid).set({user.toMap()});
   }
 
   Future getUserDataByEmail(String email) async {
@@ -37,24 +31,15 @@ class UserService {
     }
   }
 
-  Stream<UserModel> getUserDataByID(String userId) {
-    return userCollection.doc(userId).snapshots().map(
-        (event) => UserModel.fromMap(event.data()! as Map<String, dynamic>));
-  }
-
-  Future<UserModel> getFutureUserDataByID(String userId) async {
-    var userData = await userCollection.doc(userId).get();
-    return UserModel.fromMap(userData.data()! as Map<String, dynamic>);
-  }
-
-  Future<UserModel?> getCurrentUserData() async {
-    var userData =
-        await userCollection.doc(FirebaseAuth.instance.currentUser?.uid).get();
-    UserModel? user;
-    if (userData.data() != null) {
-      user = UserModel.fromMap(userData.data()! as Map<String, dynamic>);
+  getUserData() async {
+    try {
+      var snapshot = await userCollection
+          .doc(authService.firebaseAuth.currentUser?.uid)
+          .get();
+      return UserModel.fromMap(snapshot.data() as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
     }
-    return user;
   }
 
   Future insertExcursionInvitation(Excursion invitation, String userId) async {
@@ -91,26 +76,6 @@ class UserService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => Excursion.fromMap(doc.data())).toList();
-    });
-  }
-
-  void updateKilometers(String userId, double additionalKilometers) {
-    final DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(userId);
-
-    FirebaseFirestore.instance.runTransaction((transaction) async {
-      final DocumentSnapshot snapshot = await transaction.get(userRef);
-
-      if (snapshot.exists) {
-        var data = snapshot.data()! as Map<String, dynamic>;
-        final currentKilometers = data['kilometers'] ?? 0.0;
-        final newKilometers = currentKilometers + additionalKilometers;
-        transaction.update(userRef, {'kilometers': newKilometers});
-      }
-    }).then((value) {
-      print('Kilometers updated successfully.');
-    }).catchError((error) {
-      print('Failed to update kilometers: $error');
     });
   }
 
@@ -179,5 +144,38 @@ class UserService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  void updateUserStatistics(StatisticRecap statistics) {
+    final DocumentReference userRef =
+        userCollection.doc(authService.firebaseAuth.currentUser!.uid);
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      final DocumentSnapshot snapshot = await transaction.get(userRef);
+
+      if (snapshot.exists) {
+        var data = snapshot.data()! as Map<String, dynamic>;
+        final currentKilometers = data['totalDistance'] ?? 0.0;
+        final newKilometers = currentKilometers + statistics.distance;
+
+        final currentExcursions = data['nExcursions'] ?? 0;
+        final newExcursions = currentExcursions + 1;
+
+        final currentTime = Duration(minutes: data['totalTime'] ?? 00);
+        final newTime = currentTime + statistics.duration;
+
+        final currentAvgSpeed = data['avgSpeed'] ?? 0.0;
+        double newSum =
+            currentAvgSpeed * currentExcursions + statistics.avgSpeed;
+        final newAvgSpeed = newSum / newExcursions;
+
+        transaction.update(userRef, {
+          'totalDistance': newKilometers,
+          'nExcursions': newExcursions,
+          'totalTime': newTime.inMinutes,
+          'avgSpeed': newAvgSpeed
+        });
+      }
+    });
   }
 }

@@ -18,6 +18,7 @@ import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
+import 'package:excursiona/services/user_service.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -255,10 +256,6 @@ class ExcursionController {
     _excursionService.saveUserRoute(_route, excursionId!);
   }
 
-  // Future<RouteModel> getRoute() async {
-  //   return await _excursionService.getUserRoute(excursionId!);
-  // }
-
   Future<RouteModel> getUserRoute(String? userId) async {
     var route =
         await _excursionService.getUserRoute(excursionId!, userId: userId);
@@ -350,5 +347,9 @@ class ExcursionController {
       }
       throw Exception("Hubo un error al obtener las excursiones: $e");
     }
+  }
+
+  updateUserStatistics(StatisticRecap statistics) async {
+    UserService().updateUserStatistics(statistics);
   }
 }

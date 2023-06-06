@@ -3,14 +3,21 @@ class UserModel {
   final String uid;
   final String profilePic;
   final String email;
-  final List contactsID;
+  final int nExcursions;
+  final double totalDistance;
+  final Duration totalTime;
+  final double avgSpeed;
 
-  UserModel(
-      {this.name = '',
-      this.uid = '',
-      this.profilePic = '',
-      this.email = '',
-      this.contactsID = const []});
+  UserModel({
+    this.name = '',
+    this.uid = '',
+    this.profilePic = '',
+    this.email = '',
+    this.nExcursions = 0,
+    this.totalDistance = 0,
+    this.totalTime = const Duration(),
+    this.avgSpeed = 0,
+  });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
@@ -18,7 +25,10 @@ class UserModel {
       uid: map['uid'] ?? '',
       profilePic: map['profilePic'] ?? '',
       email: map['email'] ?? '',
-      contactsID: map['contacts'] ?? [],
+      nExcursions: map['nExcursions'] ?? 0,
+      totalDistance: map['totalDistance'] ?? 0,
+      totalTime: Duration(minutes: map['totalTime'] ?? 0),
+      avgSpeed: map['avgSpeed'] ?? 0,
     );
   }
 
@@ -28,7 +38,10 @@ class UserModel {
       'uid': uid,
       'profilePic': profilePic,
       'email': email,
-      'contactsID': contactsID,
+      'nExcursions': nExcursions,
+      'totalDistance': totalDistance,
+      'totalTime': totalTime.inMinutes,
+      'avgSpeed': avgSpeed,
     };
   }
 

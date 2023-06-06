@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/controllers/user_controller.dart';
-import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/auth_page.dart';
-import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
@@ -12,6 +10,7 @@ import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -38,12 +37,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   getUserData() async {
-    var user = await _userController.getUserBasicInfo();
-    setState(() {
-      _userModel = user;
-      _profilePic = user.profilePic;
-      _isLoading = false;
-    });
+    try {
+      var user = await _userController.getUserData();
+      setState(() {
+        _userModel = user;
+        _profilePic = user.profilePic;
+        _isLoading = false;
+      });
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
+    }
   }
 
   _updateProfilePic(XFile image) async {
@@ -68,7 +71,6 @@ class _ProfilePageState extends State<ProfilePage> {
     ImagePicker imagePicker = ImagePicker();
     return IntrinsicHeight(
       child: Container(
-        // height: MediaQuery.of(context).size.height * 0.23,
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
         child: Column(
           children: [
@@ -85,10 +87,17 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               onTap: () async {
                 Navigator.pop(context);
-                var result =
-                    await imagePicker.pickImage(source: ImageSource.camera);
-                if (result != null) {
-                  _updateProfilePic(result);
+                PermissionStatus cameraPermissions =
+                    await Permission.camera.request();
+
+                if (cameraPermissions.isGranted) {
+                  var result = await pickImageFromCamera();
+                  if (result != null) {
+                    _updateProfilePic(result);
+                  }
+                } else {
+                  showSnackBar(context, Colors.red,
+                      "Es necesario dar permisos de cámara para poder tomar una foto");
                 }
               },
             ),
@@ -101,10 +110,17 @@ class _ProfilePageState extends State<ProfilePage> {
               title: const Text("Galería"),
               onTap: () async {
                 Navigator.pop(context);
-                var result =
-                    await imagePicker.pickImage(source: ImageSource.gallery);
-                if (result != null) {
-                  _updateProfilePic(result);
+                PermissionStatus storagePermissions =
+                    await Permission.storage.request();
+                if (storagePermissions.isGranted) {
+                  var result =
+                      await imagePicker.pickImage(source: ImageSource.gallery);
+                  if (result != null) {
+                    _updateProfilePic(result);
+                  }
+                } else {
+                  showSnackBar(context, Colors.red,
+                      "Es necesario dar permisos de almacenamiento para poder abrir la galería");
                 }
               },
             ),
@@ -122,22 +138,15 @@ class _ProfilePageState extends State<ProfilePage> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Material(
-                  elevation: 5,
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(15),
-                  )),
+                IntrinsicHeight(
                   child: Container(
-                    height: MediaQuery.of(context).size.height * 0.25,
+                    // height: MediaQuery.of(context).size.height * 0.25,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(15),
-                      ),
                     ),
+                    padding: const EdgeInsets.only(top: 5, bottom: 20),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SafeArea(
                           child: Align(
@@ -149,6 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               icon: const Icon(
                                 Icons.exit_to_app_rounded,
                                 color: Colors.white,
+                                size: 28,
                               ),
                             ),
                           ),
@@ -161,15 +171,39 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               Stack(
                                 children: [
-                                  _userModel!.profilePic.isEmpty
+                                  _profilePic.isEmpty
                                       ? AccountAvatar(
-                                          radius: 45, name: _userModel!.name)
+                                          radius: 50, name: _userModel!.name)
                                       : CircleAvatar(
-                                          radius: 45,
-                                          backgroundImage:
-                                              CachedNetworkImageProvider(
-                                                  _profilePic),
-                                        ),
+                                          radius: 50,
+                                          backgroundColor: Constants.darkWhite,
+                                          child: CachedNetworkImage(
+                                            imageUrl: _profilePic,
+                                            placeholder: (context, url) =>
+                                                Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color:
+                                                          Constants.darkWhite,
+                                                    ),
+                                                    child: const Loader()),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const Icon(Icons.error),
+                                            placeholderFadeInDuration:
+                                                const Duration(
+                                                    milliseconds: 300),
+                                            imageBuilder:
+                                                (context, imageProvider) =>
+                                                    Container(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    image: imageProvider,
+                                                    fit: BoxFit.cover),
+                                              ),
+                                            ),
+                                          )),
                                   Positioned(
                                     bottom: 0,
                                     right: 0,
@@ -204,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ],
                               ),
                               const SizedBox(
-                                width: 20,
+                                width: 24,
                               ),
                               Flexible(
                                 child: Column(
@@ -213,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   children: [
                                     Text(_userModel!.name,
                                         style: GoogleFonts.inter(
-                                            fontSize: 20,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white)),
                                     const SizedBox(height: 5),
@@ -232,7 +266,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 20),
+                      horizontal: 16.0, vertical: 24),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -241,31 +275,37 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: GoogleFonts.inter(
                               fontSize: 18, fontWeight: FontWeight.w600),
                         ),
-                        ListView.separated(
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              var entry = data.entries.elementAt(index);
-                              return Row(
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    entry.key,
-                                    style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                  const Spacer(),
-                                  Text(entry.value.toString(),
-                                      style: GoogleFonts.inter(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w300)),
+                                  StatisticItem("Excursiones completadas",
+                                      _userModel!.nExcursions.toString()),
+                                  const SizedBox(width: 12),
+                                  StatisticItem("Distancia total",
+                                      "${_userModel!.totalDistance.toStringAsFixed(2)} km"),
                                 ],
-                              );
-                            },
-                            separatorBuilder: (context, index) => Divider(),
-                            itemCount: data.length),
-                        ElevatedButton(
-                            onPressed: () => _logout(),
-                            child: const Text("Cerrar sesión")),
+                              ),
+                              const SizedBox(height: 40),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  StatisticItem("Tiempo dedicado",
+                                      "${_userModel!.totalTime.inHours.toString()}h ${(_userModel!.totalTime.inMinutes % 60).toString()}min"),
+                                  const SizedBox(width: 12),
+                                  StatisticItem("Velocidad media",
+                                      "${_userModel!.avgSpeed.toStringAsFixed(2)} km/h"),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
                       ]),
                 )
               ],
@@ -306,5 +346,34 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const AuthPage()),
         (route) => false);
+  }
+}
+
+class StatisticItem extends StatelessWidget {
+  final String title;
+  final String value;
+  const StatisticItem(this.title, this.value, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      fit: FlexFit.tight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.inter(
+                fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+                fontSize: 12, fontWeight: FontWeight.w300, color: Colors.black),
+          ),
+        ],
+      ),
+    );
   }
 }

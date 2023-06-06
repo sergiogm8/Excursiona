@@ -8,6 +8,7 @@ import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
 import 'package:excursiona/services/user_service.dart';
+import 'package:screenshot/screenshot.dart';
 
 class UserController {
   final UserService _userService = UserService();
@@ -21,6 +22,14 @@ class UserController {
     var email = await HelperFunctions.getUserEmail();
     return UserModel(
         name: name!, profilePic: profilePic!, uid: uid!, email: email!);
+  }
+
+  Future<UserModel> getUserData() async {
+    try {
+      return await _userService.getUserData();
+    } catch (e) {
+      throw Exception("Hubo un error al obtener los datos del usuario: $e");
+    }
   }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
