@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AddMarkerDialog extends StatefulWidget {
   const AddMarkerDialog(
@@ -104,18 +105,20 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
     }
   }
 
-  _pickImage() {
-    ImagePicker imagePicker = ImagePicker();
-    imagePicker
-        .pickImage(source: ImageSource.camera, imageQuality: 70)
-        .then((value) {
-      if (value != null) {
+  _pickImage() async {
+    PermissionStatus cameraPermissions = await Permission.camera.request();
+
+    if (cameraPermissions.isGranted) {
+      var image = await pickImageFromCamera();
+      if (image != null) {
         setState(() {
-          _image = File(value.path);
+          _image = File(image.path);
         });
-        print(value.path);
       }
-    });
+    } else {
+      showSnackBar(context, Colors.red,
+          "Es necesario dar permisos de cámara para poder tomar una foto");
+    }
   }
 
   @override

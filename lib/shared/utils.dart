@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future nextScreen(context, page, PageTransitionType animation) {
   return Navigator.push(context, PageTransition(child: page, type: animation));
@@ -109,9 +110,8 @@ bool isCurrentUser(String uid) {
 
 Future<XFile?> pickImageFromCamera() async {
   final ImagePicker _picker = ImagePicker();
-  var image =
-      await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
-  return image;
+
+  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
 }
 
 void showFullscreenImage(BuildContext context, String imagePath) {
