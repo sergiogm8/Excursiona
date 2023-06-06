@@ -242,16 +242,23 @@ class _StatisticsPageState extends State<StatisticsPage> {
         backgroundColor: Theme.of(context).primaryColor,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () async {
-              if (widget.isNew) {
-                await _saveExcursion();
-              }
-              nextScreenReplace(
-                  context, const HomePage(), PageTransitionType.rightToLeft);
-            },
-          ),
+          widget.isNew
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () async {
+                    if (widget.isNew) {
+                      await _saveExcursion();
+                    }
+                    nextScreenReplace(context, const HomePage(),
+                        PageTransitionType.rightToLeft);
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
         ],
       ),
       body: !_isLoading ? _buildBody() : const Center(child: Loader()),
