@@ -453,7 +453,7 @@ class StatisticView extends StatelessWidget {
                 const Divider(),
                 StatisticRow(
                   Icons.photo_library,
-                  "Imágenes subidas",
+                  "Imágenes en la galería",
                   statistics.nPhotos.toString(),
                 ),
                 const Divider(),
