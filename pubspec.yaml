@@ -36,7 +36,6 @@ dependencies:
   cloud_firestore: ^4.3.1
   cloud_functions: ^4.1.1
   cupertino_icons: ^1.0.2
-  custom_info_window: ^1.0.1
   email_validator: ^2.1.17
   firebase_auth: ^4.2.4
   firebase_core: ^2.4.1
