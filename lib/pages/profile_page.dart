@@ -132,185 +132,203 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? const Loader()
-        : Scaffold(
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                IntrinsicHeight(
-                  child: Container(
-                    // height: MediaQuery.of(context).size.height * 0.25,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    padding: const EdgeInsets.only(top: 5, bottom: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SafeArea(
-                          child: Align(
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                              onPressed: () {
-                                _logout();
-                              },
-                              icon: const Icon(
-                                Icons.exit_to_app_rounded,
-                                color: Colors.white,
-                                size: 28,
+    return Scaffold(
+      body: _isLoading
+          ? const Loader()
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  IntrinsicHeight(
+                    child: Container(
+                      // height: MediaQuery.of(context).size.height * 0.25,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      padding: const EdgeInsets.only(top: 5, bottom: 40),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SafeArea(
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: IconButton(
+                                onPressed: () {
+                                  _logout();
+                                },
+                                icon: const Icon(
+                                  Icons.exit_to_app_rounded,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Stack(
-                                children: [
-                                  _profilePic.isEmpty
-                                      ? AccountAvatar(
-                                          radius: 50, name: _userModel!.name)
-                                      : CircleAvatar(
-                                          radius: 50,
-                                          backgroundColor: Constants.darkWhite,
-                                          child: CachedNetworkImage(
-                                            imageUrl: _profilePic,
-                                            placeholder: (context, url) =>
-                                                Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color:
-                                                          Constants.darkWhite,
-                                                    ),
-                                                    child: const Loader()),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Icon(Icons.error),
-                                            placeholderFadeInDuration:
-                                                const Duration(
-                                                    milliseconds: 300),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                          )),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Constants.lapisLazuli),
-                                      height: 35,
-                                      width: 35,
-                                      child: Center(
-                                        child: IconButton(
-                                          icon: Icon(Icons.edit_outlined),
-                                          onPressed: () {
-                                            showModalBottomSheet(
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.vertical(
-                                                    top: Radius.circular(15),
-                                                  ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 32.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Stack(
+                                  children: [
+                                    _profilePic.isEmpty
+                                        ? AccountAvatar(
+                                            radius: 50, name: _userModel!.name)
+                                        : CircleAvatar(
+                                            radius: 50,
+                                            backgroundColor:
+                                                Constants.darkWhite,
+                                            child: CachedNetworkImage(
+                                              imageUrl: _profilePic,
+                                              placeholder: (context, url) =>
+                                                  Container(
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color:
+                                                            Constants.darkWhite,
+                                                      ),
+                                                      child: const Loader()),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(Icons.error),
+                                              placeholderFadeInDuration:
+                                                  const Duration(
+                                                      milliseconds: 300),
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
                                                 ),
-                                                context: context,
-                                                builder: (builder) =>
-                                                    _imagePickerBottomSheet());
-                                          },
-                                          color: Colors.white,
-                                          iconSize: 20,
+                                              ),
+                                            )),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Constants.lapisLazuli),
+                                        height: 35,
+                                        width: 35,
+                                        child: Center(
+                                          child: IconButton(
+                                            icon: Icon(Icons.edit_outlined),
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                  shape:
+                                                      const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.vertical(
+                                                      top: Radius.circular(15),
+                                                    ),
+                                                  ),
+                                                  context: context,
+                                                  builder: (builder) =>
+                                                      _imagePickerBottomSheet());
+                                            },
+                                            color: Colors.white,
+                                            iconSize: 20,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                width: 24,
-                              ),
-                              Flexible(
-                                child: Column(
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                                Flexible(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(_userModel!.name,
+                                          style: GoogleFonts.inter(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white)),
+                                      const SizedBox(height: 5),
+                                      Text(_userModel!.email,
+                                          style: GoogleFonts.inter(
+                                              color: Colors.white,
+                                              fontSize: 16)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 24),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Resumen de actividad",
+                            style: GoogleFonts.inter(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 14),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Row(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(_userModel!.name,
-                                        style: GoogleFonts.inter(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white)),
-                                    const SizedBox(height: 5),
-                                    Text(_userModel!.email,
-                                        style: GoogleFonts.inter(
-                                            color: Colors.white, fontSize: 16)),
+                                    StatisticItem("Excursiones completadas",
+                                        _userModel!.nExcursions.toString()),
+                                    const SizedBox(width: 12),
+                                    StatisticItem("Distancia total",
+                                        "${_userModel!.totalDistance.toStringAsFixed(2)} km"),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 24),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Resumen de actividad",
-                          style: GoogleFonts.inter(
-                              fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 14),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  StatisticItem("Excursiones completadas",
-                                      _userModel!.nExcursions.toString()),
-                                  const SizedBox(width: 12),
-                                  StatisticItem("Distancia total",
-                                      "${_userModel!.totalDistance.toStringAsFixed(2)} km"),
-                                ],
-                              ),
-                              const SizedBox(height: 40),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  StatisticItem("Tiempo dedicado",
-                                      "${_userModel!.totalTime.inHours.toString()}h ${(_userModel!.totalTime.inMinutes % 60).toString()}min"),
-                                  const SizedBox(width: 12),
-                                  StatisticItem("Velocidad media",
-                                      "${_userModel!.avgSpeed.toStringAsFixed(2)} km/h"),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      ]),
-                )
-              ],
+                                const SizedBox(height: 40),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    StatisticItem("Tiempo dedicado",
+                                        "${_userModel!.totalTime.inHours.toString()}h ${(_userModel!.totalTime.inMinutes % 60).toString()}min"),
+                                    const SizedBox(width: 12),
+                                    StatisticItem("Velocidad media",
+                                        "${_userModel!.avgSpeed.toStringAsFixed(2)} km/h"),
+                                  ],
+                                ),
+                                const SizedBox(height: 40),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    StatisticItem("Imágenes compartidas",
+                                        _userModel!.nPhotos.toString()),
+                                    const SizedBox(width: 12),
+                                    StatisticItem("Marcadores compartidos",
+                                        _userModel!.nMarkers.toString()),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ]),
+                  )
+                ],
+              ),
             ),
-          );
+    );
   }
 
   void _logout() async {
@@ -364,13 +382,17 @@ class StatisticItem extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.inter(
-                fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 5),
           Text(
             title,
             style: GoogleFonts.inter(
-                fontSize: 12, fontWeight: FontWeight.w300, color: Colors.black),
+              fontSize: 12,
+              fontWeight: FontWeight.w300,
+            ),
           ),
         ],
       ),

@@ -7,6 +7,8 @@ class UserModel {
   final double totalDistance;
   final Duration totalTime;
   final double avgSpeed;
+  final int nPhotos;
+  final int nMarkers;
 
   UserModel({
     this.name = '',
@@ -17,6 +19,8 @@ class UserModel {
     this.totalDistance = 0,
     this.totalTime = const Duration(),
     this.avgSpeed = 0,
+    this.nPhotos = 0,
+    this.nMarkers = 0,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -29,6 +33,8 @@ class UserModel {
       totalDistance: map['totalDistance'] ?? 0,
       totalTime: Duration(minutes: map['totalTime'] ?? 0),
       avgSpeed: map['avgSpeed'] ?? 0,
+      nPhotos: map['nPhotos'] ?? 0,
+      nMarkers: map['nMarkers'] ?? 0,
     );
   }
 
@@ -42,6 +48,8 @@ class UserModel {
       'totalDistance': totalDistance,
       'totalTime': totalTime.inMinutes,
       'avgSpeed': avgSpeed,
+      'nPhotos': nPhotos,
+      'nMarkers': nMarkers,
     };
   }
 

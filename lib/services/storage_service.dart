@@ -23,7 +23,7 @@ class StorageService {
       await referenceUploadImage.putFile(image);
       return await referenceUploadImage.getDownloadURL();
     } catch (e) {
-      return '';
+      rethrow;
     }
   }
 

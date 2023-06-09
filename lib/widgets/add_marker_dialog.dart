@@ -77,32 +77,29 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
     setState(() {
       _uploadingMarker = true;
     });
-    var uploaded;
-    if (_image != null) {
-      uploaded = await ExcursionController().uploadMarker(
-          excursionId: widget.excursionId,
-          title: _markerTitle,
-          markerType: widget.markerType,
-          position: widget.currentPosition,
-          image: _image!);
-    } else {
-      uploaded = await ExcursionController().uploadMarker(
-          excursionId: widget.excursionId,
-          title: _markerTitle,
-          markerType: widget.markerType,
-          position: widget.currentPosition);
+    try {
+      if (_image != null) {
+        await ExcursionController().uploadMarker(
+            excursionId: widget.excursionId,
+            title: _markerTitle,
+            markerType: widget.markerType,
+            position: widget.currentPosition,
+            image: _image!);
+      } else {
+        await ExcursionController().uploadMarker(
+            excursionId: widget.excursionId,
+            title: _markerTitle,
+            markerType: widget.markerType,
+            position: widget.currentPosition);
+      }
+      Navigator.pop(context);
+      showSnackBar(context, Colors.green, "Marcador compartido correctamente.");
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
     }
     setState(() {
       _uploadingMarker = false;
     });
-    if (uploaded) {
-      Navigator.pop(context);
-      showSnackBar(context, Colors.green, "Marcador compartido correctamente.");
-    } else {
-      setState(() {
-        _uploadedSuccessfully = false;
-      });
-    }
   }
 
   _pickImage() async {

@@ -178,4 +178,57 @@ class UserService {
       }
     });
   }
+
+  void updateUserPhotos(int nNewPhotos) {
+    final DocumentReference userRef =
+        userCollection.doc(authService.firebaseAuth.currentUser!.uid);
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      final DocumentSnapshot snapshot = await transaction.get(userRef);
+
+      if (snapshot.exists) {
+        var data = snapshot.data()! as Map<String, dynamic>;
+        final currentPhotos = data['nPhotos'] ?? 0.0;
+        final newPhotos = currentPhotos + nNewPhotos;
+
+        transaction.update(userRef, {
+          'nPhotos': newPhotos,
+        });
+      }
+    }).catchError((error) {
+      throw Exception(error.toString());
+    });
+  }
+
+  void updateUserMarkers(int nNewMarkers) {
+    final DocumentReference userRef =
+        userCollection.doc(authService.firebaseAuth.currentUser!.uid);
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      final DocumentSnapshot snapshot = await transaction.get(userRef);
+
+      if (snapshot.exists) {
+        var data = snapshot.data()! as Map<String, dynamic>;
+        final currentMarkers = data['nMarkers'] ?? 0.0;
+        final newMarkers = currentMarkers + nNewMarkers;
+
+        transaction.update(userRef, {
+          'nMarkers': newMarkers,
+        });
+      }
+    }).catchError((error) {
+      throw Exception(error.toString());
+    });
+  }
+
+  getUserPic(String userId) {
+    try {
+      return userCollection.doc(userId).get().then((value) {
+        var data = value.data()! as Map<String, dynamic>;
+        return data['profilePic'];
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

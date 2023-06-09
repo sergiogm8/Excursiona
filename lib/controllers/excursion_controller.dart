@@ -143,30 +143,32 @@ class ExcursionController {
       required MarkerType markerType,
       required Position position,
       File? image}) async {
-    String imageDownloadURL = "";
-    if (image != null) {
-      imageDownloadURL = await StorageService().uploadMarkerImage(
-          image: image, excursionId: excursionId, title: title);
-      if (imageDownloadURL.isEmpty) {
-        return false;
+    try {
+      String imageDownloadURL = "";
+      if (image != null) {
+        imageDownloadURL = await StorageService().uploadMarkerImage(
+            image: image, excursionId: excursionId, title: title);
       }
+      var userId = await HelperFunctions.getUserUID();
+      var userName = await HelperFunctions.getUserName();
+      var userPic = await HelperFunctions.getUserProfilePic();
+      var marker = MarkerModel(
+        id: Uuid().v1(),
+        userId: userId!,
+        ownerName: userName!,
+        ownerPic: userPic!,
+        title: title,
+        position: LatLng(position.latitude, position.longitude),
+        markerType: markerType,
+        imageUrl: imageDownloadURL,
+        timestamp: DateTime.now(),
+      );
+      await _excursionService.addMarkerToExcursion(
+          marker: marker, excursionId: excursionId);
+      UserController().updateUserMarkers(1);
+    } catch (e) {
+      throw Exception("Hubo un error al compartir el marcador: $e");
     }
-    var userId = await HelperFunctions.getUserUID();
-    var userName = await HelperFunctions.getUserName();
-    var userPic = await HelperFunctions.getUserProfilePic();
-    var marker = MarkerModel(
-      id: Uuid().v1(),
-      userId: userId!,
-      ownerName: userName!,
-      ownerPic: userPic!,
-      title: title,
-      position: LatLng(position.latitude, position.longitude),
-      markerType: markerType,
-      imageUrl: imageDownloadURL,
-      timestamp: DateTime.now(),
-    );
-    return await _excursionService.addMarkerToExcursion(
-        marker: marker, excursionId: excursionId);
   }
 
   Future<bool> uploadImages(List<XFile> images) async {
@@ -194,6 +196,8 @@ class ExcursionController {
         imagesUploaded++;
       }
     }
+
+    UserController().updateUserPhotos(imagesUploaded);
     return true;
   }
 

@@ -221,9 +221,8 @@ class ExcursionService {
           .collection('markers')
           .doc(marker.id)
           .set(marker.toMap());
-      return true;
-    } on FirebaseException {
-      return false;
+    } catch (e) {
+      rethrow;
     }
   }
 

@@ -84,4 +84,29 @@ class UserController {
       throw Exception("Hubo un error al actualizar la foto de perfil: $e");
     }
   }
+
+  updateUserPhotos(int nNewPhotos) async {
+    try {
+      _userService.updateUserPhotos(nNewPhotos);
+    } catch (e) {
+      throw Exception("Hubo un error al actualizar la cantidad de fotos: $e");
+    }
+  }
+
+  updateUserMarkers(int nNewMarkers) async {
+    try {
+      _userService.updateUserMarkers(nNewMarkers);
+    } catch (e) {
+      throw Exception(
+          "Hubo un error al actualizar la cantidad de marcadores: $e");
+    }
+  }
+
+  Future getUserPic(String userId) async {
+    try {
+      return await _userService.getUserPic(userId);
+    } catch (e) {
+      throw Exception("Hubo un error al obtener la foto de perfil: $e");
+    }
+  }
 }
