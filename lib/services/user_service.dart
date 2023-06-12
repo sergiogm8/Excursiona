@@ -188,8 +188,8 @@ class UserService {
 
       if (snapshot.exists) {
         var data = snapshot.data()! as Map<String, dynamic>;
-        final currentPhotos = data['nPhotos'] ?? 0.0;
-        final newPhotos = currentPhotos + nNewPhotos;
+        int currentPhotos = data['nPhotos'] ?? 0;
+        int newPhotos = currentPhotos + nNewPhotos;
 
         transaction.update(userRef, {
           'nPhotos': newPhotos,
@@ -209,8 +209,8 @@ class UserService {
 
       if (snapshot.exists) {
         var data = snapshot.data()! as Map<String, dynamic>;
-        final currentMarkers = data['nMarkers'] ?? 0.0;
-        final newMarkers = currentMarkers + nNewMarkers;
+        int currentMarkers = data['nMarkers'] ?? 0;
+        int newMarkers = currentMarkers + nNewMarkers;
 
         transaction.update(userRef, {
           'nMarkers': newMarkers,
@@ -221,12 +221,11 @@ class UserService {
     });
   }
 
-  getUserPic(String userId) {
+  getUserPic(String userId) async {
     try {
-      return userCollection.doc(userId).get().then((value) {
-        var data = value.data()! as Map<String, dynamic>;
-        return data['profilePic'];
-      });
+      var user = await userCollection.doc(userId).get();
+      var data = user.data()! as Map<String, dynamic>;
+      return data['profilePic'];
     } catch (e) {
       rethrow;
     }

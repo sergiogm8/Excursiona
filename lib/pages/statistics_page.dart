@@ -54,6 +54,19 @@ class _StatisticsPageState extends State<StatisticsPage> {
     super.initState();
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+
   _getExcursionData() async {
     try {
       var userRoute = await _excursionController.getUserRoute(_userId);
@@ -176,7 +189,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               _mapController = controller;
               await _generateMarkers();
               Future.delayed(const Duration(microseconds: 100));
-              controller
+              _mapController!
                   .animateCamera(CameraUpdate.newLatLngBounds(bounds, 40));
             },
           ),

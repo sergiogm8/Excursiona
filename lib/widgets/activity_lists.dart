@@ -192,202 +192,260 @@ class _CommunityActivityState extends State<CommunityActivity> {
   }
 }
 
-class ActivityItem extends StatelessWidget {
+class ActivityItem extends StatefulWidget {
   final ExcursionRecap item;
   const ActivityItem({super.key, required this.item});
+
+  @override
+  State<ActivityItem> createState() => _ActivityItemState();
+}
+
+class _ActivityItemState extends State<ActivityItem> {
   final iconsColor = Constants.lapisLazuli;
+  String _profilePic = "";
+
+  @override
+  void initState() {
+    _getUserPic();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  _getUserPic() async {
+    if (!isCurrentUser(widget.item.userId)) {
+      UserController().getUserPic(widget.item.userId).then((value) {
+        if (this.mounted) {
+          setState(() {
+            _profilePic = value;
+          });
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15.0),
-        border: Border.all(color: Constants.indigoDye),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            offset: Offset(0, 2),
-            blurRadius: 6.0,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!isCurrentUser(item.userId))
-                  Row(
-                    children: [
-                      item.userPic.isEmpty
-                          ? AccountAvatar(radius: 20, name: item.userName)
-                          : CircleAvatar(
-                              radius: 20,
-                              backgroundImage:
-                                  CachedNetworkImageProvider(item.userPic),
-                            ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        item.userName,
-                        style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Constants.indigoDye),
-                      ),
-                    ],
-                  ),
-                if (!isCurrentUser(item.userId)) const SizedBox(height: 12.0),
-                Text(
-                  item.title,
-                  style: GoogleFonts.inter(
-                      fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8.0),
-                RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: [
-                      TextSpan(
-                        text: 'Dificultad: ',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w500),
-                      ),
-                      TextSpan(
-                        text: item.difficulty,
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w400),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  item.description,
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w300),
-                ),
-                const SizedBox(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.timelapse, color: iconsColor),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          '${item.duration.inHours.toString()}h ${(item.duration.inMinutes % 60).toString()}min',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(MdiIcons.mapMarkerDistance, color: iconsColor),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          "${item.distance.toStringAsFixed(2)} km",
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.group, color: iconsColor),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          item.nParticipants.toString(),
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(MdiIcons.runFast, color: iconsColor),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          '${item.avgSpeed.toStringAsFixed(1)}km/h',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+    return GestureDetector(
+      onTap: () async {
+        try {
+          await ExcursionController()
+              .getExcursionById(widget.item.id)
+              .then((value) {
+            nextScreen(
+              context,
+              StatisticsPage(
+                  excursion: value, userId: widget.item.userId, isNew: false),
+              PageTransitionType.rightToLeft,
+            );
+          });
+        } catch (e) {
+          showSnackBar(context, Colors.red, e.toString());
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15.0),
+          border: Border.all(color: Constants.indigoDye),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              offset: Offset(0, 2),
+              blurRadius: 6.0,
             ),
-          ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: CachedNetworkImage(
-              placeholder: (context, url) => const Loader(),
-              imageUrl: item.mapSnapshotUrl!,
-              height: 150,
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              imageBuilder: (context, imageProvider) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15.0),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          // const SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(DateFormat('dd/MM/yyyy').format(item.date),
-                    style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w500,
-                        color: Constants.indigoDye)),
-                TextButton(
-                    onPressed: () async {
-                      try {
-                        await ExcursionController()
-                            .getExcursionById(item.id)
-                            .then((value) {
-                          nextScreen(
-                            context,
-                            StatisticsPage(
-                                excursion: value,
-                                userId: item.userId,
-                                isNew: false),
-                            PageTransitionType.rightToLeft,
-                          );
-                        });
-                      } catch (e) {
-                        showSnackBar(context, Colors.red, e.toString());
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0)),
-                    child: Row(
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isCurrentUser(widget.item.userId))
+                    Row(
                       children: [
-                        Icon(
-                          Icons.open_in_new,
-                          color: Constants.indigoDye,
-                          size: 20,
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: _profilePic.isEmpty
+                              ? AccountAvatar(
+                                  radius: 20, name: widget.item.userName)
+                              : CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage:
+                                      CachedNetworkImageProvider(_profilePic),
+                                ),
                         ),
-                        const SizedBox(width: 5.0),
+                        const SizedBox(width: 8.0),
                         Text(
-                          "Ver detalles",
+                          widget.item.userName,
                           style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                               color: Constants.indigoDye),
-                        )
+                        ),
                       ],
-                    ))
-              ],
+                    ),
+                  if (!isCurrentUser(widget.item.userId))
+                    const SizedBox(height: 12.0),
+                  Text(
+                    widget.item.title,
+                    style: GoogleFonts.inter(
+                        fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8.0),
+                  RichText(
+                    text: TextSpan(
+                      style: DefaultTextStyle.of(context).style,
+                      children: [
+                        TextSpan(
+                          text: 'Dificultad: ',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                        ),
+                        TextSpan(
+                          text: widget.item.difficulty,
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w400),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    widget.item.description,
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w300),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.timelapse, color: iconsColor),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            '${widget.item.duration.inHours.toString()}h ${(widget.item.duration.inMinutes % 60).toString()}min',
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(MdiIcons.mapMarkerDistance, color: iconsColor),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            "${widget.item.distance.toStringAsFixed(2)} km",
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.group, color: iconsColor),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            widget.item.nParticipants.toString(),
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(MdiIcons.runFast, color: iconsColor),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            '${widget.item.avgSpeed.toStringAsFixed(1)}km/h',
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          )
-        ],
+            const SizedBox(height: 8.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: CachedNetworkImage(
+                placeholder: (context, url) => const Loader(),
+                imageUrl: widget.item.mapSnapshotUrl!,
+                height: 150,
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                imageBuilder: (context, imageProvider) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            // const SizedBox(height: 8.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(DateFormat('dd/MM/yyyy').format(widget.item.date),
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w500,
+                          color: Constants.indigoDye)),
+                  TextButton(
+                      onPressed: () async {
+                        try {
+                          await ExcursionController()
+                              .getExcursionById(widget.item.id)
+                              .then((value) {
+                            nextScreen(
+                              context,
+                              StatisticsPage(
+                                  excursion: value,
+                                  userId: widget.item.userId,
+                                  isNew: false),
+                              PageTransitionType.rightToLeft,
+                            );
+                          });
+                        } catch (e) {
+                          showSnackBar(context, Colors.red, e.toString());
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0)),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.open_in_new,
+                            color: Constants.indigoDye,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            "Ver detalles",
+                            style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w500,
+                                color: Constants.indigoDye),
+                          )
+                        ],
+                      ))
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
