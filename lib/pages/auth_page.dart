@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:excursiona/shared/assets.dart';
 import 'package:excursiona/controllers/auth_controller.dart';
-import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/pages/forgot_password.dart';
 import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/pages/verify_email_page.dart';
@@ -10,7 +9,7 @@ import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/form_button.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';

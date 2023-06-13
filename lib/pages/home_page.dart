@@ -3,13 +3,14 @@ import 'package:excursiona/pages/create_excursion_page.dart';
 import 'package:excursiona/pages/excursion_page.dart';
 import 'package:excursiona/pages/landing_page.dart';
 import 'package:excursiona/pages/map_page.dart';
-import 'package:excursiona/pages/my_chats_page.dart';
+import 'package:excursiona/pages/activity_page.dart';
 import 'package:excursiona/pages/profile_page.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,8 +26,8 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
 
   List<Widget> pages = [
-    const LandingPage(), // => const LandingPage(),
-    const MyChatsPage(),
+    const LandingPage(),
+    const ActivityPage(),
     const CreateExcursionPage(),
     const MapPage(),
     const ProfilePage(),
@@ -90,31 +91,35 @@ class _HomePageState extends State<HomePage> {
   }
 
   _createExcursion() {
-    nextScreen(context, pages.elementAt(2), PageTransitionType.bottomToTop);
+    nextScreen(
+        context, const CreateExcursionPage(), PageTransitionType.bottomToTop);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // bottomNavigationBar: BottomNavBarMallika1(),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: currentIndex,
           selectedItemColor: Constants.indigoDye,
           onTap: _onItemTapped,
-          // backgroundColor: Colors.grey[900],
           unselectedItemColor: Colors.grey[500],
-          unselectedFontSize: 3,
-          selectedFontSize: 3,
+          // showUnselectedLabels: false,
+          // showSelectedLabels: false,
+          unselectedFontSize: 12,
+          selectedFontSize: 12,
+          iconSize: 24,
           items: [
             const BottomNavigationBarItem(
                 icon: Icon(
                   Icons.home_rounded,
-                  size: 35,
                 ),
-                label: ""),
+                label: "Inicio"),
             const BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_rounded, size: 35), label: ""),
+                icon: Icon(
+                  Icons.list_rounded,
+                ),
+                label: "Actividad"),
             BottomNavigationBarItem(
                 icon: FloatingActionButton(
                   heroTag: "createExcursion",
@@ -122,15 +127,24 @@ class _HomePageState extends State<HomePage> {
                   onPressed: _createExcursion,
                   foregroundColor: Colors.white,
                   backgroundColor: Constants.indigoDye,
-                  child: Icon(Icons.landscape_rounded, size: 40),
+                  child: Icon(
+                    Icons.landscape_rounded,
+                    size: 40,
+                  ),
                 ),
                 label: ""),
             const BottomNavigationBarItem(
-              icon: Icon(Icons.map_rounded, size: 35),
-              label: "",
+              icon: Icon(
+                MdiIcons.map,
+              ),
+              label: "Mapa",
             ),
             const BottomNavigationBarItem(
-                icon: Icon(Icons.person, size: 35), label: ""),
+              icon: Icon(
+                Icons.person,
+              ),
+              label: "Mi perfil",
+            ),
           ],
         ),
         body: pages.elementAt(currentIndex));

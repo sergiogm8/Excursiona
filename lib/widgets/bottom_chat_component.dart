@@ -1,12 +1,11 @@
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'widgets.dart';
 
 class BottomChatComponent extends StatefulWidget {
   final Function sendTextMessage;
@@ -52,7 +51,7 @@ class _BottomChatComponentState extends State<BottomChatComponent> {
 
   _recordAudio() async {
     var tempDir = await getTemporaryDirectory();
-    var path = tempDir.path + '/audio.aac';
+    var path = '${tempDir.path}/audio.aac';
     await _audioRecorder.startRecorder(toFile: path);
   }
 
@@ -61,7 +60,6 @@ class _BottomChatComponentState extends State<BottomChatComponent> {
     setState(() {
       _uploadingAudio = true;
     });
-    print("Audio path: $path");
     var result = await widget.sendAudioMessage(path);
     setState(() {
       _uploadingAudio = false;
@@ -94,8 +92,8 @@ class _BottomChatComponentState extends State<BottomChatComponent> {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Row(
                           children: [
-                            SizedBox(
-                                height: 25, width: 25, child: const Loader()),
+                            const SizedBox(
+                                height: 25, width: 25, child: Loader()),
                             const SizedBox(width: 10),
                             Text(
                               "Enviando audio...",
@@ -169,7 +167,6 @@ class _BottomChatComponentState extends State<BottomChatComponent> {
                       onPressed: () async {
                         if (_audioRecorder.isRecording) {
                           await _sendAudio();
-                          print("audio grabado");
                           setState(() {
                             _isRecordingAudio = false;
                           });

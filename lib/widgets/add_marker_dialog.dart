@@ -4,11 +4,12 @@ import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AddMarkerDialog extends StatefulWidget {
   const AddMarkerDialog(
@@ -76,46 +77,45 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
     setState(() {
       _uploadingMarker = true;
     });
-    var uploaded;
-    if (_image != null) {
-      uploaded = await ExcursionController().uploadMarker(
-          excursionId: widget.excursionId,
-          title: _markerTitle,
-          markerType: widget.markerType,
-          position: widget.currentPosition,
-          image: _image!);
-    } else {
-      uploaded = await ExcursionController().uploadMarker(
-          excursionId: widget.excursionId,
-          title: _markerTitle,
-          markerType: widget.markerType,
-          position: widget.currentPosition);
+    try {
+      if (_image != null) {
+        await ExcursionController().uploadMarker(
+            excursionId: widget.excursionId,
+            title: _markerTitle,
+            markerType: widget.markerType,
+            position: widget.currentPosition,
+            image: _image!);
+      } else {
+        await ExcursionController().uploadMarker(
+            excursionId: widget.excursionId,
+            title: _markerTitle,
+            markerType: widget.markerType,
+            position: widget.currentPosition);
+      }
+      Navigator.pop(context);
+      showSnackBar(context, Colors.green, "Marcador compartido correctamente.");
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
     }
     setState(() {
       _uploadingMarker = false;
     });
-    if (uploaded) {
-      Navigator.pop(context);
-      showSnackBar(context, Colors.green, "Marcador compartido correctamente.");
-    } else {
-      setState(() {
-        _uploadedSuccessfully = false;
-      });
-    }
   }
 
-  _pickImage() {
-    ImagePicker imagePicker = ImagePicker();
-    imagePicker
-        .pickImage(source: ImageSource.camera, imageQuality: 70)
-        .then((value) {
-      if (value != null) {
+  _pickImage() async {
+    PermissionStatus cameraPermissions = await Permission.camera.request();
+
+    if (cameraPermissions.isGranted) {
+      var image = await pickImageFromCamera();
+      if (image != null) {
         setState(() {
-          _image = File(value.path);
+          _image = File(image.path);
         });
-        print(value.path);
       }
-    });
+    } else {
+      showSnackBar(context, Colors.red,
+          "Es necesario dar permisos de cámara para poder tomar una foto");
+    }
   }
 
   @override
@@ -141,7 +141,7 @@ class _AddMarkerDialogState extends State<AddMarkerDialog> {
                     const Loader(),
                     const SizedBox(height: 20),
                     Text(
-                      "Compartiendo ${_title}... ",
+                      "Compartiendo $_title... ",
                       style: GoogleFonts.inter(fontSize: 20),
                       textAlign: TextAlign.center,
                     )

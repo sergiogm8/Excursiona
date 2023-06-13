@@ -2,7 +2,7 @@ import 'package:excursiona/controllers/user_controller.dart';
 import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/widgets/excursion_invitation_card.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future nextScreen(context, page, PageTransitionType animation) {
   return Navigator.push(context, PageTransition(child: page, type: animation));
@@ -51,6 +52,18 @@ final blueTextInputDecoration = InputDecoration(
   focusedBorder: OutlineInputBorder(
       borderSide: const BorderSide(color: Constants.steelBlue, width: 2),
       borderRadius: BorderRadius.circular(15)),
+);
+
+final textInputDecoration = InputDecoration(
+  hintStyle: GoogleFonts.inter(
+      color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w300),
+  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+  enabledBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Colors.black, width: 1.5),
+  ),
+  focusedBorder: const UnderlineInputBorder(
+    borderSide: BorderSide(color: Constants.lapisLazuli, width: 2.0),
+  ),
 );
 
 getIconByMarkerType(MarkerType markerType) {
@@ -97,9 +110,8 @@ bool isCurrentUser(String uid) {
 
 Future<XFile?> pickImageFromCamera() async {
   final ImagePicker _picker = ImagePicker();
-  var image =
-      await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
-  return image;
+
+  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
 }
 
 void showFullscreenImage(BuildContext context, String imagePath) {

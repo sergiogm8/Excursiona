@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,35 +28,45 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initializeFirebaseMessaging();
-    getIsUserLoggedIn();
+    // initializeFirebaseMessaging();
+    _getIsUserLoggedIn();
+    _askPermissions();
   }
 
-  initializeFirebaseMessaging() async {
-    await FirebaseMessaging.instance.setAutoInitEnabled(true);
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
+  void _askPermissions() async {
+    PermissionStatus storageStatus = await Permission.storage.request();
+    var locationServiceStatusEnabled =
+        await Permission.location.serviceStatus.isEnabled;
+    if (locationServiceStatusEnabled) {
+      await Permission.location.request();
+    }
   }
 
-  void getIsUserLoggedIn() async {
+  // initializeFirebaseMessaging() async {
+  //   await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  //   FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  //   NotificationSettings settings = await messaging.requestPermission(
+  //     alert: true,
+  //     announcement: false,
+  //     badge: true,
+  //     carPlay: false,
+  //     criticalAlert: false,
+  //     provisional: false,
+  //     sound: true,
+  //   );
+
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print('Got a message whilst in the foreground!');
+  //     print('Message data: ${message.data}');
+
+  //     if (message.notification != null) {
+  //       print('Message also contained a notification: ${message.notification}');
+  //     }
+  //   });
+  // }
+
+  void _getIsUserLoggedIn() async {
     await HelperFunctions.getUserLoggedInStatus().then((value) {
       if (value != null) {
         setState(() {

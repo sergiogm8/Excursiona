@@ -8,14 +8,18 @@ class AccountAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: Constants.indigoDye.withOpacity(0.1),
-      child: Text(
-        _getInitials(),
-        style: TextStyle(
-          color: Constants.indigoDye,
-          fontSize: radius * 0.85,
+    return Container(
+      decoration: const BoxDecoration(
+          color: Constants.darkWhite, shape: BoxShape.circle),
+      child: CircleAvatar(
+        radius: radius,
+        backgroundColor: Constants.indigoDye.withOpacity(0.1),
+        child: Text(
+          _getInitials(),
+          style: TextStyle(
+            color: Constants.indigoDye,
+            fontSize: radius * 0.85,
+          ),
         ),
       ),
     );

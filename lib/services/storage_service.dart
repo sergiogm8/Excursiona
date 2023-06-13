@@ -8,6 +8,7 @@ class StorageService {
   Reference referenceDirAudios = FirebaseStorage.instance.ref().child('audios');
   final String excursionsFolder = 'excursions';
   final String profilePicsFolder = 'profile_pics';
+  final String userPicsFolder = 'user_pics';
 
   uploadMarkerImage(
       {required File image,
@@ -21,8 +22,8 @@ class StorageService {
     try {
       await referenceUploadImage.putFile(image);
       return await referenceUploadImage.getDownloadURL();
-    } on FirebaseException {
-      return '';
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -36,7 +37,7 @@ class StorageService {
     try {
       await referenceUploadImage.putFile(image);
       return await referenceUploadImage.getDownloadURL();
-    } on FirebaseException {
+    } catch (e) {
       return '';
     }
   }
@@ -50,9 +51,8 @@ class StorageService {
     try {
       await referenceUploadAudio.putFile(audio);
       var path = await referenceUploadAudio.getDownloadURL();
-      print(path);
       return path;
-    } on FirebaseException {
+    } catch (e) {
       return '';
     }
   }
@@ -63,8 +63,34 @@ class StorageService {
     try {
       var list = await referenceDirExcursion.listAll();
       return list.items.length;
-    } on FirebaseException {
+    } catch (e) {
       return 0;
+    }
+  }
+
+  uploadMapSnapshot(String excursionId, File mapSnapshot, String userId) async {
+    Reference referenceDirUserMapImages =
+        referenceDirImages.child(userPicsFolder).child('map_snapshots');
+    final fileName = '${excursionId}_${userId}';
+    Reference referenceUploadImage = referenceDirUserMapImages.child(fileName);
+    try {
+      await referenceUploadImage.putFile(mapSnapshot);
+      return await referenceUploadImage.getDownloadURL();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  uploadProfilePic(File profilePic, String userId) async {
+    Reference referenceDirUserPics =
+        referenceDirImages.child(profilePicsFolder);
+    final fileName = userId;
+    Reference referenceUploadImage = referenceDirUserPics.child(fileName);
+    try {
+      await referenceUploadImage.putFile(profilePic);
+      return await referenceUploadImage.getDownloadURL();
+    } catch (e) {
+      rethrow;
     }
   }
 }

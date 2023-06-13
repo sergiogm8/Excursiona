@@ -13,11 +13,13 @@ import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/route.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/message.dart';
-import 'package:excursiona/model/statistic_recap.dart';
+import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/chat_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
+import 'package:excursiona/services/user_service.dart';
+import 'package:excursiona/shared/utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,6 +36,8 @@ class ExcursionController {
   Timer? batteryTimer;
   Battery battery = Battery();
   RouteModel _route = RouteModel();
+
+  var _lastDocumentFetched = null;
 
   Future createExcursion(
       Excursion excursion, Set<UserModel> participants) async {
@@ -100,20 +104,6 @@ class ExcursionController {
         userId: userId);
   }
 
-  List<Excursion>? getUserExcursions() {
-    //TODO: Review later with the method of the service
-    List<Excursion>? excursions = [];
-    _excursionService.getUserExcursions().then((excursionsQuery) {
-      for (var excursion in excursionsQuery) {
-        excursions
-            ?.add(Excursion.fromMap(excursion.data() as Map<String, dynamic>));
-      }
-    }).catchError((error) {
-      excursions = null;
-    });
-    return excursions;
-  }
-
   shareCurrentLocation(Position coords, double speed, double distance) async {
     var userId = await HelperFunctions.getUserUID();
     var userPic = await HelperFunctions.getUserProfilePic();
@@ -153,30 +143,32 @@ class ExcursionController {
       required MarkerType markerType,
       required Position position,
       File? image}) async {
-    String imageDownloadURL = "";
-    if (image != null) {
-      imageDownloadURL = await StorageService().uploadMarkerImage(
-          image: image, excursionId: excursionId, title: title);
-      if (imageDownloadURL.isEmpty) {
-        return false;
+    try {
+      String imageDownloadURL = "";
+      if (image != null) {
+        imageDownloadURL = await StorageService().uploadMarkerImage(
+            image: image, excursionId: excursionId, title: title);
       }
+      var userId = await HelperFunctions.getUserUID();
+      var userName = await HelperFunctions.getUserName();
+      var userPic = await HelperFunctions.getUserProfilePic();
+      var marker = MarkerModel(
+        id: Uuid().v1(),
+        userId: userId!,
+        ownerName: userName!,
+        ownerPic: userPic!,
+        title: title,
+        position: LatLng(position.latitude, position.longitude),
+        markerType: markerType,
+        imageUrl: imageDownloadURL,
+        timestamp: DateTime.now(),
+      );
+      await _excursionService.addMarkerToExcursion(
+          marker: marker, excursionId: excursionId);
+      UserController().updateUserMarkers(1);
+    } catch (e) {
+      throw Exception("Hubo un error al compartir el marcador: $e");
     }
-    var userId = await HelperFunctions.getUserUID();
-    var userName = await HelperFunctions.getUserName();
-    var userPic = await HelperFunctions.getUserProfilePic();
-    var marker = MarkerModel(
-      id: Uuid().v1(),
-      userId: userId!,
-      ownerName: userName!,
-      ownerPic: userPic!,
-      title: title,
-      position: LatLng(position.latitude, position.longitude),
-      markerType: markerType,
-      imageUrl: imageDownloadURL,
-      timestamp: DateTime.now(),
-    );
-    return await _excursionService.addMarkerToExcursion(
-        marker: marker, excursionId: excursionId);
   }
 
   Future<bool> uploadImages(List<XFile> images) async {
@@ -204,6 +196,8 @@ class ExcursionController {
         imagesUploaded++;
       }
     }
+
+    UserController().updateUserPhotos(imagesUploaded);
     return true;
   }
 
@@ -266,34 +260,38 @@ class ExcursionController {
     _excursionService.saveUserRoute(_route, excursionId!);
   }
 
-  // Future<RouteModel> getRoute() async {
-  //   return await _excursionService.getUserRoute(excursionId!);
-  // }
-
-  Future<RouteModel> getUserRoute() async {
-    var route = await _excursionService.getUserRoute(excursionId!);
+  Future<RouteModel> getUserRoute(String? userId) async {
+    var route =
+        await _excursionService.getUserRoute(excursionId!, userId: userId);
     _route = route;
     return route;
   }
 
-  Future<StatisticRecap> getExcursionData({String? excursionId}) async {
+  Future<StatisticRecap> getExcursionData(String? userId,
+      {String? excursionId}) async {
     excursionId ??= this.excursionId;
-    var participant = await _excursionService.getParticipantData(excursionId!);
-    var participants = await getParticipantsData();
-    var nParticipants = participants.length;
-    var nPhotos = await StorageService().getNumberOfImages(excursionId);
-    var nMarkers = await _excursionService.getNumberOfMarkers(excursionId);
-    var statistics = StatisticRecap(
-        startTime: participant.joinedAt!,
-        endTime: participant.leftAt!,
-        nParticipants: nParticipants,
-        nPhotos: nPhotos,
-        nMarkers: nMarkers,
-        avgAltitude: _route.avgAltitude,
-        avgSpeed: _route.avgSpeed,
-        distance: _route.distance);
+    try {
+      var participant = await _excursionService.getParticipantData(excursionId!,
+          userId: userId);
+      var participants = await getParticipantsData();
+      var nParticipants = participants.length;
+      var nPhotos = await StorageService().getNumberOfImages(excursionId);
+      var nMarkers = await _excursionService.getNumberOfMarkers(excursionId);
+      var statistics = StatisticRecap(
+          startTime: participant.joinedAt!,
+          endTime: participant.leftAt!,
+          nParticipants: nParticipants,
+          nPhotos: nPhotos,
+          nMarkers: nMarkers,
+          avgAltitude: _route.avgAltitude,
+          avgSpeed: _route.avgSpeed,
+          distance: _route.distance);
 
-    return statistics;
+      return statistics;
+    } catch (e) {
+      throw Exception(
+          "Hubo algún error al obtener los datos de la excursión: $e");
+    }
   }
 
   sendEmergencyAlert({required Position myPosition}) async {
@@ -324,5 +322,38 @@ class ExcursionController {
     var excursionId = await HelperFunctions.getExcursionSession();
     if (excursionId == null) return null;
     return await _excursionService.getExcursion(excursionId);
+  }
+
+  Future<Excursion> getExcursionById(String excursionId) async {
+    try {
+      var excursion = await _excursionService.getExcursion(excursionId);
+      return excursion;
+    } catch (e) {
+      throw Exception("Hubo un error al obtener la excursión: $e");
+    }
+  }
+
+  Future<List<ExcursionRecap>> getTLExcursions(int docsLimit) async {
+    try {
+      var docs = await _excursionService.getTLExcursions(
+          docsLimit, _lastDocumentFetched);
+      List<ExcursionRecap> excursions = [];
+      docs.forEach((doc) {
+        excursions
+            .add(ExcursionRecap.fromMap(doc.data()! as Map<String, dynamic>));
+      });
+      _lastDocumentFetched = docs.last;
+      excursions.removeWhere((element) => isCurrentUser(element.userId));
+      return excursions;
+    } catch (e) {
+      if (e.toString().contains("Bad state: No element")) {
+        return [];
+      }
+      throw Exception("Hubo un error al obtener las excursiones: $e");
+    }
+  }
+
+  updateUserStatistics(StatisticRecap statistics) async {
+    UserService().updateUserStatistics(statistics);
   }
 }

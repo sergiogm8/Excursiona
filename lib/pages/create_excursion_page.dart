@@ -10,7 +10,6 @@ import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/add_participant_avatar.dart';
 import 'package:excursiona/widgets/form_button.dart';
 import 'package:excursiona/widgets/participant_avatar.dart';
-import 'package:excursiona/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';

@@ -22,11 +22,10 @@ import 'package:excursiona/widgets/add_marker_dialog.dart';
 import 'package:excursiona/widgets/change_map_type_button.dart';
 import 'package:excursiona/widgets/drawer_item.dart';
 import 'package:excursiona/widgets/icon_marker.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:excursiona/widgets/marker_info_sheet.dart';
 import 'package:excursiona/widgets/user_marker.dart';
 import 'package:excursiona/widgets/user_marker_sheet.dart';
-import 'package:excursiona/widgets/widgets.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
@@ -712,7 +711,11 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _excursionController!.saveUserRoute();
     _excursionController!.leaveExcursion();
     Navigator.pop(context);
-    nextScreenReplace(context, StatisticsPage(excursionId: widget.excursionId),
+    nextScreenReplace(
+        context,
+        StatisticsPage(
+          excursion: widget.excursion,
+        ),
         PageTransitionType.fade);
   }
 

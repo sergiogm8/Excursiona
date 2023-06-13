@@ -3,6 +3,7 @@ import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -49,6 +50,9 @@ class MarkerInfoSheet extends StatelessWidget {
                         children: [
                           CachedNetworkImage(
                             imageUrl: markerModel.imageUrl!,
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                            placeholder: (context, url) => const Loader(),
                             imageBuilder: (context, imageProvider) {
                               return Container(
                                 decoration: BoxDecoration(

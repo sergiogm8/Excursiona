@@ -4,12 +4,11 @@ import 'package:banner_carousel/banner_carousel.dart';
 import 'package:excursiona/controllers/excursion_controller.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
-import 'package:excursiona/widgets/widgets.dart';
+import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ShareImagePage extends StatefulWidget {
   final ExcursionController excursionController;
@@ -29,11 +28,17 @@ class _ShareImagePageState extends State<ShareImagePage> {
   }
 
   _addImage() async {
-    var image = await pickImageFromCamera();
-    if (image != null) {
-      setState(() {
-        _images.add(image);
-      });
+    PermissionStatus cameraPermissions = await Permission.camera.request();
+    if (cameraPermissions.isGranted) {
+      var image = await pickImageFromCamera();
+      if (image != null) {
+        setState(() {
+          _images.add(image);
+        });
+      }
+    } else {
+      showSnackBar(context, Colors.red,
+          "Es necesario dar permisos de cámara para poder tomar una foto");
     }
   }
 
