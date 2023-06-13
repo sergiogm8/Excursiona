@@ -27,4 +27,6 @@ class Constants {
   static const String restMarkerText = 'Zona de descanso';
   static const String interestMarkerText = 'Punto de interés';
   static const String customMarkerText = 'Punto personalizado';
+
+  static const String openWeatherMapKey = "cf7d04d95242f493cc2da8f6ea4af65d";
 }
