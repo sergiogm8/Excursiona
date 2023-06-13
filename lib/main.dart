@@ -35,11 +35,8 @@ class _MyAppState extends State<MyApp> {
 
   void _askPermissions() async {
     PermissionStatus storageStatus = await Permission.storage.request();
-    var locationServiceStatusEnabled =
-        await Permission.location.serviceStatus.isEnabled;
-    if (locationServiceStatusEnabled) {
-      await Permission.location.request();
-    }
+    PermissionStatus locationServiceStatus =
+        await Permission.location.request();
   }
 
   // initializeFirebaseMessaging() async {
