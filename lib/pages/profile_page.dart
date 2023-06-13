@@ -24,11 +24,6 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? _userModel;
   var _profilePic = "";
   bool _isLoading = true;
-  var data = {
-    'Excursiones realizadas': '0',
-    'Kilómetros recorridos': '0',
-    'Tiempo dedicado': '105'
-  };
 
   @override
   void initState() {
