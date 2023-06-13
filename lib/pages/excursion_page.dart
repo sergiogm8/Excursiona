@@ -95,7 +95,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _setCustomMarkerIcon();
     _retrieveParticipantsData();
     _initializeDurationTimer();
-    loadData();
+    _setPositionData();
     _excursionController!.initializeBatteryTimer();
     super.initState();
   }
@@ -108,7 +108,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     super.dispose();
   }
 
-  loadData() {
+  _setPositionData() {
     getCurrentPosition().then((value) async {
       setState(() {
         _currentPosition = value;
@@ -127,31 +127,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
       _finishedLocation = true;
     });
-  }
-
-  Future<Position> getCurrentPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('La ubicación no está activada');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Permisos de ubicación denegados');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Permisos de ubicación denegados permanentemente, no se pueden solicitar los permisos.');
-    }
-
-    return await Geolocator.getCurrentPosition();
   }
 
   Stream<List<MarkerModel>> getMarkers() {
@@ -305,7 +280,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
         showSnackBar(context, Theme.of(context).primaryColor,
             'La ubicación no está activada');
       } else {
-        loadData();
+        _setPositionData();
       }
     });
 
