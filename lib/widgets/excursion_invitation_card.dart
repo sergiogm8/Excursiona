@@ -84,11 +84,24 @@ class ExcursionInvitationCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      'Te ha invitado a: ${excursion.title}',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Te ha invitado a: ',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: excursion.title,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -96,6 +109,35 @@ class ExcursionInvitationCard extends StatelessWidget {
               ),
             ],
           ),
+          // const SizedBox(height: 15),
+          if (excursion.description.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 15, bottom: 5),
+              child: Text(
+                excursion.description,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          const SizedBox(height: 8),
+          RichText(
+              text: TextSpan(children: [
+            TextSpan(
+              text: 'Dificultad: ',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: excursion.difficulty,
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+              ),
+            ),
+          ])),
           const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
