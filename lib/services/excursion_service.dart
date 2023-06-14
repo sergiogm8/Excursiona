@@ -47,8 +47,8 @@ class ExcursionService {
         if (participant.uid == currentUserId) continue;
         await UserService()
             .insertExcursionInvitation(excursion, participant.uid);
-        NotificationService()
-            .sendExcursionNotificationToUser(excursion, participant.uid);
+        // NotificationService()
+        //     .sendExcursionNotificationToUser(excursion, participant.uid);
       }
       return true;
     } on FirebaseException {
