@@ -18,7 +18,7 @@ class UserService {
       FirebaseFirestore.instance.collection('users');
 
   Future saveUserData(UserModel user) async {
-    return await userCollection.doc(uid).set({user.toMap()});
+    return await userCollection.doc(uid).set(user.toMap());
   }
 
   Future getUserDataByEmail(String email) async {
