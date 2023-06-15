@@ -145,13 +145,22 @@ class ExcursionController {
       File? image}) async {
     try {
       String imageDownloadURL = "";
-      if (image != null) {
-        imageDownloadURL = await StorageService().uploadMarkerImage(
-            image: image, excursionId: excursionId, title: title);
-      }
       var userId = await HelperFunctions.getUserUID();
       var userName = await HelperFunctions.getUserName();
       var userPic = await HelperFunctions.getUserProfilePic();
+      if (image != null) {
+        imageDownloadURL = await StorageService().uploadMarkerImage(
+            image: image, excursionId: excursionId, title: title);
+        ImageModel imageModel = ImageModel(
+          ownerId: userId!,
+          ownerName: userName!,
+          ownerPic: userPic!,
+          imageUrl: imageDownloadURL,
+          timestamp: DateTime.now(),
+        );
+        UserController().saveImage(imageModel);
+      }
+
       var marker = MarkerModel(
         id: Uuid().v1(),
         userId: userId!,
@@ -172,16 +181,17 @@ class ExcursionController {
   }
 
   Future<bool> uploadImages(List<XFile> images) async {
-    int imagesUploaded = 0;
+    int nImagesUploaded = 0;
     var userId = await HelperFunctions.getUserUID();
     var userName = await HelperFunctions.getUserName();
     var userPic = await HelperFunctions.getUserProfilePic();
+    List<ImageModel> uploadedImages = [];
 
     for (var image in images) {
       String imageDownloadURL = await StorageService().uploadExcursionImage(
           image: File(image.path), excursionId: excursionId!);
       if (imageDownloadURL.isEmpty) {
-        break;
+        continue;
       }
       ImageModel imageModel = ImageModel(
           ownerId: userId!,
@@ -190,14 +200,16 @@ class ExcursionController {
           imageUrl: imageDownloadURL,
           timestamp: DateTime.now());
 
+      uploadedImages.add(imageModel);
+
       var uploaded = await _excursionService.addImageToExcursion(
           excursionId: excursionId!, imageModel: imageModel);
       if (uploaded) {
-        imagesUploaded++;
+        nImagesUploaded++;
       }
     }
 
-    UserController().updateUserPhotos(imagesUploaded);
+    UserController().updateUserPhotos(nImagesUploaded, uploadedImages);
     return true;
   }
 
@@ -343,7 +355,6 @@ class ExcursionController {
             .add(ExcursionRecap.fromMap(doc.data()! as Map<String, dynamic>));
       });
       _lastDocumentFetched = docs.last;
-      excursions.removeWhere((element) => isCurrentUser(element.userId));
       return excursions;
     } catch (e) {
       if (e.toString().contains("Bad state: No element")) {

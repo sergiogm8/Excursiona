@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
@@ -85,11 +86,27 @@ class UserController {
     }
   }
 
-  updateUserPhotos(int nNewPhotos) async {
+  updateUserPhotos(int nNewPhotos, List<ImageModel> uploadedImages) async {
     try {
-      _userService.updateUserPhotos(nNewPhotos);
+      _userService.updateUserPhotos(nNewPhotos, uploadedImages);
     } catch (e) {
       throw Exception("Hubo un error al actualizar la cantidad de fotos: $e");
+    }
+  }
+
+  saveImages(List<ImageModel> images) async {
+    try {
+      await _userService.saveImages(images);
+    } catch (e) {
+      throw Exception("Hubo un error al guardar las fotos: $e");
+    }
+  }
+
+  saveImage(ImageModel image) async {
+    try {
+      await _userService.saveImage(image);
+    } catch (e) {
+      throw Exception("Hubo un error al guardar la foto: $e");
     }
   }
 
