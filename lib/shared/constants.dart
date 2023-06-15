@@ -29,4 +29,14 @@ class Constants {
   static const String customMarkerText = 'Punto personalizado';
 
   static const String openWeatherMapKey = "cf7d04d95242f493cc2da8f6ea4af65d";
+
+  static const List<BoxShadow> boxShadow = [
+    BoxShadow(
+      color: Colors.black12,
+      offset: Offset(0, 2),
+      blurRadius: 6.0,
+    ),
+  ];
+
+  static Border border = Border.all(color: Colors.grey[300]!, width: 2);
 }

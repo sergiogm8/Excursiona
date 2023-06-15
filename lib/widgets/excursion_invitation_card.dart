@@ -45,15 +45,8 @@ class ExcursionInvitationCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[300]!, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 1,
-            offset: const Offset(3, 2),
-          ),
-        ],
+        border: Constants.border,
+        boxShadow: Constants.boxShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

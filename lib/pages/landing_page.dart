@@ -9,6 +9,7 @@ import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/profile_page.dart';
 import 'package:excursiona/pages/statistics_page.dart';
+import 'package:excursiona/pages/user_gallery_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
 import 'package:excursiona/widgets/account_avatar.dart';
@@ -461,7 +462,10 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            nextScreen(context, const UserGalleryPage(),
+                                PageTransitionType.rightToLeft);
+                          },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Constants.indigoDye,
                               shape: RoundedRectangleBorder(
@@ -520,10 +524,10 @@ class SmallActivityItem extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.8,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Constants.border,
+            boxShadow: Constants.boxShadow),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             height: 110,
