@@ -90,7 +90,7 @@ class UserController {
     try {
       _userService.updateUserPhotos(nNewPhotos, uploadedImages);
     } catch (e) {
-      throw Exception("Hubo un error al actualizar la cantidad de fotos: $e");
+      throw Exception("Hubo un error al subir las fotos: $e");
     }
   }
 

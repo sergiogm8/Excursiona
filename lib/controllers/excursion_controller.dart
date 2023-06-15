@@ -158,7 +158,7 @@ class ExcursionController {
           imageUrl: imageDownloadURL,
           timestamp: DateTime.now(),
         );
-        UserController().saveImage(imageModel);
+        await UserController().saveImage(imageModel);
       }
 
       var marker = MarkerModel(
@@ -209,7 +209,11 @@ class ExcursionController {
       }
     }
 
-    UserController().updateUserPhotos(nImagesUploaded, uploadedImages);
+    try {
+      UserController().updateUserPhotos(nImagesUploaded, uploadedImages);
+    } catch (e) {
+      rethrow;
+    }
     return true;
   }
 

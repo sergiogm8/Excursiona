@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class UserService {
   UserService({this.uid});
@@ -16,6 +16,8 @@ class UserService {
   final String? uid;
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
+  final CollectionReference imagesCollection =
+      FirebaseFirestore.instance.collection('images');
 
   Future saveUserData(UserModel user) async {
     return await userCollection.doc(uid).set(user.toMap());
@@ -179,7 +181,7 @@ class UserService {
     });
   }
 
-  void updateUserPhotos(int nNewPhotos) {
+  void updateUserPhotos(int nNewPhotos, List<ImageModel> uploadedImages) {
     final DocumentReference userRef =
         userCollection.doc(authService.firebaseAuth.currentUser!.uid);
 
@@ -198,6 +200,30 @@ class UserService {
     }).catchError((error) {
       throw Exception(error.toString());
     });
+
+    try {
+      saveImages(uploadedImages);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  saveImages(List<ImageModel> images) async {
+    for (var image in images) {
+      try {
+        await saveImage(image);
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+
+  saveImage(ImageModel image) async {
+    try {
+      await imagesCollection.add(image.toMapForGallery());
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void updateUserMarkers(int nNewMarkers) {
