@@ -6,18 +6,17 @@ import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/widgets/gallery_page_widgets.dart';
 import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ImageGalleryPage extends StatefulWidget {
+class ExcImageGalleryPage extends StatefulWidget {
   final ExcursionController excursionController;
-  const ImageGalleryPage({super.key, required this.excursionController});
+  const ExcImageGalleryPage({super.key, required this.excursionController});
 
   @override
-  State<ImageGalleryPage> createState() => _ImageGalleryPageState();
+  State<ExcImageGalleryPage> createState() => _ExcImageGalleryPageState();
 }
 
-class _ImageGalleryPageState extends State<ImageGalleryPage> {
+class _ExcImageGalleryPageState extends State<ExcImageGalleryPage> {
   ExcursionController get _excursionController => widget.excursionController;
 
   Stream<List<ImageModel>> _getImagesFromExcursion() {

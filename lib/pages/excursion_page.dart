@@ -10,7 +10,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/chat_room_page.dart';
-import 'package:excursiona/pages/image_gallery_page.dart';
+import 'package:excursiona/pages/exc_image_gallery_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/pages/statistics_page.dart';
@@ -800,7 +800,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     onTap: () {
                       nextScreen(
                           context,
-                          ImageGalleryPage(
+                          ExcImageGalleryPage(
                               excursionController: _excursionController!),
                           PageTransitionType.rightToLeft);
                     }),
