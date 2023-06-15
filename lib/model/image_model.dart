@@ -32,4 +32,12 @@ class ImageModel {
       'timestamp': timestamp.millisecondsSinceEpoch,
     };
   }
+
+  Map<String, dynamic> toMapForGallery() {
+    return {
+      'userId': ownerId,
+      'imageUrl': imageUrl,
+      'timestamp': timestamp.millisecondsSinceEpoch,
+    };
+  }
 }
