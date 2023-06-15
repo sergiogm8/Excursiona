@@ -67,9 +67,13 @@ class _ShareImagePageState extends State<ShareImagePage> {
         );
       },
     );
-    await _excursionController.uploadImages(_images);
-    Navigator.pop(context);
-    Navigator.pop(context);
+    try {
+      await _excursionController.uploadImages(_images);
+      Navigator.pop(context);
+      Navigator.pop(context);
+    } catch (e) {
+      showSnackBar(context, Colors.red, e.toString());
+    }
   }
 
   @override
