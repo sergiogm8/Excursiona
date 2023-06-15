@@ -55,9 +55,9 @@ class _MyActivityState extends State<MyActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        setState(() {
-          _isLoading = false;
-        });
+      });
+      setState(() {
+        _isLoading = false;
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
@@ -145,9 +145,9 @@ class _CommunityActivityState extends State<CommunityActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        setState(() {
-          _isLoading = false;
-        });
+      });
+      setState(() {
+        _isLoading = false;
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
