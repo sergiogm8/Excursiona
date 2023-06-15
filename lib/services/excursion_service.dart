@@ -333,10 +333,14 @@ class ExcursionService {
       final CollectionReference TLCollection =
           FirebaseFirestore.instance.collection('timeline');
       var snapshot = lastDoc == null
-          ? await TLCollection.orderBy('date', descending: true)
+          ? await TLCollection.where('userId', isNotEqualTo: currentUserId)
+              .orderBy('userId')
+              .orderBy('date', descending: true)
               .limit(docsPerPage)
               .get()
-          : await TLCollection.orderBy('date', descending: true)
+          : await TLCollection.where('userId', isNotEqualTo: currentUserId)
+              .orderBy('userId')
+              .orderBy('date', descending: true)
               .startAfterDocument(lastDoc)
               .limit(docsPerPage)
               .get();
