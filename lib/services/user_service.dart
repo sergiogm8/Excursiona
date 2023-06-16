@@ -226,6 +226,28 @@ class UserService {
     }
   }
 
+  Future<List<QueryDocumentSnapshot>> getGalleryImages(
+      int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
+    var userId = authService.firebaseAuth.currentUser!.uid;
+    try {
+      var data = lastDoc == null
+          ? await imagesCollection
+              .where('userId', isEqualTo: userId)
+              .orderBy('timestamp', descending: true)
+              .limit(docsPerPage)
+              .get()
+          : await imagesCollection
+              .where('userId', isEqualTo: userId)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDoc)
+              .limit(docsPerPage)
+              .get();
+      return data.docs;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void updateUserMarkers(int nNewMarkers) {
     final DocumentReference userRef =
         userCollection.doc(authService.firebaseAuth.currentUser!.uid);

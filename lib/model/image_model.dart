@@ -23,6 +23,16 @@ class ImageModel {
     );
   }
 
+  factory ImageModel.fromMapForGallery(Map<String, dynamic> map) {
+    return ImageModel(
+      ownerId: map['userId'] as String,
+      ownerName: '',
+      ownerPic: '',
+      imageUrl: map['imageUrl'] as String,
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'ownerId': ownerId,

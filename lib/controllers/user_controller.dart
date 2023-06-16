@@ -110,6 +110,25 @@ class UserController {
     }
   }
 
+  Future<List<ImageModel>> getGalleryImages(int docsLimit) async {
+    List<ImageModel> images = [];
+    try {
+      var docs =
+          await _userService.getGalleryImages(docsLimit, _lastDocumentFetched);
+      docs.forEach((e) {
+        images.add(
+            ImageModel.fromMapForGallery(e.data() as Map<String, dynamic>));
+      });
+      _lastDocumentFetched = docs.last;
+      return images;
+    } catch (e) {
+      if (e.toString().contains("Bad state: No element")) {
+        return [];
+      }
+      throw Exception("Hubo un error al obtener las imágenes: $e");
+    }
+  }
+
   updateUserMarkers(int nNewMarkers) async {
     try {
       _userService.updateUserMarkers(nNewMarkers);
