@@ -91,11 +91,15 @@ class _UserGalleryPageState extends State<UserGalleryPage> {
                     return const SizedBox();
                   }
                 }
-                return CachedNetworkImage(
-                  imageUrl: _items[index].imageUrl,
-                  errorWidget: (context, url, error) =>
-                      const Icon(Icons.error, color: Constants.indigoDye),
-                  fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () =>
+                      showFullscreenImage(context, _items[index].imageUrl),
+                  child: CachedNetworkImage(
+                    imageUrl: _items[index].imageUrl,
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error, color: Constants.indigoDye),
+                    fit: BoxFit.cover,
+                  ),
                 );
               },
             ),
