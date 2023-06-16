@@ -112,7 +112,7 @@ bool isCurrentUser(String uid) {
 Future<XFile?> pickImageFromCamera() async {
   final ImagePicker _picker = ImagePicker();
 
-  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 65);
 }
 
 void showFullscreenImage(BuildContext context, String imagePath) {

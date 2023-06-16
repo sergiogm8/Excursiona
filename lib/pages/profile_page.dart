@@ -108,8 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 PermissionStatus storagePermissions =
                     await Permission.storage.request();
                 if (storagePermissions.isGranted) {
-                  var result =
-                      await imagePicker.pickImage(source: ImageSource.gallery);
+                  var result = await imagePicker.pickImage(
+                      source: ImageSource.gallery, imageQuality: 65);
                   if (result != null) {
                     _updateProfilePic(result);
                   }
