@@ -549,6 +549,8 @@ class SmallActivityItem extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             data.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 10),
