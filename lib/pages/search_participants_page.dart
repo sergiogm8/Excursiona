@@ -29,6 +29,9 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   void initState() {
     super.initState();
     _isLoading = true;
+    setState(() {
+      _participants.addAll(widget.alreadyParticipants);
+    });
     _fetchUsers();
   }
 
@@ -36,7 +39,7 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
     var results = await _userController
         .getAllUsersBasicInfo(_textController.text.toLowerCase());
     results = results
-        .where((element) => !_alreadyParticipants
+        .where((element) => !_participants
             .where(
                 (alreadyParticipant) => alreadyParticipant.uid == element.uid)
             .isNotEmpty)
