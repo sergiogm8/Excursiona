@@ -9,6 +9,7 @@ class StorageService {
   final String excursionsFolder = 'excursions';
   final String profilePicsFolder = 'profile_pics';
   final String userPicsFolder = 'user_pics';
+  final String mapSnapshotsFolder = 'map_snapshots';
 
   uploadMarkerImage(
       {required File image,
@@ -70,7 +71,7 @@ class StorageService {
 
   uploadMapSnapshot(String excursionId, File mapSnapshot, String userId) async {
     Reference referenceDirUserMapImages =
-        referenceDirImages.child(userPicsFolder).child('map_snapshots');
+        referenceDirImages.child(mapSnapshotsFolder);
     final fileName = '${excursionId}_${userId}';
     Reference referenceUploadImage = referenceDirUserMapImages.child(fileName);
     try {
