@@ -8,6 +8,7 @@ import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SearchParticipantsPage extends StatefulWidget {
   final Set<UserModel> alreadyParticipants;
@@ -28,14 +29,18 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
   @override
   void initState() {
     super.initState();
-    _isLoading = true;
     setState(() {
       _participants.addAll(widget.alreadyParticipants);
     });
-    _fetchUsers();
   }
 
   _fetchUsers() async {
+    if (_textController.text.isEmpty) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
     var results = await _userController
         .getAllUsersBasicInfo(_textController.text.toLowerCase());
     results = results
@@ -79,6 +84,7 @@ class _SearchParticipantsPageState extends State<SearchParticipantsPage> {
               const SizedBox(width: 16),
               Expanded(
                 child: TextField(
+                  autofocus: true,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: "Buscar",

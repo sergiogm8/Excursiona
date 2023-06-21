@@ -82,8 +82,6 @@ class UserService {
   }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
-    //if a name is given filter by name
-    //if no name is given return all users
     List<UserModel> users = [];
     QuerySnapshot snapshot =
         await userCollection.orderBy('name').limit(25).get();
