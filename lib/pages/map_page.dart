@@ -113,6 +113,7 @@ class _MapPageState extends State<MapPage> {
     Marker marker = Marker(
       markerId: markerId,
       position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+      icon: _currentLocationIcon,
     );
 
     setState(() {

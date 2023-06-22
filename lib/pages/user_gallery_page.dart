@@ -79,7 +79,7 @@ class _UserGalleryPageState extends State<UserGalleryPage> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 3,
-                mainAxisSpacing: 2,
+                mainAxisSpacing: 3,
               ),
               itemBuilder: (BuildContext context, int index) {
                 if (index == _items.length) {
