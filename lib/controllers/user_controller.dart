@@ -47,7 +47,17 @@ class UserController {
 
   saveExcursion(ExcursionRecap excursion, File mapSnapshot) async {
     try {
-      await _userService.saveExcursion(excursion, mapSnapshot);
+      var uid = await HelperFunctions.getUserUID();
+      String mapUrl = await StorageService()
+          .uploadMapSnapshot(excursion.id, mapSnapshot, uid!);
+      if (mapUrl.isNotEmpty) {
+        excursion.mapSnapshotUrl = mapUrl;
+        try {
+          await ExcursionService().saveExcursionToTL(excursion);
+        } catch (e) {
+          rethrow;
+        }
+      }
     } catch (e) {
       throw Exception(
           "Hubo un error al guardar la excursión en el sistema: $e");

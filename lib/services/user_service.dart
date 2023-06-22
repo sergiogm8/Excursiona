@@ -99,12 +99,6 @@ class UserService {
     if (mapUrl.isNotEmpty) {
       excursion.mapSnapshotUrl = mapUrl;
       try {
-        await userCollection
-            .doc(authService.firebaseAuth.currentUser!.uid)
-            .collection('excursions')
-            .doc(excursion.id)
-            .set(excursion.toMap());
-
         await ExcursionService().saveExcursionToTL(excursion);
       } catch (e) {
         rethrow;
@@ -116,16 +110,16 @@ class UserService {
       int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
     var userId = authService.firebaseAuth.currentUser!.uid;
     try {
+      CollectionReference tlCollection =
+          FirebaseFirestore.instance.collection('timeline');
       var data = lastDoc == null
-          ? await userCollection
-              .doc(userId)
-              .collection('excursions')
+          ? await tlCollection
+              .where('userId', isEqualTo: userId)
               .orderBy('date', descending: true)
               .limit(docsPerPage)
               .get()
-          : await userCollection
-              .doc(userId)
-              .collection('excursions')
+          : await tlCollection
+              .where('userId', isEqualTo: userId)
               .orderBy('date', descending: true)
               .startAfterDocument(lastDoc)
               .limit(docsPerPage)
