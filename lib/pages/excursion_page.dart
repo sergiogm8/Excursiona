@@ -287,16 +287,16 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position? position) {
-      if (!_isDragging) {
-        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-            target: LatLng(position!.latitude, position.longitude),
-            zoom: _zoom)));
-      }
       _previousPosition = _currentPosition;
       setState(() {
         _currentPosition = position;
       });
       _shareCurrentLocation();
+      if (!_isDragging) {
+        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+            target: LatLng(position!.latitude, position.longitude),
+            zoom: _zoom)));
+      }
       _recalculateDistanceAndSpeed();
     });
     _captureWidgets();
