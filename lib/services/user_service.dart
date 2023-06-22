@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/auth_service.dart';
 import 'package:excursiona/services/excursion_service.dart';
 import 'package:excursiona/services/storage_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class UserService {
   UserService({this.uid});
@@ -16,9 +16,11 @@ class UserService {
   final String? uid;
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
+  final CollectionReference imagesCollection =
+      FirebaseFirestore.instance.collection('images');
 
   Future saveUserData(UserModel user) async {
-    return await userCollection.doc(uid).set({user.toMap()});
+    return await userCollection.doc(uid).set(user.toMap());
   }
 
   Future getUserDataByEmail(String email) async {
@@ -80,8 +82,6 @@ class UserService {
   }
 
   Future<List<UserModel>> getAllUsersBasicInfo(String name) async {
-    //if a name is given filter by name
-    //if no name is given return all users
     List<UserModel> users = [];
     QuerySnapshot snapshot =
         await userCollection.orderBy('name').limit(25).get();
@@ -99,12 +99,6 @@ class UserService {
     if (mapUrl.isNotEmpty) {
       excursion.mapSnapshotUrl = mapUrl;
       try {
-        await userCollection
-            .doc(authService.firebaseAuth.currentUser!.uid)
-            .collection('excursions')
-            .doc(excursion.id)
-            .set(excursion.toMap());
-
         await ExcursionService().saveExcursionToTL(excursion);
       } catch (e) {
         rethrow;
@@ -116,16 +110,16 @@ class UserService {
       int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
     var userId = authService.firebaseAuth.currentUser!.uid;
     try {
+      CollectionReference tlCollection =
+          FirebaseFirestore.instance.collection('timeline');
       var data = lastDoc == null
-          ? await userCollection
-              .doc(userId)
-              .collection('excursions')
+          ? await tlCollection
+              .where('userId', isEqualTo: userId)
               .orderBy('date', descending: true)
               .limit(docsPerPage)
               .get()
-          : await userCollection
-              .doc(userId)
-              .collection('excursions')
+          : await tlCollection
+              .where('userId', isEqualTo: userId)
               .orderBy('date', descending: true)
               .startAfterDocument(lastDoc)
               .limit(docsPerPage)
@@ -179,7 +173,7 @@ class UserService {
     });
   }
 
-  void updateUserPhotos(int nNewPhotos) {
+  void updateUserPhotos(int nNewPhotos, List<ImageModel> uploadedImages) {
     final DocumentReference userRef =
         userCollection.doc(authService.firebaseAuth.currentUser!.uid);
 
@@ -198,6 +192,52 @@ class UserService {
     }).catchError((error) {
       throw Exception(error.toString());
     });
+
+    try {
+      saveImages(uploadedImages);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  saveImages(List<ImageModel> images) async {
+    for (var image in images) {
+      try {
+        await saveImage(image);
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+
+  saveImage(ImageModel image) async {
+    try {
+      await imagesCollection.add(image.toMapForGallery());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<QueryDocumentSnapshot>> getGalleryImages(
+      int docsPerPage, QueryDocumentSnapshot? lastDoc) async {
+    var userId = authService.firebaseAuth.currentUser!.uid;
+    try {
+      var data = lastDoc == null
+          ? await imagesCollection
+              .where('userId', isEqualTo: userId)
+              .orderBy('timestamp', descending: true)
+              .limit(docsPerPage)
+              .get()
+          : await imagesCollection
+              .where('userId', isEqualTo: userId)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDoc)
+              .limit(docsPerPage)
+              .get();
+      return data.docs;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void updateUserMarkers(int nNewMarkers) {

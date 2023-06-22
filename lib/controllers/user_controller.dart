@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excursiona/helper/helper_functions.dart';
 import 'package:excursiona/model/excursion.dart';
+import 'package:excursiona/model/image_model.dart';
 import 'package:excursiona/model/recap_models.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/services/excursion_service.dart';
@@ -46,7 +47,17 @@ class UserController {
 
   saveExcursion(ExcursionRecap excursion, File mapSnapshot) async {
     try {
-      await _userService.saveExcursion(excursion, mapSnapshot);
+      var uid = await HelperFunctions.getUserUID();
+      String mapUrl = await StorageService()
+          .uploadMapSnapshot(excursion.id, mapSnapshot, uid!);
+      if (mapUrl.isNotEmpty) {
+        excursion.mapSnapshotUrl = mapUrl;
+        try {
+          await ExcursionService().saveExcursionToTL(excursion);
+        } catch (e) {
+          rethrow;
+        }
+      }
     } catch (e) {
       throw Exception(
           "Hubo un error al guardar la excursión en el sistema: $e");
@@ -85,11 +96,46 @@ class UserController {
     }
   }
 
-  updateUserPhotos(int nNewPhotos) async {
+  updateUserPhotos(int nNewPhotos, List<ImageModel> uploadedImages) async {
     try {
-      _userService.updateUserPhotos(nNewPhotos);
+      _userService.updateUserPhotos(nNewPhotos, uploadedImages);
     } catch (e) {
-      throw Exception("Hubo un error al actualizar la cantidad de fotos: $e");
+      throw Exception("Hubo un error al subir las fotos: $e");
+    }
+  }
+
+  saveImages(List<ImageModel> images) async {
+    try {
+      await _userService.saveImages(images);
+    } catch (e) {
+      throw Exception("Hubo un error al guardar las fotos: $e");
+    }
+  }
+
+  saveImage(ImageModel image) async {
+    try {
+      await _userService.saveImage(image);
+    } catch (e) {
+      throw Exception("Hubo un error al guardar la foto: $e");
+    }
+  }
+
+  Future<List<ImageModel>> getGalleryImages(int docsLimit) async {
+    List<ImageModel> images = [];
+    try {
+      var docs =
+          await _userService.getGalleryImages(docsLimit, _lastDocumentFetched);
+      docs.forEach((e) {
+        images.add(
+            ImageModel.fromMapForGallery(e.data() as Map<String, dynamic>));
+      });
+      _lastDocumentFetched = docs.last;
+      return images;
+    } catch (e) {
+      if (e.toString().contains("Bad state: No element")) {
+        return [];
+      }
+      throw Exception("Hubo un error al obtener las imágenes: $e");
     }
   }
 

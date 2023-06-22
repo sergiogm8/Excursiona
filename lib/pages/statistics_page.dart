@@ -315,10 +315,13 @@ class MarkersView extends StatelessWidget {
                   return const Text("Error al cargar los marcadores");
                 }
                 return snapshot.data != null && snapshot.data!.isNotEmpty
-                    ? Column(children: [
-                        for (var marker in snapshot.data!)
-                          MarkerImageCard(marker: marker)
-                      ])
+                    ? Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: Column(children: [
+                          for (var marker in snapshot.data!)
+                            MarkerImageCard(marker: marker)
+                        ]),
+                      )
                     : const Align(
                         alignment: Alignment.center,
                         child: Padding(

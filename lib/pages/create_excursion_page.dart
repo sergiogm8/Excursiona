@@ -47,10 +47,11 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
 
   _addParticipants() async {
     WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
-    Set<UserModel> result = await nextScreen(
+    Set<UserModel>? result = await nextScreen(
         context,
         SearchParticipantsPage(alreadyParticipants: _participants),
         PageTransitionType.rightToLeftWithFade);
+    if (result == null) return;
     setState(() {
       _participants.addAll(result);
     });
@@ -134,8 +135,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Crear excursión",
-            style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        title: Text("Crear excursión", style: GoogleFonts.inter()),
         foregroundColor: Colors.black,
         backgroundColor: const Color(0xFFFAFAFA),
         leading: IconButton(
@@ -198,16 +198,9 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                    border: Constants.border,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 7,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    boxShadow: Constants.boxShadow,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

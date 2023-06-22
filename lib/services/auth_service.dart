@@ -18,7 +18,7 @@ class AuthService {
           .user!;
       var userModel = UserModel(uid: user.uid, name: name, email: email);
       await UserService(uid: user.uid).saveUserData(userModel);
-      NotificationService().initializeNotificationService();
+      // NotificationService().initializeNotificationService();
       if (user != null) {
         result = true;
       }
@@ -51,7 +51,7 @@ class AuthService {
         QuerySnapshot snapshot =
             await UserService(uid: firebaseAuth.currentUser!.uid)
                 .getUserDataByEmail(email);
-        NotificationService().initializeNotificationService();
+        // NotificationService().initializeNotificationService();
         return snapshot.docs[0];
       }
     } on FirebaseException catch (e) {
@@ -86,7 +86,7 @@ class AuthService {
       QuerySnapshot snapshot =
           await UserService(uid: firebaseAuth.currentUser!.uid)
               .getUserDataByEmail(user!.email!);
-      NotificationService().initializeNotificationService();
+      // NotificationService().initializeNotificationService();
       return snapshot.docs[0];
       // } on FirebaseAuthException catch (e) {
       //   return e.message;

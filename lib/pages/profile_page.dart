@@ -24,11 +24,6 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? _userModel;
   var _profilePic = "";
   bool _isLoading = true;
-  var data = {
-    'Excursiones realizadas': '0',
-    'Kilómetros recorridos': '0',
-    'Tiempo dedicado': '105'
-  };
 
   @override
   void initState() {
@@ -113,8 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 PermissionStatus storagePermissions =
                     await Permission.storage.request();
                 if (storagePermissions.isGranted) {
-                  var result =
-                      await imagePicker.pickImage(source: ImageSource.gallery);
+                  var result = await imagePicker.pickImage(
+                      source: ImageSource.gallery, imageQuality: 65);
                   if (result != null) {
                     _updateProfilePic(result);
                   }

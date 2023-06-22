@@ -30,6 +30,7 @@ class _MyActivityState extends State<MyActivity> {
 
   @override
   void initState() {
+    super.initState();
     _fetchData();
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==
@@ -37,8 +38,6 @@ class _MyActivityState extends State<MyActivity> {
         _fetchData();
       }
     });
-
-    super.initState();
   }
 
   @override
@@ -55,9 +54,9 @@ class _MyActivityState extends State<MyActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        setState(() {
-          _isLoading = false;
-        });
+      });
+      setState(() {
+        _isLoading = false;
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
@@ -145,9 +144,9 @@ class _CommunityActivityState extends State<CommunityActivity> {
           _hasMore = false;
         }
         _items.addAll(newExcursions);
-        setState(() {
-          _isLoading = false;
-        });
+      });
+      setState(() {
+        _isLoading = false;
       });
     } catch (e) {
       showSnackBar(context, Colors.red, e.toString());
@@ -249,17 +248,10 @@ class _ActivityItemState extends State<ActivityItem> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15.0),
-          border: Border.all(color: Constants.indigoDye),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 2),
-              blurRadius: 6.0,
-            ),
-          ],
-        ),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15.0),
+            border: Constants.border,
+            boxShadow: Constants.boxShadow),
         child: Column(
           children: [
             Padding(
@@ -295,6 +287,7 @@ class _ActivityItemState extends State<ActivityItem> {
                     const SizedBox(height: 12.0),
                   Text(
                     widget.item.title,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                         fontSize: 16, fontWeight: FontWeight.w500),
                   ),
@@ -317,6 +310,8 @@ class _ActivityItemState extends State<ActivityItem> {
                   const SizedBox(height: 8.0),
                   Text(
                     widget.item.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(fontWeight: FontWeight.w300),
                   ),
                   const SizedBox(height: 8.0),
@@ -384,6 +379,8 @@ class _ActivityItemState extends State<ActivityItem> {
                 imageBuilder: (context, imageProvider) {
                   return Container(
                     decoration: BoxDecoration(
+                      border: Constants.border,
+                      boxShadow: Constants.boxShadow,
                       borderRadius: BorderRadius.circular(15.0),
                       image: DecorationImage(
                         image: imageProvider,

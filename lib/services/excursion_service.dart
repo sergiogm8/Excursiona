@@ -47,8 +47,8 @@ class ExcursionService {
         if (participant.uid == currentUserId) continue;
         await UserService()
             .insertExcursionInvitation(excursion, participant.uid);
-        NotificationService()
-            .sendExcursionNotificationToUser(excursion, participant.uid);
+        // NotificationService()
+        //     .sendExcursionNotificationToUser(excursion, participant.uid);
       }
       return true;
     } on FirebaseException {
@@ -333,10 +333,14 @@ class ExcursionService {
       final CollectionReference TLCollection =
           FirebaseFirestore.instance.collection('timeline');
       var snapshot = lastDoc == null
-          ? await TLCollection.orderBy('date', descending: true)
+          ? await TLCollection.where('userId', isNotEqualTo: currentUserId)
+              .orderBy('userId')
+              .orderBy('date', descending: true)
               .limit(docsPerPage)
               .get()
-          : await TLCollection.orderBy('date', descending: true)
+          : await TLCollection.where('userId', isNotEqualTo: currentUserId)
+              .orderBy('userId')
+              .orderBy('date', descending: true)
               .startAfterDocument(lastDoc)
               .limit(docsPerPage)
               .get();

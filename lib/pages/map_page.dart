@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:excursiona/shared/assets.dart';
+import 'package:excursiona/shared/constants.dart';
 import 'package:excursiona/shared/utils.dart';
+import 'package:excursiona/widgets/change_map_type_button.dart';
 import 'package:excursiona/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapPage extends StatefulWidget {
@@ -28,9 +32,11 @@ class _MapPageState extends State<MapPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  static const double _zoom = 19;
+  BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
+  MapType _mapType = MapType.satellite;
   Position? _currentPosition;
   var _finishedLocation = false;
-  var _geoServiceEnabled;
   var _isDragging = false;
 
   @override
@@ -42,94 +48,121 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    loadData();
+    _setCustomMarkerIcon();
+    _setPositionData();
   }
 
-  loadData() {
+  _setPositionData() {
     getCurrentPosition().then((value) async {
-      const markerId = MarkerId('currentPos');
-      Marker marker = Marker(
-        markerId: markerId,
-        position: LatLng(value.latitude, value.longitude),
-      );
+      setState(() {
+        _currentPosition = value;
+      });
+      _generateLocationMarker();
+
       CameraPosition cameraPosition = CameraPosition(
-        target: LatLng(value.latitude, value.longitude),
-      );
+          target: LatLng(value.latitude, value.longitude), zoom: _zoom);
 
       final GoogleMapController controller = await _controller.future;
 
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
       _finishedLocation = true;
-      setState(() {
-        _currentPosition = value;
-        markers[markerId] = marker;
-      });
     }).catchError((error) {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
       _finishedLocation = true;
     });
   }
 
-  Future<Position> getCurrentPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('La ubicación no está activada');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    return await Geolocator.getCurrentPosition();
+  _setCustomMarkerIcon() {
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration.empty, Assets.resourceImagesMylocationicon)
+        .then((value) {
+      setState(() {
+        _currentLocationIcon = value;
+      });
+    });
   }
 
-  getOthersLocation() {}
   _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
     Geolocator.getServiceStatusStream().listen((status) {
       if (status == ServiceStatus.disabled) {
-        _geoServiceEnabled = false;
         showSnackBar(context, Theme.of(context).primaryColor,
             'La ubicación no está activada');
       } else {
-        _geoServiceEnabled = true;
+        _setPositionData();
       }
     });
     positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position? position) {
+      setState(() {
+        _currentPosition = position;
+      });
       if (!_isDragging) {
         controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-            target: LatLng(position!.latitude, position.longitude), zoom: 18)));
+            target: LatLng(position!.latitude, position.longitude),
+            zoom: _zoom)));
       }
-      const markerId = MarkerId('currentPos');
-      try {
-        final marker = markers[markerId];
-        Marker _marker = Marker(
-          markerId: marker!.markerId,
-          position: LatLng(position!.latitude, position.longitude),
-        );
-        setState(() {
-          markers[markerId] = _marker;
-          _currentPosition = position;
-        });
-      } catch (e) {
-        print(e.toString());
-      }
+      _generateLocationMarker();
     });
+  }
+
+  _generateLocationMarker() {
+    const markerId = MarkerId('currentPos');
+    Marker marker = Marker(
+      markerId: markerId,
+      position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+    );
+
+    setState(() {
+      markers[markerId] = marker;
+    });
+  }
+
+  void _changeMapType(MapType mapType) {
+    setState(() {
+      _mapType = mapType;
+    });
+    Navigator.pop(context);
+  }
+
+  _buildBottomSheet() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            "Tipo de mapa",
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.satellite,
+                  icon: Icons.satellite_alt,
+                  label: "Satélite"),
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.normal,
+                  icon: Icons.map,
+                  label: "Normal"),
+              MapTypeButton(
+                  selectedMapType: _mapType,
+                  onTap: _changeMapType,
+                  mapType: MapType.terrain,
+                  icon: Icons.terrain,
+                  label: "Terreno")
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -140,6 +173,7 @@ class _MapPageState extends State<MapPage> {
         GoogleMap(
           initialCameraPosition: initialCameraPosition,
           markers: Set<Marker>.of(markers.values),
+          mapType: _mapType,
           onMapCreated: (GoogleMapController controller) =>
               _onMapCreated(controller),
           onTap: (LatLng? latLng) {
@@ -147,13 +181,50 @@ class _MapPageState extends State<MapPage> {
           },
           zoomControlsEnabled: false,
         ),
-        Positioned(
-            bottom: 20,
-            right: 20,
-            child: _currentPosition != null
-                ? FloatingActionButton(
+        Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FloatingActionButton.small(
+                      heroTag: 'mapType',
+                      backgroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).primaryColor,
+                      tooltip: "Cambiar tipo de mapa",
+                      child: const Icon(
+                        Icons.layers_rounded,
+                      ),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          backgroundColor: Constants.darkWhite,
+                          constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.20),
+                          builder: (context) {
+                            return _buildBottomSheet();
+                          },
+                        );
+                      }),
+                  FloatingActionButton.small(
+                    heroTag: 'centerPosition',
+                    backgroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).primaryColor,
+                    tooltip: "Centrar en mi ubicación",
+                    child: const Icon(
+                      Icons.gps_fixed,
+                    ),
                     onPressed: () async {
-                      _isDragging = false;
+                      setState(() {
+                        _isDragging = false;
+                      });
                       final GoogleMapController controller =
                           await _controller.future;
                       controller.animateCamera(
@@ -161,28 +232,14 @@ class _MapPageState extends State<MapPage> {
                           CameraPosition(
                               target: LatLng(_currentPosition!.latitude,
                                   _currentPosition!.longitude),
-                              zoom: 18),
+                              zoom: _zoom),
                         ),
                       );
                     },
-                    backgroundColor: Theme.of(context).primaryColor,
-                    tooltip: "Centrar en mi ubicación",
-                    child: const Icon(
-                      Icons.gps_fixed,
-                      size: 40,
-                    ),
-                  )
-                : FloatingActionButton(
-                    onPressed: () {
-                      loadData();
-                    },
-                    backgroundColor: Theme.of(context).primaryColor,
-                    tooltip: "Localizarme",
-                    child: const Icon(
-                      Icons.location_searching,
-                      size: 40,
-                    ),
-                  )),
+                  ),
+                ],
+              ),
+            )),
         if (!_finishedLocation) const Geolocating(),
       ],
     ));

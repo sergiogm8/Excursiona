@@ -5,6 +5,7 @@ import 'package:excursiona/controllers/auth_controller.dart';
 import 'package:excursiona/enums/marker_type.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
@@ -111,7 +112,7 @@ bool isCurrentUser(String uid) {
 Future<XFile?> pickImageFromCamera() async {
   final ImagePicker _picker = ImagePicker();
 
-  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+  return await _picker.pickImage(source: ImageSource.camera, imageQuality: 65);
 }
 
 void showFullscreenImage(BuildContext context, String imagePath) {
@@ -129,4 +130,29 @@ void showFullscreenImage(BuildContext context, String imagePath) {
           ),
         );
       });
+}
+
+Future<Position> getCurrentPosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('La ubicación no está activada');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Permisos de ubicación denegados');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Permisos de ubicación denegados permanentemente, no se pueden solicitar los permisos.');
+  }
+
+  return await Geolocator.getCurrentPosition();
 }

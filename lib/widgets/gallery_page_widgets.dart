@@ -17,18 +17,10 @@ class SharedImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Constants.indigoDye, width: 1),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(2, 3),
-          )
-        ],
-      ),
+          borderRadius: BorderRadius.circular(15),
+          border: Constants.border,
+          color: Colors.white,
+          boxShadow: Constants.boxShadow),
       child: GestureDetector(
         onTap: () => showFullscreenImage(context, data.imageUrl),
         child: Column(
@@ -109,18 +101,10 @@ class MarkerImageCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Constants.indigoDye, width: 1),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(2, 3),
-          )
-        ],
-      ),
+          borderRadius: BorderRadius.circular(15),
+          border: Constants.border,
+          color: Colors.white,
+          boxShadow: Constants.boxShadow),
       height: 200,
       child: Row(mainAxisSize: MainAxisSize.max, children: [
         Expanded(

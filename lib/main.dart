@@ -3,7 +3,6 @@ import 'package:excursiona/pages/auth_page.dart';
 import 'package:excursiona/pages/home_page.dart';
 import 'package:excursiona/shared/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,36 +34,9 @@ class _MyAppState extends State<MyApp> {
 
   void _askPermissions() async {
     PermissionStatus storageStatus = await Permission.storage.request();
-    var locationServiceStatusEnabled =
-        await Permission.location.serviceStatus.isEnabled;
-    if (locationServiceStatusEnabled) {
-      await Permission.location.request();
-    }
+    PermissionStatus locationServiceStatus =
+        await Permission.location.request();
   }
-
-  // initializeFirebaseMessaging() async {
-  //   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  //   FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  //   NotificationSettings settings = await messaging.requestPermission(
-  //     alert: true,
-  //     announcement: false,
-  //     badge: true,
-  //     carPlay: false,
-  //     criticalAlert: false,
-  //     provisional: false,
-  //     sound: true,
-  //   );
-
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print('Got a message whilst in the foreground!');
-  //     print('Message data: ${message.data}');
-
-  //     if (message.notification != null) {
-  //       print('Message also contained a notification: ${message.notification}');
-  //     }
-  //   });
-  // }
 
   void _getIsUserLoggedIn() async {
     await HelperFunctions.getUserLoggedInStatus().then((value) {

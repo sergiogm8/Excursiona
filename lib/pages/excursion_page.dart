@@ -10,7 +10,7 @@ import 'package:excursiona/model/excursion.dart';
 import 'package:excursiona/model/marker_model.dart';
 import 'package:excursiona/model/user_model.dart';
 import 'package:excursiona/pages/chat_room_page.dart';
-import 'package:excursiona/pages/image_gallery_page.dart';
+import 'package:excursiona/pages/exc_image_gallery_page.dart';
 import 'package:excursiona/pages/search_participants_page.dart';
 import 'package:excursiona/pages/share_image_page.dart';
 import 'package:excursiona/pages/statistics_page.dart';
@@ -95,7 +95,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     _setCustomMarkerIcon();
     _retrieveParticipantsData();
     _initializeDurationTimer();
-    loadData();
+    _setPositionData();
     _excursionController!.initializeBatteryTimer();
     super.initState();
   }
@@ -108,7 +108,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
     super.dispose();
   }
 
-  loadData() {
+  _setPositionData() {
     getCurrentPosition().then((value) async {
       setState(() {
         _currentPosition = value;
@@ -127,31 +127,6 @@ class _ExcursionPageState extends State<ExcursionPage> {
       showSnackBar(context, Theme.of(context).primaryColor, error.toString());
       _finishedLocation = true;
     });
-  }
-
-  Future<Position> getCurrentPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('La ubicación no está activada');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Permisos de ubicación denegados');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Permisos de ubicación denegados permanentemente, no se pueden solicitar los permisos.');
-    }
-
-    return await Geolocator.getCurrentPosition();
   }
 
   Stream<List<MarkerModel>> getMarkers() {
@@ -305,23 +280,23 @@ class _ExcursionPageState extends State<ExcursionPage> {
         showSnackBar(context, Theme.of(context).primaryColor,
             'La ubicación no está activada');
       } else {
-        loadData();
+        _setPositionData();
       }
     });
 
     _positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position? position) {
-      if (!_isDragging) {
-        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-            target: LatLng(position!.latitude, position.longitude),
-            zoom: _zoom)));
-      }
       _previousPosition = _currentPosition;
       setState(() {
         _currentPosition = position;
       });
       _shareCurrentLocation();
+      if (!_isDragging) {
+        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+            target: LatLng(position!.latitude, position.longitude),
+            zoom: _zoom)));
+      }
       _recalculateDistanceAndSpeed();
     });
     _captureWidgets();
@@ -825,7 +800,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                     onTap: () {
                       nextScreen(
                           context,
-                          ImageGalleryPage(
+                          ExcImageGalleryPage(
                               excursionController: _excursionController!),
                           PageTransitionType.rightToLeft);
                     }),
