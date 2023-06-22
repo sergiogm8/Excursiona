@@ -358,6 +358,7 @@ class ExcursionController {
         excursions
             .add(ExcursionRecap.fromMap(doc.data()! as Map<String, dynamic>));
       });
+      excursions.sort((a, b) => b.date.compareTo(a.date));
       _lastDocumentFetched = docs.last;
       return excursions;
     } catch (e) {
