@@ -41,8 +41,8 @@ class UserController {
     return _userService.getExcursionInvitations();
   }
 
-  deleteExcursionInvitation(String invitationId) {
-    _userService.deleteExcursionInvitation(invitationId);
+  deleteExcursionInvitation(String invitationId) async {
+    await _userService.deleteExcursionInvitation(invitationId);
   }
 
   saveExcursion(ExcursionRecap excursion, File mapSnapshot) async {
