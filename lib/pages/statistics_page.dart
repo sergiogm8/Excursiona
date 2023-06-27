@@ -80,7 +80,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
     setState(() {
       _isLoading = false;
     });
-    _excursionController.updateUserStatistics(_excursionData!);
+    if (widget.isNew) {
+      _excursionController.updateUserStatistics(_excursionData!);
+    }
   }
 
   LatLngBounds _getPolylineBounds(Polyline polyline) {
