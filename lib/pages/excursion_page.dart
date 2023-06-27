@@ -762,6 +762,7 @@ class _ExcursionPageState extends State<ExcursionPage> {
                           SearchParticipantsPage(
                               alreadyParticipants: _participants),
                           PageTransitionType.rightToLeft);
+                      if (newParticipants.isEmpty) return;
                       setState(() {
                         _participants.addAll(newParticipants);
                       });
