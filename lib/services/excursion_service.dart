@@ -321,7 +321,7 @@ class ExcursionService {
     try {
       final CollectionReference TLCollection =
           FirebaseFirestore.instance.collection('timeline');
-      await TLCollection.doc(excursion.id).set(excursion.toMap());
+      await TLCollection.add(excursion.toMap());
     } catch (e) {
       rethrow;
     }
