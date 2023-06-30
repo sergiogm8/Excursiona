@@ -162,27 +162,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.1"
-  cloud_functions:
-    dependency: "direct main"
-    description:
-      name: cloud_functions
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.1.1"
-  cloud_functions_platform_interface:
-    dependency: transitive
-    description:
-      name: cloud_functions_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "5.2.1"
-  cloud_functions_web:
-    dependency: transitive
-    description:
-      name: cloud_functions_web
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.4.1"
   collection:
     dependency: transitive
     description:
@@ -204,13 +183,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
   dbus:
     dependency: transitive
     description:
