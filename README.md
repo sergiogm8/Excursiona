@@ -1,16 +1,11 @@
-# excursiona
+# Excursiona
 
-A new Flutter project.
+## Aplicación móvil colaborativa para realizar excursiones en la naturaleza
 
-## Getting Started
+Aplicación para Android realizada con Flutter y Firebase para el Trabajo Fin de Grado de Ingeniería Informática (UCLM).
+Para instalarla, descargar el archivo `Excursiona.apk` y habilita la instalación de aplicaciones de orígenes desconocidos.
 
-This project is a starting point for a Flutter application.
+## Collaborative mobile application for shared excursions in nature
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Android app built with Flutter and Firebase for the Final Degree Project of Computer Engineering (UCLM).
+To install it, download the `Excursiona.apk` file and enable the installation of apps from unknown sources.
